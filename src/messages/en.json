@@ -1,0 +1,132 @@
+{
+  "nav": {
+    "about": "About",
+    "advantages": "Why Wings",
+    "projects": "Opportunities",
+    "team": "Our Team",
+    "contact": "Contact",
+    "cta": "Request Access"
+  },
+  "hero": {
+    "eyebrow": "Wings Real Estate — Jerusalem",
+    "headline": "Exclusive addresses, quietly offered",
+    "subheadline": "A curated selection of properties in Jerusalem, available to a limited circle before they ever reach the open market.",
+    "cta": "Request Private Access"
+  },
+  "about": {
+    "eyebrow": "Who We Are",
+    "title": "An end-to-end path to a home in Jerusalem",
+    "body": "From sourcing and legal guidance to financing and ongoing management, Wings accompanies every step of acquiring a home in Israel — with the discretion our clients expect."
+  },
+  "video": {
+    "eyebrow": "See Wings",
+    "title": "A closer look",
+    "cta": "Watch the film"
+  },
+  "seeWings": {
+    "sections": [
+      {
+        "id": "main",
+        "label": "Jerusalem",
+        "eyebrow": "Wings Real Estate — Jerusalem",
+        "title": "Exclusive addresses, quietly offered",
+        "body": "A curated selection of properties in Jerusalem, available to a limited circle before they ever reach the open market.",
+        "tags": []
+      }
+    ],
+    "ctaPrimary": "Request Access",
+    "ctaSecondary": "Back to Wings",
+    "cues": [
+      { "eyebrow": "Who We Are", "title": "An end-to-end path to a home in Jerusalem" },
+      { "eyebrow": "Where We Operate", "title": "Curated locations across Jerusalem" },
+      { "eyebrow": "Selected Opportunities", "title": "A few addresses worth knowing about" },
+      { "eyebrow": "Why Wings", "title": "What sets an exclusive process apart" },
+      { "eyebrow": "Meet the Team", "title": "The people behind every address" },
+      { "eyebrow": "Get in Touch", "title": "Request private access" }
+    ]
+  },
+  "map": {
+    "eyebrow": "Where We Operate",
+    "title": "Curated locations across Jerusalem"
+  },
+  "projects": {
+    "eyebrow": "Selected Opportunities",
+    "title": "A few addresses worth knowing about",
+    "cta": "Inquire",
+    "viewDetails": "View Details",
+    "close": "Close",
+    "items": [
+      {
+        "title": "Opportunity — Talbiya",
+        "location": "Talbiya, Jerusalem",
+        "description": "A boutique building steps from the President's Residence, offered before public listing — walking distance to the city's diplomatic quarter."
+      },
+      {
+        "title": "Opportunity — Rechavia",
+        "location": "Rechavia, Jerusalem",
+        "description": "A quiet garden apartment in Jerusalem's most established address, with the kind of long-term value that rarely reaches the open market."
+      },
+      {
+        "title": "Opportunity — German Colony",
+        "location": "German Colony, Jerusalem",
+        "description": "A renovated townhouse on a tree-lined street, minutes from Emek Refaim's cafes and the First Station promenade."
+      }
+    ]
+  },
+  "whyUs": {
+    "eyebrow": "Why Wings",
+    "title": "What sets an exclusive process apart",
+    "items": [
+      { "title": "Personal guidance", "body": "A single point of contact from first conversation to closing." },
+      { "title": "Below-market opportunities", "body": "Access to addresses before they are publicly listed." },
+      { "title": "Full-service", "body": "Legal, financing and property management under one roof." },
+      { "title": "Proven track record", "body": "Thousands of properties placed, hundreds of millions in transactions." }
+    ]
+  },
+  "team": {
+    "eyebrow": "Meet the Team",
+    "title": "The people behind every address",
+    "members": [
+      {
+        "name": "Noa Amrani",
+        "initials": "NA",
+        "role": "Founder & CEO",
+        "bio": "Fifteen years sourcing off-market property across Jerusalem, with a client list built entirely on referral."
+      },
+      {
+        "name": "Eitan Barak",
+        "initials": "EB",
+        "role": "Head of Acquisitions",
+        "bio": "Identifies opportunities before they reach a listing agent, vetted against Wings' own due-diligence standard."
+      },
+      {
+        "name": "Maya Rosen",
+        "initials": "MR",
+        "role": "Legal & Compliance",
+        "bio": "Oversees every transaction from contract to closing, coordinating with counsel on both sides."
+      },
+      {
+        "name": "Daniel Cohen",
+        "initials": "DC",
+        "role": "Client Relations",
+        "bio": "The single point of contact for international buyers, from first call through settling in."
+      }
+    ]
+  },
+  "leadForm": {
+    "eyebrow": "Get in Touch",
+    "title": "Request private access",
+    "name": "Full name",
+    "phone": "Phone",
+    "email": "Email",
+    "message": "What are you looking for?",
+    "submit": "Request Access",
+    "success": "Thank you — we'll be in touch shortly.",
+    "error": "Something went wrong. Please try again or reach us directly."
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp"
+  }
+}

@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Public brand/content assets (team photos, project images) — readable
+    // by anyone, writable only through the server (firebase-admin SDK) which
+    // handles admin-dashboard uploads.
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

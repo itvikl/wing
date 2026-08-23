@@ -1,0 +1,41 @@
+import enJson from '@/messages/en.json';
+import heJson from '@/messages/he.json';
+import type { LocaleText, SiteContent, SiteText } from './schema';
+
+const FOOTER_LINK_DEFAULTS = {
+  phoneNumber: '',
+  whatsappLink: '',
+  facebookUrl: '',
+  instagramUrl: '',
+};
+
+function withFooterDefaults(messages: typeof enJson | typeof heJson): LocaleText {
+  return {
+    ...messages,
+    hero: { ...messages.hero, subheadline: [messages.hero.subheadline] },
+    about: { ...messages.about, body: [messages.about.body] },
+    footer: { ...messages.footer, ...FOOTER_LINK_DEFAULTS },
+  } as unknown as LocaleText;
+}
+
+export const defaultText: SiteText = {
+  en: withFooterDefaults(enJson),
+  he: withFooterDefaults(heJson),
+};
+
+export const defaultContent: SiteContent = {
+  text: defaultText,
+  media: {
+    logo: '/brand/logo.png',
+    video: { poster: '/scroll-world/img/germancolony.webp' },
+    projects: { items: defaultText.en.projects.items.map(() => null) },
+    seeWings: {
+      sections: defaultText.en.seeWings.sections.map((s) => ({
+        id: s.id,
+        still: `/scroll-world/img/${s.id}.png`,
+        clip: `/scroll-world/vid/${s.id}.mp4`,
+      })),
+      connectors: [],
+    },
+  },
+};

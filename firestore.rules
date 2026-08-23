@@ -1,0 +1,14 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All reads/writes go through the Next.js server (firebase-admin SDK),
+    // which bypasses these rules entirely. Direct client access is denied
+    // by default — flip specific paths open only if a client-side use case
+    // actually needs it (e.g. public read of `content` for a future static
+    // export path).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

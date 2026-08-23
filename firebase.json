@@ -1,0 +1,11 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": [
+    {
+      "bucket": "wings-dce9c.firebasestorage.app",
+      "rules": "storage.rules"
+    }
+  ]
+}
