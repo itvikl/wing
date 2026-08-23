@@ -1,15 +1,26 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useLocale } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Link = { id: string; label: string };
 
+const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
+
 export function NavLinks({ links }: { links: Link[] }) {
   const [active, setActive] = useState<string | null>(null);
+  const locale = useLocale();
+  const pathname = usePathname();
+  const localeBase = locale === 'en' ? '' : `/${locale}`;
+  const homeHref = localeBase || '/';
+  const onHome = pathname === homeHref;
 
   useEffect(() => {
+    if (!onHome) return;
     const sections = links
+      .filter((link) => !ROUTED_IDS.has(link.id))
       .map((link) => document.getElementById(link.id))
       .filter((el): el is HTMLElement => el !== null);
 
@@ -27,26 +38,29 @@ export function NavLinks({ links }: { links: Link[] }) {
 
     sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
-  }, [links]);
+  }, [links, onHome]);
 
   return (
     <nav className="hidden items-center gap-8 text-sm md:flex">
-      {links.map((link) => (
-        <a
-          key={link.id}
-          href={`#${link.id}`}
-          className="relative py-1 transition-colors hover:text-accent-light"
-        >
-          <span className={active === link.id ? 'text-accent-light' : undefined}>{link.label}</span>
-          {active === link.id && (
-            <motion.span
-              layoutId="nav-indicator"
-              className="absolute inset-x-0 -bottom-1 h-[2px] rounded-full bg-accent-light"
-              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            />
-          )}
-        </a>
-      ))}
+      {links.map((link) => {
+        const isRouted = ROUTED_IDS.has(link.id);
+        const routedHref = `${localeBase}/${link.id}`;
+        const href = isRouted ? routedHref : onHome ? `#${link.id}` : `${homeHref}#${link.id}`;
+        const isActive = isRouted ? pathname.startsWith(routedHref) : active === link.id;
+
+        return (
+          <a key={link.id} href={href} className="relative py-1 transition-colors hover:text-accent-light">
+            <span className={isActive ? 'text-accent-light' : undefined}>{link.label}</span>
+            {isActive && (
+              <motion.span
+                layoutId="nav-indicator"
+                className="absolute inset-x-0 -bottom-1 h-[2px] rounded-full bg-accent-light"
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+          </a>
+        );
+      })}
     </nav>
   );
 }

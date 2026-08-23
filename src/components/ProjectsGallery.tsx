@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLocale } from 'next-intl';
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { Reveal } from './motion/Reveal';
 import { TiltCard } from './motion/TiltCard';
@@ -30,6 +31,8 @@ export function ProjectsGallery({
   closeLabel: string;
   items: Item[];
 }) {
+  const locale = useLocale();
+  const contactHref = locale === 'en' ? '/contact' : `/${locale}/contact`;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ down: boolean; startX: number; startScroll: number }>({
@@ -171,7 +174,7 @@ export function ProjectsGallery({
                 <h3 className="mt-3 font-display text-2xl font-semibold text-primary-dark">{active.title}</h3>
                 <p className="mt-4 text-neutral-muted">{active.description}</p>
                 <MagneticButton
-                  href="#contact"
+                  href={contactHref}
                   className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-sm font-medium text-primary-dark transition-colors hover:bg-accent-light"
                 >
                   {ctaLabel}

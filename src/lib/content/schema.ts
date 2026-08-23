@@ -146,6 +146,11 @@ export const seeWingsMediaSectionSchema = z.object({
   id: z.string(),
   still: z.string(),
   clip: z.string(),
+  // Lighter phone-only encodes (~720p, tight GOP) so scroll-scrubbing the dive
+  // doesn't force a full-res desktop download over cellular. Optional — the
+  // engine falls back to `still`/`clip` on phones when these aren't set.
+  stillMobile: z.string().optional(),
+  clipMobile: z.string().optional(),
 });
 export type SeeWingsMediaSection = z.infer<typeof seeWingsMediaSectionSchema>;
 

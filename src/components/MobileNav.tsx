@@ -1,12 +1,21 @@
 'use client';
 
+import { useLocale } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
 type Link = { id: string; label: string };
 
+const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
+
 export function MobileNav({ links }: { links: Link[] }) {
   const [open, setOpen] = useState(false);
+  const locale = useLocale();
+  const pathname = usePathname();
+  const localeBase = locale === 'en' ? '' : `/${locale}`;
+  const homeHref = localeBase || '/';
+  const onHome = pathname === homeHref;
 
   useEffect(() => {
     if (!open) return;
@@ -42,16 +51,24 @@ export function MobileNav({ links }: { links: Link[] }) {
       {open && (
         <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-primary-soft bg-primary px-6 py-6 shadow-lg">
           <nav className="flex flex-col gap-1 text-base">
-            {links.map((link) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-3 transition-colors hover:bg-primary-soft hover:text-accent-light"
-              >
-                {link.label}
-              </a>
-            ))}
+            {links.map((link) => {
+              const href = ROUTED_IDS.has(link.id)
+                ? `${localeBase}/${link.id}`
+                : onHome
+                  ? `#${link.id}`
+                  : `${homeHref}#${link.id}`;
+
+              return (
+                <a
+                  key={link.id}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-3 transition-colors hover:bg-primary-soft hover:text-accent-light"
+                >
+                  {link.label}
+                </a>
+              );
+            })}
           </nav>
           <div className="mt-4 border-t border-primary-soft pt-4">
             <LanguageSwitcher />

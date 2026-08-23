@@ -18,9 +18,11 @@ export type SeeWingsSection = {
 type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
 type NavLink = { id: string; label: string };
 export type SeeWingsMedia = {
-  sections: { id: string; still: string; clip: string }[];
+  sections: { id: string; still: string; clip: string; stillMobile?: string; clipMobile?: string }[];
   connectors: (string | null)[];
 };
+
+const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team']);
 
 const GOLD = '#B58238';
 const GOLD_LIGHT = '#FFBC7D';
@@ -58,13 +60,17 @@ export function SeeWingsExperience({
     ref.current.innerHTML = '';
     document.getElementById('sw-css')?.remove();
     const homeHref = locale === 'en' ? '/' : `/${locale}`;
+    const routedHref = (id: string) => (locale === 'en' ? `/${id}` : `/${locale}/${id}`);
 
     mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
       // where the topbar mark would sit and takes over that role instead.
       cta: { label: brandCta, href: `${homeHref}#contact` },
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
-      navLinks: navLinks.map((n) => ({ label: n.label, href: `${homeHref}#${n.id}` })),
+      navLinks: navLinks.map((n) => ({
+        label: n.label,
+        href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,
+      })),
       atmosphere: true,
       diveScroll: TRACK_VH,
       // Was 0.85 — the connector clips are the "flight" between scenes, and at
@@ -82,6 +88,8 @@ export function SeeWingsExperience({
           label: s.label,
           still: sceneMedia?.still || `/scroll-world/img/${s.id}.png`,
           clip: sceneMedia?.clip || `/scroll-world/vid/${s.id}.mp4`,
+          stillMobile: sceneMedia?.stillMobile,
+          clipMobile: sceneMedia?.clipMobile,
           accent: i === sections.length - 1 ? GOLD_LIGHT : GOLD,
           scroll: TRACK_VH,
           // Was 0.4 — settle harder mid-scene (engine caps this at 0.6) so the

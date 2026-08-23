@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { getSiteMedia } from '@/lib/content/store';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { MagneticButton } from './motion/MagneticButton';
@@ -10,6 +10,8 @@ import { MobileNav } from './MobileNav';
 export async function Header() {
   const t = await getTranslations('nav');
   const media = await getSiteMedia();
+  const locale = await getLocale();
+  const contactHref = locale === 'en' ? '/contact' : `/${locale}/contact`;
 
   const links = [
     { id: 'about', label: t('about') },
@@ -33,7 +35,7 @@ export async function Header() {
             <LanguageSwitcher />
           </div>
           <MagneticButton
-            href="#contact"
+            href={contactHref}
             className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-primary-dark transition-colors hover:bg-accent-light sm:px-5"
           >
             {t('cta')}

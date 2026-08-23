@@ -35,6 +35,10 @@ export const defaultContent: SiteContent = {
         id: s.id,
         still: `/scroll-world/img/${s.id}.png`,
         clip: `/scroll-world/vid/${s.id}.mp4`,
+        // Optional lighter phone encode — see seeWingsMediaSectionSchema. Unlike
+        // `clip`/`still`, the engine does NOT fall back to the desktop file if
+        // this 404s, so only default it where the phone file actually exists.
+        clipMobile: `/scroll-world/vid/${s.id}.mobile.mp4`,
       })),
       connectors: [],
     },
