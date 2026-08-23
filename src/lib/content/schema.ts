@@ -153,6 +153,7 @@ export const siteMediaSchema = z.object({
   logo: z.string(),
   video: z.object({ poster: z.string() }),
   projects: z.object({ items: z.array(z.string().nullable()) }),
+  team: z.object({ members: z.array(z.string().nullable()) }),
   seeWings: z.object({
     sections: z.array(seeWingsMediaSectionSchema),
     connectors: z.array(z.string().nullable()),

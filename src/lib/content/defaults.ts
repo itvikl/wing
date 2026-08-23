@@ -29,6 +29,7 @@ export const defaultContent: SiteContent = {
     logo: '/brand/logo.png',
     video: { poster: '/scroll-world/img/germancolony.webp' },
     projects: { items: defaultText.en.projects.items.map(() => null) },
+    team: { members: defaultText.en.team.members.map(() => null) },
     seeWings: {
       sections: defaultText.en.seeWings.sections.map((s) => ({
         id: s.id,

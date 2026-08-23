@@ -90,6 +90,11 @@ export async function updateProjectImages(images: (string | null)[]) {
   revalidateSite();
 }
 
+export async function updateTeamImages(images: (string | null)[]) {
+  await contentDoc().set({ media: { team: { members: images } } }, { merge: true });
+  revalidateSite();
+}
+
 export async function updateSeeWingsMedia(sections: SeeWingsMediaSection[], connectors: (string | null)[]) {
   await contentDoc().set({ media: { seeWings: { sections, connectors } } }, { merge: true });
   revalidateSite();

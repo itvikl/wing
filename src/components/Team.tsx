@@ -1,4 +1,6 @@
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
+import { getSiteMedia } from '@/lib/content/store';
 import { Reveal } from './motion/Reveal';
 import { TiltCard } from './motion/TiltCard';
 
@@ -6,7 +8,11 @@ type Member = { name: string; initials: string; role: string; bio: string };
 
 export async function Team() {
   const t = await getTranslations('team');
-  const members = t.raw('members') as Member[];
+  const media = await getSiteMedia();
+  const members = (t.raw('members') as Member[]).map((member, index) => ({
+    ...member,
+    image: media.team.members[index] ?? null,
+  }));
 
   return (
     <section id="team" className="bg-neutral-100 py-16 sm:py-20 md:py-24">
@@ -23,9 +29,15 @@ export async function Team() {
             <Reveal key={member.name} index={index}>
               <TiltCard>
                 <div className="flex h-full flex-col items-center rounded-2xl bg-neutral-bg p-8 text-center shadow-sm">
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-dark font-display text-lg font-semibold text-accent-light">
-                    {member.initials}
-                  </span>
+                  {member.image ? (
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-primary-dark">
+                      <Image src={member.image} alt="" fill unoptimized className="object-cover" />
+                    </div>
+                  ) : (
+                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-dark font-display text-lg font-semibold text-accent-light">
+                      {member.initials}
+                    </span>
+                  )}
                   <h3 className="mt-5 font-display text-lg font-semibold text-primary-dark">{member.name}</h3>
                   <p className="mt-1 text-xs uppercase tracking-[0.15em] text-accent-dark">{member.role}</p>
                   <p className="mt-4 text-sm text-neutral-muted">{member.bio}</p>

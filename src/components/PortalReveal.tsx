@@ -33,10 +33,15 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
  * component can't run at all for them.
  */
 export function PortalReveal({ children, trackVh }: { children: ReactNode; trackVh: number }) {
-  const [revealed, setRevealed] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  );
-  const revealedOnce = useRef(revealed);
+  const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [revealed, setRevealed] = useState(reducedMotion);
+  // Reduced-motion visitors bypass the gate entirely and must never be re-hidden by
+  // the scroll-position tracking below — that tracking exists only to make the real
+  // portal hand-off bidirectional, and previously ran for these visitors too (keyed
+  // off the same `revealedOnce` flag), hiding content again the instant they scrolled
+  // even one pixel before reaching the threshold.
+  const skipGate = useRef(reducedMotion());
+  const revealedOnce = useRef(skipGate.current);
 
   useEffect(() => {
     if (revealedOnce.current) return;
@@ -56,6 +61,7 @@ export function PortalReveal({ children, trackVh }: { children: ReactNode; track
   }, []);
 
   useEffect(() => {
+    if (skipGate.current) return;
     function onScroll() {
       if (!revealedOnce.current) return;
       setRevealed(window.scrollY >= trackVh * window.innerHeight - 1);
