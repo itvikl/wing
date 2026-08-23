@@ -69,13 +69,17 @@ export function SeeWingsCues({
     progressRef.current = p;
   });
 
-  // A fast mobile flick can fling the scroll straight through several cue
-  // windows before momentum decays, changing the caption faster than it can
-  // be read. Once the gesture actually settles (no scroll events for a
-  // beat), ease the rest of the way to the nearest cue's fully-visible
-  // midpoint instead of leaving the reader stranded on a half-faded one.
-  // Scoped to coarse/touch pointers — this is a flick-momentum problem, not
-  // a desktop wheel/trackpad one.
+  // A fast mobile flick can occasionally land scroll right on a window seam,
+  // where the outgoing cue has faded out and the incoming one hasn't faded in
+  // yet — genuinely nothing readable on screen. Once the gesture settles
+  // there (no scroll events for a beat), ease a little further to the nearest
+  // fully-visible cue. Two guards keep this from fighting the reader: it only
+  // fires when the settle point is actually low-opacity (an earlier version
+  // pulled back to the *current* window's midpoint unconditionally, which
+  // meant anyone who paused anywhere in the back half of a window — i.e.
+  // after already reading it, mid-forward-scroll — got yanked backwards; very
+  // disorienting), and it only ever moves further in the direction already
+  // being scrolled, never against it.
   useEffect(() => {
     const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -83,16 +87,29 @@ export function SeeWingsCues({
 
     let timer: ReturnType<typeof setTimeout>;
     let snapping = false;
+    let lastY = window.scrollY;
+    let forward = true;
 
     function settle() {
       if (snapping) return;
       const p = progressRef.current;
       if (p <= 0 || p >= 0.999) return;
-      const idx = Math.min(cues.length - 1, Math.floor(p * cues.length));
+      const count = cues.length;
+      const raw = p * count;
+      const idx = Math.min(count - 1, Math.floor(raw));
+      if (cueOpacity(p, idx, count, trackVh) > 0.3) return; // already legible — leave it alone
+
+      const pastPeak = raw > idx + 0.5;
+      let targetIdx = idx;
+      if (forward && pastPeak) targetIdx = Math.min(count - 1, idx + 1);
+      else if (!forward && !pastPeak) targetIdx = Math.max(0, idx - 1);
+
       const vh = window.innerHeight;
-      const target = ((idx + 0.5) / cues.length) * trackVh * vh;
+      const target = ((targetIdx + 0.5) / count) * trackVh * vh;
       const current = window.scrollY;
-      if (Math.abs(current - target) < vh * 0.03) return;
+      if (Math.abs(current - target) < vh * 0.02) return;
+      if (forward && target < current) return; // never move against the scroll direction
+      if (!forward && target > current) return;
 
       snapping = true;
       const lenis = (window as typeof window & { __lenis?: { scrollTo: (t: number, o?: object) => void } }).__lenis;
@@ -102,6 +119,9 @@ export function SeeWingsCues({
     }
 
     function onScroll() {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) > 0.5) forward = y > lastY;
+      lastY = y;
       clearTimeout(timer);
       timer = setTimeout(settle, 150);
     }
