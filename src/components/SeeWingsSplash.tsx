@@ -120,7 +120,15 @@ export function SeeWingsSplash({
 
       <motion.div
         className="absolute inset-x-0 flex flex-col items-center gap-6 px-6 text-center"
-        style={{ opacity: mounted ? textOpacity : 1, top: `calc(50% + ${BIG_HEIGHT / 2 + 32}px)` }}
+        style={{
+          opacity: mounted ? textOpacity : 1,
+          // On short mobile viewports, anchoring purely below the logo (50% + fixed
+          // offset) can push a long title/body down far enough to collide with the
+          // fixed "01 / N" scene counter and the scroll hint pinned near the bottom.
+          // min() keeps the natural centered position on tall screens but pulls the
+          // block up once the viewport is too short to fit both without overlap.
+          top: `min(calc(50% + ${BIG_HEIGHT / 2 + 20}px), calc(100dvh - 260px))`,
+        }}
       >
         <div>
           <span className="block font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
@@ -130,7 +138,11 @@ export function SeeWingsSplash({
             {title}
           </h1>
           {body && (
-            <p className="mx-auto mt-4 max-w-xl text-base text-neutral-200 [text-shadow:0_2px_16px_rgba(5,32,26,0.7)] md:text-lg">
+            // Hidden on very short viewports (e.g. iPhone SE-class phones) — even
+            // pulled up as far as it can go without colliding with the logo above,
+            // the block still doesn't have room for a 3-line body without running
+            // into the "01 / N" counter and scroll hint pinned near the bottom.
+            <p className="mx-auto mt-4 hidden max-w-xl text-base text-neutral-200 [text-shadow:0_2px_16px_rgba(5,32,26,0.7)] [@media(min-height:781px)]:block md:text-lg">
               {body}
             </p>
           )}
