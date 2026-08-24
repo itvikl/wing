@@ -31,7 +31,16 @@ const GOLD_LIGHT = '#FFBC7D';
 // the chapter windows line up with the actual track length.
 // Raised from 4 so each scene takes longer to scroll through — it was reading
 // as "flying by" immediately instead of settling into an experience.
-export const TRACK_VH = 5.5;
+// Raised again from 5.5: on mobile, a single hard flick's scroll distance is
+// fixed by the OS's own momentum physics, not by this constant — so the only
+// lever that actually slows the *story* down relative to a flick is giving it
+// more scroll runway to cover. At 5.5 a hard flick could blow past several
+// chapters (captions flashing by unread, camera cuts feeling like a fast-
+// forward) before momentum decayed. This was tried the other way first (a
+// scroll-settle "snap back to the nearest caption") but that fought the
+// reader's own scroll direction and felt worse than the problem it fixed —
+// slowing the underlying pace is the more honest fix.
+export const TRACK_VH = 9;
 
 export function SeeWingsExperience({
   locale,
