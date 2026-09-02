@@ -4,6 +4,16 @@ import type { Locale } from '@/i18n/request';
 import { getSiteMedia } from '@/lib/content/store';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
 
+// Every string on the site comes from the Firestore content doc (see
+// i18n/request.ts -> getLocaleText). That's a raw Admin SDK read, not a fetch,
+// so Next can't tie it to a cache tag: prerendered pages keep serving whatever
+// was in Firestore at build time, and revalidatePath() only clears the on-disk
+// ISR cache of the one Cloud Run instance that ran the admin action. Rendering
+// per request is what actually makes an admin save show up on the live site.
+// Route segment config does not cascade from the layout, so every page under
+// [locale] needs this line.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'A closer look — Wings Real Estate',
 };
