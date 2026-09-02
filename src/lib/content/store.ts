@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
-import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase-admin';
+import { requireAdmin } from '@/lib/auth/session';
 import { defaultContent } from './defaults';
 import {
   TEXT_SECTION_SCHEMAS,
@@ -62,40 +62,48 @@ export async function getSiteMedia() {
   return content.media;
 }
 
-const REVALIDATE_PATHS = ['/', '/he', '/see-wings', '/he/see-wings'];
-
-function revalidateSite() {
-  for (const path of REVALIDATE_PATHS) revalidatePath(path);
-}
-
 export async function updateTextSection<K extends TextSectionKey>(locale: ContentLocale, section: K, data: unknown) {
+  await requireAdmin();
   const schema = TEXT_SECTION_SCHEMAS[section];
   const parsed = schema.parse(data);
   await contentDoc().set({ text: { [locale]: { [section]: parsed } } }, { merge: true });
-  revalidateSite();
 }
 
 export async function updateLogo(url: string) {
+  await requireAdmin();
   await contentDoc().set({ media: { logo: url } }, { merge: true });
-  revalidateSite();
 }
 
 export async function updateVideoPoster(url: string) {
+  await requireAdmin();
   await contentDoc().set({ media: { video: { poster: url } } }, { merge: true });
-  revalidateSite();
 }
 
-export async function updateProjectImages(images: (string | null)[]) {
-  await contentDoc().set({ media: { projects: { items: images } } }, { merge: true });
-  revalidateSite();
+/** Text (both locales) + images written in one Firestore call so a mid-save failure can never leave them out of sync. */
+export async function updateProjectsSection(he: unknown, en: unknown, images: (string | null)[]) {
+  await requireAdmin();
+  const schema = TEXT_SECTION_SCHEMAS.projects;
+  const parsedHe = schema.parse(he);
+  const parsedEn = schema.parse(en);
+  await contentDoc().set(
+    { text: { he: { projects: parsedHe }, en: { projects: parsedEn } }, media: { projects: { items: images } } },
+    { merge: true },
+  );
 }
 
-export async function updateTeamImages(images: (string | null)[]) {
-  await contentDoc().set({ media: { team: { members: images } } }, { merge: true });
-  revalidateSite();
+/** Text (both locales) + images written in one Firestore call so a mid-save failure can never leave them out of sync. */
+export async function updateTeamSection(he: unknown, en: unknown, images: (string | null)[]) {
+  await requireAdmin();
+  const schema = TEXT_SECTION_SCHEMAS.team;
+  const parsedHe = schema.parse(he);
+  const parsedEn = schema.parse(en);
+  await contentDoc().set(
+    { text: { he: { team: parsedHe }, en: { team: parsedEn } }, media: { team: { members: images } } },
+    { merge: true },
+  );
 }
 
 export async function updateSeeWingsMedia(sections: SeeWingsMediaSection[], connectors: (string | null)[]) {
+  await requireAdmin();
   await contentDoc().set({ media: { seeWings: { sections, connectors } } }, { merge: true });
-  revalidateSite();
 }

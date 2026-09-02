@@ -78,7 +78,16 @@ function mountScrollWorld(container, config) {
   const CONN_W = config.connScroll || 0.9;
   const CROSSFADE = (config.crossfade != null) ? config.crossfade : 0.12;  // seam dissolve width (vh)
   const N = SECTIONS.length;
-  if (!N) return;
+  if (!N) return { dispose() {} };
+
+  // Torn down on dispose(): stops the rAF loop, removes every window-level
+  // listener registered below, clears the pending portal-transition timer, and
+  // revokes each clip's Blob URL. Without this, a caller that mounts a new
+  // instance on top of an old one (e.g. a client-side route change that keeps
+  // the page alive) leaks listeners/rAF/video blobs without bound.
+  let disposed = false;
+  const objectUrls = [];
+  let portalTimeout = null;
 
   injectCSS();
   container.classList.add('sw-root');
@@ -131,10 +140,18 @@ function mountScrollWorld(container, config) {
       nav.appendChild(a);
     });
   }
+  // Grouped so a single margin-inline-start:auto on the wrapper pins both to
+  // the topbar's end edge, regardless of which of the two is present.
+  const topEnd = el('div', 'sw-topbar__end');
+  if (config.lang && config.lang.label) {
+    const l = el('a', 'sw-toplang'); l.href = config.lang.href || '#'; l.textContent = config.lang.label;
+    topEnd.appendChild(l);
+  }
   if (config.cta && config.cta.label) {
     const c = el('a', 'sw-topcta'); c.href = config.cta.href || '#'; c.textContent = config.cta.label;
-    topbar.appendChild(c);
+    topEnd.appendChild(c);
   }
+  if (topEnd.children.length) topbar.appendChild(topEnd);
 
   const stage = el('div', 'sw-stage');
   const copylayer = el('div', 'sw-copylayer');
@@ -203,11 +220,28 @@ function mountScrollWorld(container, config) {
   // back up and returning later just reveals/hides the video normally.
   let doneWasActive = false, portalPlayed = false, portalLocking = false;
   let laidOutW = window.innerWidth;   // width the current layout was computed at (see onResize)
+  let lastIsMobile = isMobile();      // tracked so layout() can catch a mobile/desktop crossing (see below)
 
   function layout() {
     vh = window.innerHeight;
     laidOutW = window.innerWidth;
     stageX = window.innerWidth > 860 ? 4 : 0;
+    // The still poster is picked once at mount time, but the video clip
+    // re-picks its mobile/desktop variant live when it actually loads (see
+    // loadClip) — a resize/rotation across the 860px boundary in between
+    // (e.g. a tablet flipped from portrait to landscape) would otherwise
+    // leave a scene showing a still and a video from mismatched variants.
+    // Re-sync the poster here too, but only for scenes whose video hasn't
+    // already taken over.
+    const nowMobile = isMobile();
+    if (nowMobile !== lastIsMobile) {
+      lastIsMobile = nowMobile;
+      SEGMENTS.forEach(s => {
+        if (s.hasClip) return;
+        const poster = (nowMobile && s.stillM) ? s.stillM : s.still;
+        if (poster) s.img.src = poster;
+      });
+    }
     let off = 0;
     SEGMENTS.forEach(s => { s.start = off * vh; off += s.w; s.end = off * vh; });
     totalW = off;
@@ -239,7 +273,9 @@ function mountScrollWorld(container, config) {
         v.className = 'sw-scene__video';
         v.muted = true; v.playsInline = true; v.preload = 'auto';
         v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-        v.src = URL.createObjectURL(blob);
+        const objectUrl = URL.createObjectURL(blob);
+        objectUrls.push(objectUrl);
+        v.src = objectUrl;
         v.addEventListener('loadedmetadata', () => { s.ready = true; read(); });
         // Reveal the video (hide the still poster) only once a real frame has
         // painted — on iOS a seeked-but-never-played muted video stays blank, so
@@ -259,7 +295,7 @@ function mountScrollWorld(container, config) {
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
       if (y > s.start - 1.6 * vh && y < s.end + 1.6 * vh) loadClip(s);
-      const local = clamp((y - s.start) / (s.end - s.start), 0, 1);
+      const local = clamp((y - s.start) / Math.max(s.end - s.start, 1e-6), 0, 1);
       s.target = s.linger ? lingerEase(local, s.linger) : local;
       let outside = 0;
       if (y < s.start) outside = s.start - y; else if (y > s.end) outside = y - s.end;
@@ -274,7 +310,10 @@ function mountScrollWorld(container, config) {
 
     for (let i = 0; i < N; i++) {
       const seg = SECTIONS[i]._seg;
-      const pr = clamp((y - seg.start) / (seg.end - seg.start), 0, 1);
+      // Math.max(...,1e-6) guards a misconfigured zero-length section (scroll: 0)
+      // from dividing by zero and producing NaN, which would silently zero out
+      // that section's copy opacity for the rest of the page's life.
+      const pr = clamp((y - seg.start) / Math.max(seg.end - seg.start, 1e-6), 0, 1);
       const before = y < seg.start, after = y > seg.end;
       let cop;
       if (i === 0) cop = after ? 0 : smooth(1 - pr / 0.62);            // greets on landing
@@ -314,6 +353,7 @@ function mountScrollWorld(container, config) {
   }
 
   function raf() {
+    if (disposed) return;
     const eps = isMobile() ? 0.02 : 0.008;   // coarser seek step on phones = fewer decodes
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
@@ -352,17 +392,22 @@ function mountScrollWorld(container, config) {
   // ---- portal hand-off: block input, let the .sw-done zoom+dissolve play out on
   // its own timeline, then snap scroll straight to the top of what follows ----
   function blockInput(e) { e.preventDefault(); e.stopPropagation(); }
+  // Only the keys that would actually scroll — a plain keydown blocker would
+  // also swallow Tab, Escape, and typing into any focused field elsewhere on
+  // the page for the whole lock duration.
+  const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar']);
+  function blockScrollKeys(e) { if (SCROLL_KEYS.has(e.key)) { e.preventDefault(); e.stopPropagation(); } }
   function lockInput() {
     window.addEventListener('wheel', blockInput, { passive: false, capture: true });
     window.addEventListener('touchmove', blockInput, { passive: false, capture: true });
-    window.addEventListener('keydown', blockInput, { capture: true });
+    window.addEventListener('keydown', blockScrollKeys, { capture: true });
     const lenis = window.__lenis;
     if (lenis) lenis.stop();
   }
   function unlockInput() {
     window.removeEventListener('wheel', blockInput, { capture: true });
     window.removeEventListener('touchmove', blockInput, { capture: true });
-    window.removeEventListener('keydown', blockInput, { capture: true });
+    window.removeEventListener('keydown', blockScrollKeys, { capture: true });
     const lenis = window.__lenis;
     if (lenis) lenis.start();
   }
@@ -380,7 +425,8 @@ function mountScrollWorld(container, config) {
     lockInput();
     // Matches the .sw-stage zoom+dissolve duration (.6s) plus a small margin so
     // the jump never lands before the animation has actually finished painting.
-    setTimeout(() => {
+    portalTimeout = setTimeout(() => {
+      portalTimeout = null;
       const targetY = (totalW + Math.max(CROSSFADE, 0.7)) * vh;
       const lenis = window.__lenis;
       if (lenis) {
@@ -398,7 +444,8 @@ function mountScrollWorld(container, config) {
 
   // Particles are a per-frame cost we can't afford alongside video scrubbing on a phone.
   seedParticles(particles, reduce || coarse);
-  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(read); } }
+  window.addEventListener('scroll', onScroll, { passive: true });
   // Mobile browsers fire `resize` every time the URL bar slides in/out. Re-running
   // layout() there rebuilds the track height and yanks the scroll position, so on
   // touch we ignore height-only changes and only relayout when the width actually
@@ -414,6 +461,23 @@ function mountScrollWorld(container, config) {
   layout();
   requestAnimationFrame(raf);
 
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onResize);
+    window.removeEventListener('orientationchange', layout);
+    window.removeEventListener('load', layout);
+    window.removeEventListener('pointerdown', onFirstGesture);
+    window.removeEventListener('touchstart', onFirstGesture);
+    window.removeEventListener('wheel', blockInput, { capture: true });
+    window.removeEventListener('touchmove', blockInput, { capture: true });
+    window.removeEventListener('keydown', blockScrollKeys, { capture: true });
+    if (portalTimeout) { clearTimeout(portalTimeout); portalTimeout = null; }
+    objectUrls.forEach((u) => URL.revokeObjectURL(u));
+    objectUrls.length = 0;
+  }
+
   // ---- helpers ----
   function el(tag, cls) { const n = document.createElement(tag); if (cls) n.className = cls; return n; }
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -424,6 +488,8 @@ function mountScrollWorld(container, config) {
     if (cta.secondary) h += `<a class="sw-btn sw-btn--ghost" href="${esc(cta.secondary.href || '#')}">${esc(cta.secondary.label)}</a>`;
     return h;
   }
+
+  return { dispose };
 }
 
 function seedParticles(host, reduce) {
@@ -481,7 +547,13 @@ function injectCSS() {
      omitted, since a single flex child sits at the start by default. This
      also now matches where the real page's own Header puts its CTA, so
      there's no visual jump when the portal hand-off swaps one for the other. */
-  .sw-topcta{margin-inline-start:auto;text-decoration:none;font-weight:600;font-size:.9rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
+  .sw-topbar__end{margin-inline-start:auto;display:flex;align-items:center;gap:12px;}
+  /* Pilled like .sw-nav__item (not plain text) — the topbar sits directly on
+     the raw photo with no darkening overlay, so anything without its own
+     background risks vanishing against light stone. */
+  .sw-toplang{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);padding:8px 14px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s;}
+  .sw-toplang:hover{background:var(--sw-accent) !important;color:#fff !important;}
+  .sw-topcta{text-decoration:none;font-weight:600;font-size:.9rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
   .sw-stage{position:fixed;inset:0;z-index:10;pointer-events:none;}
   .sw-scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity;}
   .sw-scene__video,.sw-scene__still{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;max-width:none !important;object-fit:cover !important;object-position:center 42%;}
@@ -489,8 +561,10 @@ function injectCSS() {
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
   .sw-copylayer::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
   .sw-copylayer:dir(rtl)::before{background:linear-gradient(270deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
-  .sw-copy{position:absolute;left:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,460px);opacity:0;will-change:opacity,transform;}
-  .sw-copy__num{font-family:ui-monospace,Menlo,monospace;font-size:.74rem;letter-spacing:.12em;color:var(--sw-ink-soft);}
+  .sw-copy{position:absolute;inset-inline-start:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,460px);opacity:0;will-change:opacity,transform;}
+  /* direction:ltr keeps "01 / 03" in numeric order — without it, an RTL page
+     (Hebrew) reorders the digit/slash runs and it reads back to front. */
+  .sw-copy__num{font-family:ui-monospace,Menlo,monospace;font-size:.74rem;letter-spacing:.12em;color:var(--sw-ink-soft);direction:ltr;unicode-bidi:isolate;display:inline-block;}
   .sw-copy__eyebrow{display:block;margin-top:18px;font-family:var(--sw-font-display);font-weight:700;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--sw-accent);}
   .sw-copy__title{font-family:var(--sw-font-display);font-weight:700;color:var(--sw-ink);font-size:clamp(2rem,4.4vw,3.5rem);line-height:1.03;margin:12px 0 0;letter-spacing:-.01em;text-shadow:0 2px 20px color-mix(in srgb,var(--sw-bg) 70%,transparent);}
   .sw-copy__body{margin-top:18px;font-size:clamp(1rem,1.25vw,1.14rem);line-height:1.55;color:color-mix(in srgb,var(--sw-ink) 78%,var(--sw-ink-soft));max-width:40ch;text-shadow:0 1px 12px color-mix(in srgb,var(--sw-bg) 90%,transparent);}
@@ -500,14 +574,19 @@ function injectCSS() {
   .sw-btn{text-decoration:none;font-weight:600;font-size:.95rem;padding:13px 24px;border-radius:999px;transition:transform .2s;}
   .sw-btn--primary{color:var(--sw-bg) !important;background:var(--sw-accent) !important;} .sw-btn--primary:hover{transform:translateY(-2px);}
   .sw-btn--ghost{color:var(--sw-ink);border:1.5px solid color-mix(in srgb,var(--sw-ink) 25%,transparent);} .sw-btn--ghost:hover{transform:translateY(-2px);}
-  .sw-route{position:fixed;right:clamp(14px,2.4vw,30px);top:50%;z-index:40;transform:translateY(-50%);display:flex;flex-direction:column;gap:22px;padding:18px 10px;}
+  /* inset-inline-end (not right) so the rail moves to the physical left in
+     RTL instead of sitting on top of .sw-copy, which itself already mirrors
+     there (see .sw-copy above). */
+  .sw-route{position:fixed;inset-inline-end:clamp(14px,2.4vw,30px);top:50%;z-index:40;transform:translateY(-50%);display:flex;flex-direction:column;gap:22px;padding:18px 10px;}
   .sw-route::before{content:"";position:absolute;left:50%;top:22px;bottom:22px;width:2px;transform:translateX(-50%);background:var(--sw-accent);opacity:.28;}
   .sw-route__dot{position:relative;border:0;background:transparent;cursor:pointer;width:14px;height:14px;display:grid;place-items:center;}
   .sw-route__dot i{width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--sw-accent) 40%,transparent);transition:transform .3s,background .3s,box-shadow .3s;}
   .sw-route__dot:hover i{transform:scale(1.25);background:var(--sw-accent);}
   .sw-route__dot.is-active i{background:var(--sw-accent);transform:scale(1.4);box-shadow:0 0 0 5px color-mix(in srgb,var(--sw-accent) 22%,transparent);}
-  .sw-route__label{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-size:.78rem;font-weight:600;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 85%,transparent);backdrop-filter:blur(6px);padding:5px 11px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border:1px solid color-mix(in srgb,var(--sw-accent) 14%,transparent);}
-  .sw-route__dot:hover .sw-route__label,.sw-route__dot.is-active .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}
+  .sw-route__label{position:absolute;inset-inline-end:24px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-size:.78rem;font-weight:600;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 85%,transparent);backdrop-filter:blur(6px);padding:5px 11px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border:1px solid color-mix(in srgb,var(--sw-accent) 14%,transparent);}
+  .sw-route__label:dir(rtl){transform:translateY(-50%) translateX(-6px);}
+  .sw-route__dot:hover .sw-route__label:dir(rtl),.sw-route__dot:focus-visible .sw-route__label:dir(rtl),.sw-route__dot.is-active .sw-route__label:dir(rtl){transform:translateY(-50%) translateX(0);}
+  .sw-route__dot:hover .sw-route__label,.sw-route__dot:focus-visible .sw-route__label,.sw-route__dot.is-active .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}
   .sw-hint{position:fixed;left:50%;bottom:26px;z-index:30;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sw-ink-soft);transition:opacity .3s;}
   .sw-hint i{width:22px;height:34px;border-radius:12px;border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
   .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s ease-in-out infinite;}
@@ -523,7 +602,7 @@ function injectCSS() {
     .sw-copy__title{font-size:clamp(1.9rem,7.5vw,2.7rem);}
     .sw-copy__body{max-width:none;font-size:clamp(.98rem,3.6vw,1.1rem);} .sw-scene__video,.sw-scene__still{object-position:center 46%;}
     .sw-hint{bottom:calc(20px + env(safe-area-inset-bottom));}
-    .sw-route{gap:16px;right:6px;} .sw-route__label{display:none;}
+    .sw-route{gap:16px;inset-inline-end:6px;} .sw-route__label{display:none;}
   }
   /* Portrait phones crop a 16:9 clip hard; keep the framing centred so the focal
      subject (which the camera dives toward) stays in view. */

@@ -7,7 +7,7 @@ import { RepeatableList } from '@/components/admin/RepeatableList';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
 import { useSectionForm } from '@/components/admin/useSectionForm';
-import { saveTeam, saveTeamImages, type TeamText } from './actions';
+import { saveTeam, type TeamText } from './actions';
 import { TeamPreview } from './Preview';
 import type { ContentLocale } from '@/lib/content/schema';
 
@@ -33,9 +33,11 @@ export function TeamForm({
   initial: { he: TeamText; en: TeamText; images: (string | null)[] };
 }) {
   async function save(data: Data) {
-    await saveTeam('he', { ...data.labels.he, members: data.rows.map((r) => r.he) });
-    await saveTeam('en', { ...data.labels.en, members: data.rows.map((r) => r.en) });
-    await saveTeamImages(data.rows.map((r) => r.image));
+    await saveTeam(
+      { ...data.labels.he, members: data.rows.map((r) => r.he) },
+      { ...data.labels.en, members: data.rows.map((r) => r.en) },
+      data.rows.map((r) => r.image),
+    );
   }
 
   const { data, setData, saving, saved, error, handleSubmit } = useSectionForm<Data>(

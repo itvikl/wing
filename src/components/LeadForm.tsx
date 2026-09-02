@@ -2,18 +2,32 @@
 
 import { useState, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { submitLead } from '@/lib/leads';
 
 export function LeadForm() {
   const t = useTranslations('leadForm');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
-  // TODO (M3): wire to a server action that writes to Firestore `leads`
-  // and forwards to the client's CRM once API details arrive.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
     setStatus('submitting');
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    setStatus('success');
+
+    try {
+      await submitLead({
+        name: String(data.get('name') ?? ''),
+        phone: String(data.get('phone') ?? ''),
+        email: String(data.get('email') ?? ''),
+        message: String(data.get('message') ?? ''),
+        refUrl: window.location.href,
+      });
+      form.reset();
+      setStatus('success');
+    } catch (error) {
+      console.error('Lead submission failed', error);
+      setStatus('error');
+    }
   }
 
   return (
@@ -60,6 +74,7 @@ export function LeadForm() {
             >
               {status === 'submitting' ? '…' : t('submit')}
             </button>
+            {status === 'error' ? <p className="text-sm text-red-400">{t('error')}</p> : null}
           </form>
         )}
       </div>

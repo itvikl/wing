@@ -1,7 +1,8 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
 import { getSiteMedia } from '@/lib/content/store';
-import { SeeWingsExperience, TRACK_VH, type SeeWingsSection } from '@/components/SeeWingsExperience';
+import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
+import { computeTrackVh } from '@/lib/seeWingsTiming';
 import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
 import { PortalReveal } from '@/components/PortalReveal';
 import { ScrollProgress } from '@/components/ScrollProgress';
@@ -27,6 +28,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const media = await getSiteMedia();
   const sections = t.raw('sections') as SeeWingsSection[];
   const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] }[];
+  const trackVh = computeTrackVh(sections.length, media.seeWings.connectors);
   const navLinks = [
     { id: 'about', label: nav('about') },
     { id: 'projects', label: nav('projects') },
@@ -48,8 +50,8 @@ export default async function HomePage({ params: { locale } }: { params: { local
       />
 
       <SmoothScrollProvider>
-        <PortalReveal trackVh={TRACK_VH}>
-          <ScrollProgress />
+        <PortalReveal trackVh={trackVh}>
+          <ScrollProgress trackVh={trackVh} />
           <Header />
           <main>
             <LeadForm />

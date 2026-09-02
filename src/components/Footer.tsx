@@ -19,17 +19,17 @@ export async function Footer() {
             </a>
           )}
           {whatsappLink && (
-            <a href={whatsappLink} className="hover:text-accent-light">
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="hover:text-accent-light">
               {t('whatsapp')}
             </a>
           )}
           {facebookUrl && (
-            <a href={facebookUrl} aria-label="Facebook" className="hover:text-accent-light">
+            <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-accent-light">
               Facebook
             </a>
           )}
           {instagramUrl && (
-            <a href={instagramUrl} aria-label="Instagram" className="hover:text-accent-light">
+            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-accent-light">
               Instagram
             </a>
           )}

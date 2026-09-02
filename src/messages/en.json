@@ -26,11 +26,27 @@
   "seeWings": {
     "sections": [
       {
-        "id": "main",
-        "label": "Jerusalem",
+        "id": "alleys",
+        "label": "Old City",
         "eyebrow": "Wings Real Estate — Jerusalem",
         "title": "Exclusive addresses, quietly offered",
         "body": "A curated selection of properties in Jerusalem, available to a limited circle before they ever reach the open market.",
+        "tags": []
+      },
+      {
+        "id": "midrachov",
+        "label": "The Walk",
+        "eyebrow": "Into the City",
+        "title": "Where every street tells a story",
+        "body": "From quiet stone alleyways to the vibrant pedestrian heart of Jerusalem.",
+        "tags": []
+      },
+      {
+        "id": "main",
+        "label": "Jerusalem",
+        "eyebrow": "The Address",
+        "title": "A home above it all",
+        "body": "Where contemporary living meets the timeless stone of Jerusalem.",
         "tags": []
       }
     ],

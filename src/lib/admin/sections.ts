@@ -2,8 +2,6 @@ export const ADMIN_SECTIONS = [
   { key: 'brand', href: '/admin/content/brand', label: 'מיתוג — לוגו' },
   { key: 'hero', href: '/admin/content/hero', label: 'ראשי (Hero)' },
   { key: 'about', href: '/admin/content/about', label: 'אודות' },
-  { key: 'video', href: '/admin/content/video', label: 'קטע הווידאו' },
-  { key: 'map', href: '/admin/content/map', label: 'מפה' },
   { key: 'projects', href: '/admin/content/projects', label: 'הזדמנויות' },
   { key: 'why-us', href: '/admin/content/why-us', label: 'למה Wings' },
   { key: 'team', href: '/admin/content/team', label: 'הצוות' },

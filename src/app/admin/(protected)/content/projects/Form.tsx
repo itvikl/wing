@@ -7,7 +7,7 @@ import { RepeatableList } from '@/components/admin/RepeatableList';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
 import { useSectionForm } from '@/components/admin/useSectionForm';
-import { saveProjectsText, saveProjectImages, type ProjectsText } from './actions';
+import { saveProjects, type ProjectsText } from './actions';
 import { ProjectsPreview } from './Preview';
 import type { ContentLocale } from '@/lib/content/schema';
 
@@ -33,9 +33,11 @@ export function ProjectsForm({
   initial: { he: ProjectsText; en: ProjectsText; images: (string | null)[] };
 }) {
   async function save(data: Data) {
-    await saveProjectsText('he', { ...data.labels.he, items: data.rows.map((r) => r.he) });
-    await saveProjectsText('en', { ...data.labels.en, items: data.rows.map((r) => r.en) });
-    await saveProjectImages(data.rows.map((r) => r.image));
+    await saveProjects(
+      { ...data.labels.he, items: data.rows.map((r) => r.he) },
+      { ...data.labels.en, items: data.rows.map((r) => r.en) },
+      data.rows.map((r) => r.image),
+    );
   }
 
   const { data, setData, saving, saved, error, handleSubmit } = useSectionForm<Data>(

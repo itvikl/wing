@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { mountScrollWorld } from '@/lib/scrollWorld';
+import { SECTION_VH, CONN_VH, computeTrackVh } from '@/lib/seeWingsTiming';
 import { SeeWingsCues } from './SeeWingsCues';
 import { SeeWingsSplash } from './SeeWingsSplash';
 import type { Locale } from '@/i18n/request';
@@ -26,21 +28,20 @@ const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team']);
 
 const GOLD = '#B58238';
 const GOLD_LIGHT = '#FFBC7D';
-// Effective scroll length (in viewport-heights) of the single flythrough dive —
-// mirrors the last-section `scroll` override below, shared with SeeWingsCues so
-// the chapter windows line up with the actual track length.
-// Raised from 4 so each scene takes longer to scroll through — it was reading
-// as "flying by" immediately instead of settling into an experience.
-// Raised again from 5.5: on mobile, a single hard flick's scroll distance is
-// fixed by the OS's own momentum physics, not by this constant — so the only
-// lever that actually slows the *story* down relative to a flick is giving it
-// more scroll runway to cover. At 5.5 a hard flick could blow past several
-// chapters (captions flashing by unread, camera cuts feeling like a fast-
-// forward) before momentum decayed. This was tried the other way first (a
-// scroll-settle "snap back to the nearest caption") but that fought the
-// reader's own scroll direction and felt worse than the problem it fixed —
-// slowing the underlying pace is the more honest fix.
-export const TRACK_VH = 9;
+
+// Mirrors the inline style set on the container div below. scrollWorld.js's
+// injected CSS reads `--sw-bg` on html/body too (so the portal hand-off's
+// fade-out reveals the right color instead of a bare page background), but
+// custom properties only inherit downward — html/body are ANCESTORS of the
+// container, so they never see a value set only there and fall back to the
+// stylesheet's hardcoded cream default, flashing white mid-transition. These
+// are applied straight to documentElement in the effect below to fix that.
+const SW_THEME_VARS: Record<string, string> = {
+  '--sw-bg': '#05201A',
+  '--sw-ink': '#F7F6F3',
+  '--sw-ink-soft': 'rgba(247,246,243,0.68)',
+  '--sw-accent': GOLD,
+};
 
 export function SeeWingsExperience({
   locale,
@@ -60,6 +61,8 @@ export function SeeWingsExperience({
   media: SeeWingsMedia;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const trackVh = computeTrackVh(sections.length, media.connectors);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -68,28 +71,34 @@ export function SeeWingsExperience({
     // Fast Refresh re-run) would otherwise stack a second copy on top of the first.
     ref.current.innerHTML = '';
     document.getElementById('sw-css')?.remove();
+    const root = document.documentElement;
+    Object.entries(SW_THEME_VARS).forEach(([k, v]) => root.style.setProperty(k, v));
     const homeHref = locale === 'en' ? '/' : `/${locale}`;
     const routedHref = (id: string) => (locale === 'en' ? `/${id}` : `/${locale}/${id}`);
 
-    mountScrollWorld(ref.current, {
+    // Mirrors LanguageSwitcher's own logic — this custom-DOM topbar has no
+    // access to that React component, so the EN/HE toggle is rebuilt here.
+    const pathWithoutLocale = pathname.replace(/^\/(en|he)/, '') || '/';
+    const targetLocale = locale === 'en' ? 'he' : 'en';
+    const langHref = targetLocale === 'en' ? pathWithoutLocale : `/he${pathWithoutLocale}`;
+
+    const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
       // where the topbar mark would sit and takes over that role instead.
       cta: { label: brandCta, href: `${homeHref}#contact` },
+      lang: { label: targetLocale, href: langHref },
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
       navLinks: navLinks.map((n) => ({
         label: n.label,
         href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,
       })),
       atmosphere: true,
-      diveScroll: TRACK_VH,
-      // Was 0.85 — the connector clips are the "flight" between scenes, and at
-      // that length they blew past in a couple of scroll ticks. This slows the
-      // between-scene motion down to match the dives instead of whooshing past.
-      connScroll: 1.3,
+      diveScroll: SECTION_VH,
+      connScroll: CONN_VH,
       crossfade: 0.14,
-      // Native per-section copy/cta is intentionally omitted — a single video has
-      // no per-property text of its own, so SeeWingsCues renders the chapter
-      // headlines instead, driven by the same scroll range (TRACK_VH).
+      // Native per-section copy/cta is intentionally omitted — the chapter
+      // headlines are rendered by SeeWingsCues instead, driven by the same
+      // total scroll range (trackVh).
       sections: sections.map((s, i) => {
         const sceneMedia = media.sections.find((m) => m.id === s.id);
         return {
@@ -100,7 +109,7 @@ export function SeeWingsExperience({
           stillMobile: sceneMedia?.stillMobile,
           clipMobile: sceneMedia?.clipMobile,
           accent: i === sections.length - 1 ? GOLD_LIGHT : GOLD,
-          scroll: TRACK_VH,
+          scroll: SECTION_VH,
           // Was 0.4 — settle harder mid-scene (engine caps this at 0.6) so the
           // camera pauses where the copy peaks instead of drifting through.
           linger: 0.55,
@@ -108,7 +117,16 @@ export function SeeWingsExperience({
       }),
       connectors: media.connectors,
     });
-  }, [locale, sections, navLinks, brandCta, media]);
+    // Without this, a remount (StrictMode's dev double-invoke, or any future
+    // client-side nav between the two routes that render this component)
+    // left the previous instance's scroll/resize listeners, rAF loop, and
+    // video Blob URLs running forever against DOM the next mount had already
+    // wiped via the innerHTML reset above.
+    return () => {
+      engine.dispose();
+      Object.keys(SW_THEME_VARS).forEach((k) => root.style.removeProperty(k));
+    };
+  }, [locale, sections, navLinks, brandCta, media, pathname]);
 
   const homeHref = locale === 'en' ? '/' : `/${locale}`;
 
@@ -118,10 +136,7 @@ export function SeeWingsExperience({
         ref={ref}
         style={
           {
-            '--sw-bg': '#05201A',
-            '--sw-ink': '#F7F6F3',
-            '--sw-ink-soft': 'rgba(247,246,243,0.68)',
-            '--sw-accent': GOLD,
+            ...SW_THEME_VARS,
             '--sw-font-display': 'var(--font-display)',
             '--sw-font-body': 'var(--font-sans)',
           } as React.CSSProperties
@@ -132,9 +147,9 @@ export function SeeWingsExperience({
         title={sections[0].title}
         body={sections[0].body}
         homeHref={homeHref}
-        trackVh={TRACK_VH}
+        trackVh={trackVh}
       />
-      <SeeWingsCues cues={cues} trackVh={TRACK_VH} ctaLabel={ctaPrimary} ctaHref={`${homeHref}#contact`} />
+      <SeeWingsCues cues={cues} trackVh={trackVh} ctaLabel={ctaPrimary} ctaHref={`${homeHref}#contact`} />
     </>
   );
 }

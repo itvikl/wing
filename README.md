@@ -28,5 +28,6 @@ Console → Project settings → General → Your apps. The `FIREBASE_ADMIN_*`
 values come from Project settings → Service accounts → Generate new private
 key — keep these secret, never commit `.env.local`.
 
-`CRM_API_URL` / `CRM_API_KEY` are left blank until the client's IT contact
-provides integration details; until then leads are stored in Firestore only.
+`SEHEL_CRM_PROJECT_ID` is the project key for the client's Sehel CRM
+(https://crm.sehel.co.il). Every lead is saved to the Firestore `leads`
+collection regardless; if this var is set, it's also forwarded to Sehel CRM.
