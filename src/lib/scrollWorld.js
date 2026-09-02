@@ -591,7 +591,14 @@ function injectCSS() {
   .sw-hint i{width:22px;height:34px;border-radius:12px;border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
   .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s ease-in-out infinite;}
   @keyframes sw-wheel{0%{opacity:0;top:6px}40%{opacity:1}100%{opacity:0;top:17px}}
-  .sw-track{position:relative;z-index:1;width:100%;pointer-events:none;}
+  /* The track is the only thing occupying the flight's scroll column in normal
+     flow, so it also has to PAINT that column. The host page's own <body> may
+     legitimately carry a light background for its other pages (this site sets
+     bg-neutral-bg), and once .sw-done fades .sw-sky out at the hand-off, that
+     light body showed through the strip of track still on screen — a pale band
+     above the real content for the length of the tail buffer. Painting the
+     track itself with the scene background closes that gap for good. */
+  .sw-track{position:relative;z-index:1;width:100%;pointer-events:none;background:var(--sw-bg);}
   @media (max-width:860px){
     .sw-nav{display:none;}
     .sw-copylayer::before,.sw-copylayer:dir(rtl)::before{width:100%;height:42%;top:auto;bottom:0;background:linear-gradient(0deg,color-mix(in srgb,var(--sw-bg) 88%,transparent) 0%,color-mix(in srgb,var(--sw-bg) 55%,transparent) 30%,color-mix(in srgb,var(--sw-bg) 18%,transparent) 62%,transparent 100%);}

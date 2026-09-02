@@ -18,7 +18,18 @@
 // (a scroll-settle "snap back to the nearest caption") but that fought the
 // reader's own scroll direction and felt worse than the problem it fixed —
 // slowing the underlying pace is the more honest fix.
-export const SECTION_VH = 9;
+//
+// Raised again from 9 to 30 when the flight collapsed from three 8s scenes plus
+// two connectors back to ONE continuous 15s clip. With a single scene this
+// constant IS the whole track length, and the track length is what the cue
+// overlay divides into one window per cue (see SeeWingsCues) — so leaving it at
+// 9 would have cut each caption's scroll window from ~4.9vh to 1.5vh and made
+// the copy flash past unread. 30 keeps the total track (and therefore the cue
+// pacing) essentially identical to the three-scene version it replaced; the
+// single clip simply scrubs more slowly across that same distance, which suits
+// one uninterrupted flight. NOTE this is still a PER-SCENE value — adding a
+// second scene would double the track, so re-tune here if scenes ever return.
+export const SECTION_VH = 30;
 
 // Scroll length (vh) of a connector clip — the short bridging shot between
 // two dives. Was 0.85 — at that length it blew past in a couple of scroll
