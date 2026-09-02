@@ -19,17 +19,25 @@
 // reader's own scroll direction and felt worse than the problem it fixed —
 // slowing the underlying pace is the more honest fix.
 //
-// Raised again from 9 to 30 when the flight collapsed from three 8s scenes plus
-// two connectors back to ONE continuous 15s clip. With a single scene this
-// constant IS the whole track length, and the track length is what the cue
-// overlay divides into one window per cue (see SeeWingsCues) — so leaving it at
-// 9 would have cut each caption's scroll window from ~4.9vh to 1.5vh and made
-// the copy flash past unread. 30 keeps the total track (and therefore the cue
-// pacing) essentially identical to the three-scene version it replaced; the
-// single clip simply scrubs more slowly across that same distance, which suits
-// one uninterrupted flight. NOTE this is still a PER-SCENE value — adding a
-// second scene would double the track, so re-tune here if scenes ever return.
-export const SECTION_VH = 30;
+// Re-tuned when the flight collapsed from three 8s scenes plus two connectors
+// back to ONE continuous 15s clip. With a single scene this constant IS the
+// whole track length, and that length does double duty: it sets how far you
+// scroll per second of video, and the cue overlay divides it into one window
+// per caption (see SeeWingsCues).
+//
+// It went to 30 first, chosen to keep the caption windows exactly where the
+// three-scene version had them (~5vh each). That was the wrong trade: at 30vh
+// a 15s clip needs ~1840px of scroll per second of video, so on a desktop
+// wheel the picture barely moved while you scrolled. 22 puts a wheel notch
+// back at ~0.076s of video — matching what the old 8s dives actually felt
+// like — and cuts scrubbing the full flight from ~460 notches to ~200, while
+// still leaving each caption ~3.7vh to be read in. Paired with restoring
+// Lenis' wheelMultiplier to 1 (see SmoothScrollProvider); the two were
+// multiplying each other.
+//
+// NOTE this is still a PER-SCENE value — adding a second scene would double
+// the track, so re-tune here if scenes ever return.
+export const SECTION_VH = 22;
 
 // Scroll length (vh) of a connector clip — the short bridging shot between
 // two dives. Was 0.85 — at that length it blew past in a couple of scroll
