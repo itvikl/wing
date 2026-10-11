@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { mountScrollWorld } from '@/lib/scrollWorld';
 import { SECTION_VH, CONN_VH, computeTrackVh } from '@/lib/seeWingsTiming';
@@ -63,9 +63,21 @@ export function SeeWingsExperience({
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const trackVh = computeTrackVh(sections.length, media.connectors);
+  const openingStill =
+    media.sections.find((m) => m.id === sections[0]?.id)?.still || `/scroll-world/img/${sections[0]?.id}.webp`;
+  // Server-rendered copy of the opening frame, up until the engine's own
+  // poster has decoded. The engine only exists after hydration, so without
+  // this the first paint had no picture at all, and the image only started
+  // downloading once the JS bundle had run.
+  const [ssrPoster, setSsrPoster] = useState(true);
 
   useEffect(() => {
     if (!ref.current) return;
+    // Every visit opens on the alley. The browser otherwise restores the last
+    // scroll position on reload, which lands mid-flight or on the lead form
+    // and then gets yanked back once the first-frame gate shuts scroll.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (!window.location.hash) window.scrollTo(0, 0);
     // Idempotent remount guard: mountScrollWorld has no teardown and unconditionally
     // appends its DOM, so React 18 StrictMode's dev-mode double-invoke (and any
     // Fast Refresh re-run) would otherwise stack a second copy on top of the first.
@@ -122,12 +134,15 @@ export function SeeWingsExperience({
       }),
       connectors: media.connectors,
     });
+    let cancelled = false;
+    Promise.resolve(engine.firstPainted).then(() => { if (!cancelled) setSsrPoster(false); });
     // Without this, a remount (StrictMode's dev double-invoke, or any future
     // client-side nav between the two routes that render this component)
     // left the previous instance's scroll/resize listeners, rAF loop, and
     // video Blob URLs running forever against DOM the next mount had already
     // wiped via the innerHTML reset above.
     return () => {
+      cancelled = true;
       engine.dispose();
       Object.keys(SW_THEME_VARS).forEach((k) => root.style.removeProperty(k));
     };
@@ -146,6 +161,20 @@ export function SeeWingsExperience({
             '--sw-font-body': 'var(--font-sans)',
           } as React.CSSProperties
         }
+      />
+      {/* Same box and framing as the engine's .sw-scene__still (object-position
+          per breakpoint included), one layer above its stage, so handing over
+          to it doesn't move a pixel. Faded rather than unmounted, so even a
+          sub-pixel difference between the two decodes dissolves instead of
+          snapping. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- must match the engine's plain <img> exactly */}
+      <img
+        src={openingStill}
+        alt=""
+        aria-hidden
+        fetchPriority="high"
+        className="pointer-events-none fixed inset-0 z-[11] h-full w-full object-cover transition-opacity duration-700 ease-out [object-position:center_42%] max-[860px]:[object-position:center_46%] max-[860px]:portrait:[object-position:center_44%]"
+        style={{ opacity: ssrPoster ? 1 : 0 }}
       />
       <SeeWingsSplash
         eyebrow={sections[0].eyebrow}

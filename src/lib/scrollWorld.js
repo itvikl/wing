@@ -176,9 +176,13 @@ function mountScrollWorld(container, config) {
   layers.forEach(n => container.appendChild(n));
 
   // segment scenes
-  SEGMENTS.forEach(s => {
+  SEGMENTS.forEach((s, i) => {
     const scene = el('div', 'sw-scene'); scene.style.setProperty('--sw-accent', s.accent || '');
-    const img = el('img', 'sw-scene__still'); img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
+    const img = el('img', 'sw-scene__still'); img.alt = '';
+    // The first poster is the page's opening frame: fetch it now, at high
+    // priority. Later scenes stay lazy until the flight gets near them.
+    if (i === 0) { img.loading = 'eager'; img.fetchPriority = 'high'; }
+    else { img.decoding = 'async'; img.loading = 'lazy'; }
     const poster = (isMobile() && s.stillM) ? s.stillM : s.still;
     if (poster) img.src = poster;
     scene.appendChild(img); stage.appendChild(scene);
@@ -568,7 +572,12 @@ function mountScrollWorld(container, config) {
     return h;
   }
 
-  return { dispose };
+  // Resolves once the opening poster has decoded and can paint, so a host
+  // that server-rendered its own copy of that frame knows when to drop it.
+  const firstStill = SEGMENTS[0].img;
+  const firstPainted = (firstStill.src ? firstStill.decode() : Promise.resolve()).catch(() => {});
+
+  return { dispose, firstPainted };
 }
 
 function seedParticles(host, reduce) {
@@ -633,10 +642,21 @@ function injectCSS() {
   .sw-toplang{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);padding:8px 14px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s;}
   .sw-toplang:hover{background:var(--sw-accent) !important;color:#fff !important;}
   .sw-topcta{text-decoration:none;font-weight:600;font-size:.9rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
-  .sw-stage{position:fixed;inset:0;z-index:10;pointer-events:none;}
+  /* Opaque: whatever the host pins behind the stage (PortalReveal parks the
+     real page there) must never show through a scene whose poster hasn't
+     painted yet. The hand-off fades the whole stage, background included. */
+  .sw-stage{position:fixed;inset:0;z-index:10;pointer-events:none;background:var(--sw-bg);}
   .sw-scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity;}
   .sw-scene__video,.sw-scene__still{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;max-width:none !important;object-fit:cover !important;object-position:center 42%;}
-  .sw-scene__still{will-change:transform;} .sw-scene.has-clip .sw-scene__still{opacity:0;} .sw-scene__video{z-index:1;}
+  .sw-scene__still{will-change:transform;transition:opacity .5s ease;} .sw-scene.has-clip .sw-scene__still{opacity:0;} .sw-scene__video{z-index:1;}
+  /* Chrome eases in over the opening frame instead of popping on at mount:
+     the topbar, hint, scrollbar and especially the copylayer's side gradient
+     appeared in a single frame and read as the screen suddenly going green
+     at the edges. backwards (not both) so once it's done, the .sw-done fade
+     and the hint's inline opacity take over again untouched. */
+  @keyframes sw-in{from{opacity:0}to{opacity:1}}
+  .sw-topbar,.sw-scrollbar,.sw-hint,.sw-route{animation:sw-in .9s ease-out .25s backwards;}
+  .sw-copylayer::before{animation:sw-in 1.8s ease-out .4s backwards;}
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
   .sw-copylayer::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
   .sw-copylayer:dir(rtl)::before{background:linear-gradient(270deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
@@ -705,7 +725,8 @@ function injectCSS() {
     .sw-route__dot{width:28px;height:28px;}
     .sw-btn{padding:15px 26px;}
   }
-  @media (prefers-reduced-motion:reduce){ .sw-hint i::after{animation:none;} .sw-pt{display:none;} }
+  @media (prefers-reduced-motion:reduce){ .sw-hint i::after{animation:none;} .sw-pt{display:none;}
+    .sw-topbar,.sw-scrollbar,.sw-hint,.sw-route,.sw-copylayer::before{animation:none;} }
   .sw-topbar,.sw-route,.sw-scrollbar,.sw-sky,.sw-copylayer{transition:opacity .4s;}
   .sw-root.sw-done .sw-topbar,.sw-root.sw-done .sw-route,.sw-root.sw-done .sw-scrollbar,.sw-root.sw-done .sw-sky,.sw-root.sw-done .sw-copylayer{opacity:0;pointer-events:none;}
   /* Stage gets its own, slightly longer hand-off: a forward zoom + dissolve
