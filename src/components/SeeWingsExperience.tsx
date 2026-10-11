@@ -88,11 +88,12 @@ export function SeeWingsExperience({
     const homeHref = locale === 'en' ? '/' : `/${locale}`;
     const routedHref = (id: string) => (locale === 'en' ? `/${id}` : `/${locale}/${id}`);
 
-    // Mirrors LanguageSwitcher's own logic — this custom-DOM topbar has no
+    // Mirrors LanguageSwitcher's own logic (always locale-prefixed, so the
+    // NEXT_LOCALE cookie gets rewritten) — this custom-DOM topbar has no
     // access to that React component, so the EN/HE toggle is rebuilt here.
-    const pathWithoutLocale = pathname.replace(/^\/(en|he)/, '') || '/';
+    const pathWithoutLocale = pathname.replace(/^\/(en|he)/, '');
     const targetLocale = locale === 'en' ? 'he' : 'en';
-    const langHref = targetLocale === 'en' ? pathWithoutLocale : `/he${pathWithoutLocale}`;
+    const langHref = `/${targetLocale}${pathWithoutLocale}`;
 
     const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
