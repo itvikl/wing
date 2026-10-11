@@ -88,6 +88,7 @@ export function SeeWingsExperience({
       cta: { label: brandCta, href: `${homeHref}#contact` },
       lang: { label: targetLocale, href: langHref },
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
+      loadingHint: locale === 'he' ? 'טוען את החוויה' : 'loading the experience',
       navLinks: navLinks.map((n) => ({
         label: n.label,
         href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,
@@ -104,15 +105,19 @@ export function SeeWingsExperience({
         return {
           id: s.id,
           label: s.label,
-          still: sceneMedia?.still || `/scroll-world/img/${s.id}.png`,
+          still: sceneMedia?.still || `/scroll-world/img/${s.id}.webp`,
           clip: sceneMedia?.clip || `/scroll-world/vid/${s.id}.mp4`,
           stillMobile: sceneMedia?.stillMobile,
           clipMobile: sceneMedia?.clipMobile,
           accent: i === sections.length - 1 ? GOLD_LIGHT : GOLD,
           scroll: SECTION_VH,
-          // Was 0.4 — settle harder mid-scene (engine caps this at 0.6) so the
-          // camera pauses where the copy peaks instead of drifting through.
-          linger: 0.55,
+          // Linear on purpose. linger (was 0.55) eases scroll→time so the
+          // camera settles mid-scene, which suited three short dives with one
+          // caption each. With one 15s flight and six captions, mid-scene is
+          // the climb up the facade: the clip dropped to ~45% speed there and
+          // read as stuck while you kept scrolling, and the caption windows
+          // (cut in clip seconds, see CUE_BEATS_S) drifted off the picture.
+          linger: 0,
         };
       }),
       connectors: media.connectors,

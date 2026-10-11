@@ -2,6 +2,7 @@
 
 import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { useState } from 'react';
+import { CUE_BEATS_S, FLIGHT_SECONDS } from '@/lib/seeWingsTiming';
 
 type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
 
@@ -19,19 +20,30 @@ function smooth(x: number) {
   return c * c * (3 - 2 * c);
 }
 
+// Track fraction where cue `index` begins: on the clip's own beats when the
+// cue count matches them, otherwise the old equal slices.
+function cueEdge(index: number, count: number) {
+  if (CUE_BEATS_S.length === count + 1) return CUE_BEATS_S[index] / FLIGHT_SECONDS;
+  return index / count;
+}
+
 function cueOpacity(progress: number, index: number, count: number, trackVh: number) {
-  const start = index === 0 ? SPLASH_CLEAR_VH / trackVh : index / count;
-  const end = (index + 1) / count;
+  const start = index === 0 ? SPLASH_CLEAR_VH / trackVh : cueEdge(index, count);
+  const end = cueEdge(index + 1, count);
   const local = Math.min(1, Math.max(0, (progress - start) / (end - start)));
   if (local < FADE) return smooth(local / FADE);
-  if (local > 1 - FADE) return smooth((1 - local) / FADE);
+  // The last cue carries the CTA and has to still be there when the flight
+  // lands — fading it out on the way to 1 left the final scene captionless
+  // right before the portal hand-off, which hides it anyway (portalDone).
+  if (index < count - 1 && local > 1 - FADE) return smooth((1 - local) / FADE);
   return 1;
 }
 
 /**
  * The single flythrough video has no natural chapter breaks, so its
- * scroll range is split into N equal windows — one per landing-page
- * section — each fading its own eyebrow/title in and out in turn.
+ * scroll range is split into N windows cut on the clip's beats (see
+ * CUE_BEATS_S) — one per landing-page section — each fading its own
+ * eyebrow/title in and out in turn.
  */
 export function SeeWingsCues({
   cues,
@@ -62,7 +74,8 @@ export function SeeWingsCues({
   const [portalDone, setPortalDone] = useState(false);
 
   useMotionValueEvent(progress, 'change', (p) => {
-    const idx = Math.min(cues.length - 1, Math.floor(p * cues.length));
+    let idx = 0;
+    while (idx < cues.length - 1 && p >= cueEdge(idx + 1, cues.length)) idx++;
     setActive(idx);
     setPortalDone(p >= 0.999);
   });

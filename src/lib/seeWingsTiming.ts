@@ -39,6 +39,18 @@
 // the track, so re-tune here if scenes ever return.
 export const SECTION_VH = 22;
 
+// Where each caption window starts and ends, in seconds of the flight clip.
+// The clip scrubs linearly against scroll (no linger — see SeeWingsExperience),
+// so a point in the video and a point on the track are the same fraction, and
+// these cut the caption windows on the clip's own beats instead of six equal
+// slices that ignored what was on screen: alley → boulevard with the tower at
+// its end → climb up the facade → over the roof (pool, view) → back down
+// through the penthouse glass → the living room, where the CTA holds.
+// Re-cut these whenever the clip is re-rendered. SeeWingsCues falls back to
+// equal windows if the admin's cue count ever stops matching.
+export const FLIGHT_SECONDS = 15;
+export const CUE_BEATS_S = [0, 2.4, 5.6, 8.8, 11, 12.8, 15];
+
 // Scroll length (vh) of a connector clip — the short bridging shot between
 // two dives. Was 0.85 — at that length it blew past in a couple of scroll
 // ticks; this slows the between-scene motion down to match the dives instead

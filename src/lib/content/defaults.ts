@@ -33,7 +33,7 @@ export const defaultContent: SiteContent = {
     seeWings: {
       sections: defaultText.en.seeWings.sections.map((s) => ({
         id: s.id,
-        still: `/scroll-world/img/${s.id}.png`,
+        still: `/scroll-world/img/${s.id}.webp`,
         clip: `/scroll-world/vid/${s.id}.mp4`,
         // Optional lighter phone encode — see seeWingsMediaSectionSchema. Unlike
         // `clip`/`still`, the engine does NOT fall back to the desktop file if

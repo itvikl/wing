@@ -109,6 +109,9 @@ function mountScrollWorld(container, config) {
     }
   });
   const NSEG = SEGMENTS.length;
+  // The clip the first-frame gate waits on (see closeGate). Null under reduced
+  // motion, where clips never load and there's nothing to wait for.
+  const gateSeg = reduce ? null : (SEGMENTS.find(s => s.clip) || null);
 
   // ---- DOM ----
   const sky = el('div', 'sw-sky');
@@ -159,6 +162,11 @@ function mountScrollWorld(container, config) {
   const hint = el('div', 'sw-hint');
   const hintText = el('span'); hintText.textContent = config.hint || 'scroll'; hint.appendChild(hintText);
   hint.appendChild(el('i'));
+  // Download progress for the first clip, shown in place of the wheel icon
+  // while the first-frame gate holds scroll (see closeGate).
+  const hintBar = el('b', 'sw-hint__bar');
+  const hintFill = el('span'); hintBar.appendChild(hintFill);
+  hint.appendChild(hintBar);
   const track = el('div', 'sw-track');
 
   // A single-section experience has nowhere to jump to, so the chapter-dot
@@ -267,7 +275,7 @@ function mountScrollWorld(container, config) {
     s.loading = true;
     // Serve the lighter mobile encode on phones when one was provided.
     const url = (isMobile() && s.clipM) ? s.clipM : s.clip;
-    fetch(url).then(r => r.ok ? r.blob() : Promise.reject(new Error('404')))
+    fetch(url).then(r => r.ok ? readBlob(r, s === gateSeg ? onGateProgress : null) : Promise.reject(new Error('404')))
       .then(blob => {
         const v = document.createElement('video');
         v.className = 'sw-scene__video';
@@ -276,14 +284,31 @@ function mountScrollWorld(container, config) {
         const objectUrl = URL.createObjectURL(blob);
         objectUrls.push(objectUrl);
         v.src = objectUrl;
-        v.addEventListener('loadedmetadata', () => { s.ready = true; read(); });
+        v.addEventListener('loadedmetadata', () => { s.ready = true; read(); if (s === gateSeg) openGate(); });
         // Reveal the video (hide the still poster) only once a real frame has
         // painted — on iOS a seeked-but-never-played muted video stays blank, so
         // hiding the still on metadata alone would flash an empty scene.
         v.addEventListener('seeked', () => { s.el.classList.add('has-clip'); }, { once: true });
         v.addEventListener('loadeddata', () => { try { v.pause(); } catch (e) {} if (userReady) primeVideo(v); });
         s.el.appendChild(v); s.video = v; s.hasClip = true;
-      }).catch(() => { s.loading = false; });
+      }).catch(() => { s.loading = false; if (s === gateSeg) openGate(); });
+  }
+
+  // Reads a fetch Response into a Blob, reporting 0..1 progress along the way
+  // when the server sent a Content-Length (otherwise it just waits for it all).
+  function readBlob(r, onProgress) {
+    const total = Number(r.headers.get('content-length')) || 0;
+    if (!onProgress || !total || !r.body) return r.blob();
+    const type = r.headers.get('content-type') || 'video/mp4';
+    const reader = r.body.getReader();
+    const chunks = [];
+    let got = 0;
+    const pump = () => reader.read().then(({ done, value }) => {
+      if (done) return new Blob(chunks, { type });
+      chunks.push(value); got += value.length; onProgress(got / total);
+      return pump();
+    });
+    return pump();
   }
 
   function read() {
@@ -303,8 +328,14 @@ function mountScrollWorld(container, config) {
       s.el.style.opacity = op; s.visible = op > 0.001;
       s.el.style.zIndex = (i === ci) ? '120' : String(100 + Math.round(op * 10));
       if (!s.hasClip || !s.ready) {
-        const sc = reduce ? 1 : 1.03 + local * 0.14;
-        s.img.style.transform = `translateX(${stageX - 2}vw) scale(${sc.toFixed(3)})`;
+        // A still standing in for a clip IS that clip's first frame — left
+        // untransformed so the video takes over without a jump. Only clip-less
+        // stills (reduced motion) keep the shift and slow push-in.
+        if (s.clip && !reduce) s.img.style.transform = 'none';
+        else {
+          const sc = reduce ? 1 : 1.03 + local * 0.14;
+          s.img.style.transform = `translateX(${stageX - 2}vw) scale(${sc.toFixed(3)})`;
+        }
       }
     }
 
@@ -354,6 +385,9 @@ function mountScrollWorld(container, config) {
 
   function raf() {
     if (disposed) return;
+    // Lenis is created by a sibling effect that runs after this mount, so the
+    // gate can't stop it up front — catch it here the first frame it exists.
+    if (gated && window.__lenis && !gateStoppedLenis) { window.__lenis.stop(); gateStoppedLenis = true; }
     const eps = isMobile() ? 0.02 : 0.008;   // coarser seek step on phones = fewer decodes
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
@@ -442,6 +476,49 @@ function mountScrollWorld(container, config) {
     }, 700);
   }
 
+  // ---- first-frame gate: the page opens on the first clip's opening frame
+  // (its still) and scroll stays shut until that clip has downloaded and can
+  // seek. Scrolling earlier only pushed the still around while the 1080p blob
+  // was still arriving, then snapped to the video wherever the scroll had got
+  // to. Opens on loadedmetadata, on a failed fetch (the still then carries the
+  // page as before), or after GATE_MAX_MS as a last resort on a dead network. ----
+  const GATE_MAX_MS = 25000;
+  let gated = false, gateTimer = null, gateStoppedLenis = false;
+  function gateBlock(e) { e.preventDefault(); e.stopImmediatePropagation(); }
+  function gateKeys(e) { if (SCROLL_KEYS.has(e.key)) gateBlock(e); }
+  function onGateProgress(p) {
+    if (!gated) return;
+    hintFill.style.transform = `scaleX(${clamp(p).toFixed(3)})`;
+    hintText.textContent = `${config.loadingHint || 'loading'} ${Math.round(clamp(p) * 100)}%`;
+  }
+  function closeGate() {
+    if (!gateSeg) return;
+    gated = true;
+    container.classList.add('sw-loading');
+    hintText.textContent = config.loadingHint || 'loading';
+    // overflow:hidden also stops scrollbar drags, which no input listener can.
+    // Capture + stopImmediatePropagation keeps the wheel from Lenis too, whose
+    // own window listener would otherwise still scroll programmatically.
+    document.documentElement.style.overflow = 'hidden';
+    window.addEventListener('wheel', gateBlock, { passive: false, capture: true });
+    window.addEventListener('touchmove', gateBlock, { passive: false, capture: true });
+    window.addEventListener('keydown', gateKeys, { capture: true });
+    gateTimer = setTimeout(openGate, GATE_MAX_MS);
+  }
+  function openGate() {
+    if (!gated) return;
+    gated = false;
+    clearTimeout(gateTimer); gateTimer = null;
+    window.removeEventListener('wheel', gateBlock, { capture: true });
+    window.removeEventListener('touchmove', gateBlock, { capture: true });
+    window.removeEventListener('keydown', gateKeys, { capture: true });
+    document.documentElement.style.overflow = '';
+    if (gateStoppedLenis && window.__lenis && !portalLocking) window.__lenis.start();
+    gateStoppedLenis = false;
+    container.classList.remove('sw-loading');
+    hintText.textContent = config.hint || 'scroll';
+  }
+
   // Particles are a per-frame cost we can't afford alongside video scrubbing on a phone.
   seedParticles(particles, reduce || coarse);
   function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(read); } }
@@ -458,11 +535,13 @@ function mountScrollWorld(container, config) {
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', layout);
   window.addEventListener('load', layout);
+  closeGate();
   layout();
   requestAnimationFrame(raf);
 
   function dispose() {
     if (disposed) return;
+    openGate();
     disposed = true;
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onResize);
@@ -591,6 +670,10 @@ function injectCSS() {
   .sw-hint i{width:22px;height:34px;border-radius:12px;border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
   .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s ease-in-out infinite;}
   @keyframes sw-wheel{0%{opacity:0;top:6px}40%{opacity:1}100%{opacity:0;top:17px}}
+  .sw-hint__bar{display:none;width:140px;height:2px;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--sw-ink) 22%,transparent);}
+  .sw-hint__bar span{display:block;width:100%;height:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--sw-accent);transition:transform .2s linear;}
+  .sw-hint__bar span:dir(rtl){transform-origin:100% 50%;}
+  .sw-root.sw-loading .sw-hint__bar{display:block;} .sw-root.sw-loading .sw-hint i{display:none;}
   /* The track is the only thing occupying the flight's scroll column in normal
      flow, so it also has to PAINT that column. The host page's own <body> may
      legitimately carry a light background for its other pages (this site sets
