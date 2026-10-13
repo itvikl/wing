@@ -17,6 +17,9 @@ export type SeeWingsSection = {
   tags: string[];
 };
 
+/** The opening screen's copy (eyebrow, headline, line under it). */
+export type SeeWingsOpening = { eyebrow: string; title: string; body: string };
+
 type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
 type NavLink = { id: string; label: string };
 export type SeeWingsMedia = {
@@ -51,6 +54,7 @@ export function SeeWingsExperience({
   ctaPrimary,
   brandCta,
   media,
+  opening,
 }: {
   locale: Locale;
   sections: SeeWingsSection[];
@@ -59,6 +63,14 @@ export function SeeWingsExperience({
   ctaPrimary: string;
   brandCta: string;
   media: SeeWingsMedia;
+  /**
+   * The admin's Hero section ("the first banner shown on entering the site").
+   * The splash used to read the flythrough's own scene copy instead, so Hero
+   * edits only reached cue 0 — a caption that appears after scrolling — and
+   * the opening headline never changed. Falls back to the scene copy when
+   * Hero is left empty.
+   */
+  opening?: SeeWingsOpening;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -178,9 +190,9 @@ export function SeeWingsExperience({
         style={{ opacity: ssrPoster ? 1 : 0 }}
       />
       <SeeWingsSplash
-        eyebrow={sections[0].eyebrow}
-        title={sections[0].title}
-        body={sections[0].body}
+        eyebrow={opening?.title ? opening.eyebrow : sections[0].eyebrow}
+        title={opening?.title || sections[0].title}
+        body={opening?.title ? opening.body : sections[0].body}
         homeHref={homeHref}
         trackVh={trackVh}
       />

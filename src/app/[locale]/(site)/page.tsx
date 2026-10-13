@@ -25,6 +25,12 @@ export default async function HomePage({ params: { locale } }: { params: { local
 
   const t = await getTranslations('seeWings');
   const nav = await getTranslations('nav');
+  const hero = await getTranslations('hero');
+  const opening = {
+    eyebrow: hero('eyebrow'),
+    title: hero('headline'),
+    body: (hero.raw('subheadline') as string[]).join(' ').trim(),
+  };
   const media = await getSiteMedia();
   const sections = t.raw('sections') as SeeWingsSection[];
   const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] }[];
@@ -47,6 +53,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
         ctaPrimary={t('ctaPrimary')}
         brandCta={nav('cta')}
         media={media.seeWings}
+        opening={opening}
       />
 
       <SmoothScrollProvider>
