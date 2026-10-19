@@ -14,6 +14,7 @@
        hint: 'scroll to fly in',
        nav: true,         // show the top section nav
        atmosphere: true,  // subtle gradient + drifting particles behind the clips
+       stream: false,     // true = stream clips via Range requests instead of whole-file Blobs
        sections: [
          { id, label, still, stillMobile, clip, clipMobile, accent,
            scroll: 1.6,   // optional per-section override of diveScroll — more scroll
@@ -59,8 +60,10 @@
      - clips encoded native-res, crf~20, -g 8, +faststart, no audio (see pipeline.md)
      - connectors' endpoints are the neighbouring dives' ACTUAL frames (see SKILL Step 5)
      - (optional) mobile variants at ~720p, -g 4 for smoother phone scrubbing
-   The engine loads each clip as a Blob (always seekable) and scrubs currentTime; it does
-   NOT depend on HTTP byte-range support.
+   By default the engine loads each clip as a Blob (always seekable) and scrubs currentTime;
+   that does NOT depend on HTTP byte-range support, but scroll stays gated until the whole
+   first clip has downloaded. With `stream: true` the browser fetches clips in ranges and
+   the gate opens once the first frames can play; that needs Range (206) support.
    ========================================================================== */
 
 function mountScrollWorld(container, config) {
@@ -77,6 +80,12 @@ function mountScrollWorld(container, config) {
   const DIVE_W = config.diveScroll || 1.3;
   const CONN_W = config.connScroll || 0.9;
   const CROSSFADE = (config.crossfade != null) ? config.crossfade : 0.12;  // seam dissolve width (vh)
+  // stream: hand the video element the clip URL and let the browser fetch it
+  // in ranges, instead of downloading the whole file as a Blob first. The
+  // first-frame gate then opens as soon as the opening frames can play rather
+  // than after the full download. Needs a server that answers Range requests
+  // (206) and +faststart clips (moov before mdat).
+  const STREAM = !!config.stream;
   const N = SECTIONS.length;
   if (!N) return { dispose() {} };
 
@@ -283,23 +292,33 @@ function mountScrollWorld(container, config) {
     s.loading = true;
     // Serve the lighter mobile encode on phones when one was provided.
     const url = (isMobile() && s.clipM) ? s.clipM : s.clip;
+    if (STREAM) { attachVideo(s, url, 'canplay'); return; }
     fetch(url).then(r => r.ok ? readBlob(r, s === gateSeg ? onGateProgress : null) : Promise.reject(new Error('404')))
       .then(blob => {
-        const v = document.createElement('video');
-        v.className = 'sw-scene__video';
-        v.muted = true; v.playsInline = true; v.preload = 'auto';
-        v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
         const objectUrl = URL.createObjectURL(blob);
         objectUrls.push(objectUrl);
-        v.src = objectUrl;
-        v.addEventListener('loadedmetadata', () => { s.ready = true; read(); if (s === gateSeg) openGate(); });
-        // Reveal the video (hide the still poster) only once a real frame has
-        // painted — on iOS a seeked-but-never-played muted video stays blank, so
-        // hiding the still on metadata alone would flash an empty scene.
-        v.addEventListener('seeked', () => { s.el.classList.add('has-clip'); }, { once: true });
-        v.addEventListener('loadeddata', () => { try { v.pause(); } catch (e) {} if (userReady) primeVideo(v); });
-        s.el.appendChild(v); s.video = v; s.hasClip = true;
+        attachVideo(s, objectUrl, 'loadedmetadata');
       }).catch(() => { s.loading = false; if (s === gateSeg) openGate(); });
+  }
+
+  // `gateOn` is the media event that lets scroll in. A Blob is already fully
+  // local, so metadata is enough; a streamed clip waits for `canplay`, when
+  // the frames at the start can actually render.
+  function attachVideo(s, src, gateOn) {
+    const v = document.createElement('video');
+    v.className = 'sw-scene__video';
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.src = src;
+    v.addEventListener('loadedmetadata', () => { s.ready = true; read(); });
+    v.addEventListener(gateOn, () => { if (s === gateSeg) openGate(); }, { once: true });
+    if (STREAM) v.addEventListener('error', () => { if (s === gateSeg) openGate(); }, { once: true });
+    // Reveal the video (hide the still poster) only once a real frame has
+    // painted — on iOS a seeked-but-never-played muted video stays blank, so
+    // hiding the still on metadata alone would flash an empty scene.
+    v.addEventListener('seeked', () => { s.el.classList.add('has-clip'); }, { once: true });
+    v.addEventListener('loadeddata', () => { try { v.pause(); } catch (e) {} if (userReady) primeVideo(v); });
+    s.el.appendChild(v); s.video = v; s.hasClip = true;
   }
 
   // Reads a fetch Response into a Blob, reporting 0..1 progress along the way
@@ -567,6 +586,8 @@ function mountScrollWorld(container, config) {
     window.removeEventListener('touchmove', blockInput, { capture: true });
     window.removeEventListener('keydown', blockScrollKeys, { capture: true });
     if (portalTimeout) { clearTimeout(portalTimeout); portalTimeout = null; }
+    // A streamed clip keeps fetching ranges until its src is dropped.
+    if (STREAM) SEGMENTS.forEach(s => { if (s.video) { s.video.removeAttribute('src'); s.video.load(); } });
     objectUrls.forEach((u) => URL.revokeObjectURL(u));
     objectUrls.length = 0;
   }
