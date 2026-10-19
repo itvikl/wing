@@ -119,6 +119,9 @@ export function SeeWingsExperience({
         href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,
       })),
       atmosphere: true,
+      // Stream the clip instead of downloading all of it (21MB desktop) before
+      // the page can scroll; both the hosting and the faststart clips support it.
+      stream: true,
       diveScroll: SECTION_VH,
       connScroll: CONN_VH,
       crossfade: 0.14,
