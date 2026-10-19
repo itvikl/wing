@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
+import { flightVh } from '@/lib/seeWingsTiming';
 
 /**
  * The real page (Header onward) needs to read as "revealed from behind the
@@ -40,7 +41,8 @@ import { flushSync } from 'react-dom';
  * The content is at least one viewport tall for the same reason: the jump
  * targets the top of this content, and anything shorter left the browser
  * unable to scroll that far, so the header settled 56px down with an empty
- * band above it.
+ * band above it. lvh rather than vh: once a phone's URL bar has slid away the
+ * visible area is taller than 100vh, which left a strip of bare body below.
  *
  * That handoff only fires once per page load, so scrolling back up into the
  * video and back down again needs its own path: once the initial reveal has
@@ -114,7 +116,7 @@ export function PortalReveal({ children, trackVh }: { children: ReactNode; track
     if (skipGate.current) return;
     function onScroll() {
       if (!revealedOnce.current) return;
-      setRevealed(window.scrollY >= trackVh * window.innerHeight - 1);
+      setRevealed(window.scrollY >= trackVh * flightVh() - 1);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -128,7 +130,7 @@ export function PortalReveal({ children, trackVh }: { children: ReactNode; track
       {!revealed && <div className="portal-reveal-spacer" aria-hidden style={{ height: spacerHeight }} />}
       <div
         ref={contentRef}
-        className="portal-reveal min-h-screen"
+        className="portal-reveal min-h-screen min-h-lvh"
         style={
           revealed
             ? undefined
