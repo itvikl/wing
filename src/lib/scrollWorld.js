@@ -249,6 +249,11 @@ function mountScrollWorld(container, config) {
 
   function layout() {
     vh = window.innerHeight;
+    // Published for host overlays that convert the track's vh into pixels:
+    // onResize below keeps this height while a phone's URL bar slides away,
+    // so a live innerHeight would put their end point trackVh × the bar's
+    // height past this one.
+    window.__swVh = vh;
     laidOutW = window.innerWidth;
     stageX = window.innerWidth > 860 ? 4 : 0;
     // The still poster is picked once at mount time, but the video clip
@@ -590,6 +595,7 @@ function mountScrollWorld(container, config) {
     if (STREAM) SEGMENTS.forEach(s => { if (s.video) { s.video.removeAttribute('src'); s.video.load(); } });
     objectUrls.forEach((u) => URL.revokeObjectURL(u));
     objectUrls.length = 0;
+    delete window.__swVh;
   }
 
   // ---- helpers ----

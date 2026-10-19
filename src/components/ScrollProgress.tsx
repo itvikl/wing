@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { flightVh } from '@/lib/seeWingsTiming';
 
 // scrollWorld.js draws its own progress bar (.sw-scrollbar) at this exact
 // fixed position while the flythrough is active, so this one stays hidden
@@ -14,7 +15,7 @@ export function ScrollProgress({ trackVh }: { trackVh: number }) {
   const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30, restDelta: 0.001 });
   const opacity = useTransform(scrollY, (y) => {
     if (typeof window === 'undefined') return 0;
-    return y >= trackVh * window.innerHeight - 1 ? 1 : 0;
+    return y >= trackVh * flightVh() - 1 ? 1 : 0;
   });
 
   return (

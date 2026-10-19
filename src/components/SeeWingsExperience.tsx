@@ -121,7 +121,9 @@ export function SeeWingsExperience({
       atmosphere: true,
       // Stream the clip instead of downloading all of it (21MB desktop) before
       // the page can scroll; both the hosting and the faststart clips support it.
-      stream: true,
+      // TEMPORARY: `?nostream` restores the whole-file download, to compare
+      // the two on real phones. Remove once that's settled.
+      stream: !new URLSearchParams(window.location.search).has('nostream'),
       diveScroll: SECTION_VH,
       connScroll: CONN_VH,
       crossfade: 0.14,

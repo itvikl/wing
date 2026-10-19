@@ -2,6 +2,7 @@
 
 import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { flightVh } from '@/lib/seeWingsTiming';
 
 const BIG_HEIGHT = 128; // px, matches the md:h-32 splash size
 const SMALL_HEIGHT = 40; // px, lands at roughly the header logo's size
@@ -50,7 +51,7 @@ export function SeeWingsSplash({
   const [portalDone, setPortalDone] = useState(false);
   useMotionValueEvent(scrollY, 'change', (y) => {
     if (typeof window === 'undefined') return;
-    setPortalDone(y >= trackVh * window.innerHeight - 1);
+    setPortalDone(y >= trackVh * flightVh() - 1);
   });
 
   const progress = useTransform(scrollY, (y) => {
