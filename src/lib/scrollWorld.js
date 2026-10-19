@@ -194,8 +194,12 @@ function mountScrollWorld(container, config) {
   const copies = [], dots = [];
   SECTIONS.forEach((s, i) => {
     const c = el('article', 'sw-copy'); c.style.setProperty('--sw-accent', s.accent || '');
+    // The "01 / 03" counter labels a section's own copy. A host that renders
+    // the copy itself (SeeWingsCues) passes none, and a bare counter then sat
+    // over that host's captions for the first half of the flight.
+    const hasCopy = !!(s.eyebrow || s.title || s.body || (s.tags && s.tags.length) || s.cta);
     c.innerHTML =
-      `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` +
+      (hasCopy ? `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` : '') +
       (s.eyebrow ? `<span class="sw-copy__eyebrow">${esc(s.eyebrow)}</span>` : '') +
       (s.title ? `<h2 class="sw-copy__title">${esc(s.title)}</h2>` : '') +
       (s.body ? `<p class="sw-copy__body">${esc(s.body)}</p>` : '') +
@@ -465,6 +469,12 @@ function mountScrollWorld(container, config) {
     // the jump never lands before the animation has actually finished painting.
     portalTimeout = setTimeout(() => {
       portalTimeout = null;
+      // Hosts that park content behind the stage (PortalReveal) unpin it on
+      // this event, synchronously, before the jump below. Content and scroll
+      // then move in the same task, so no frame paints one without the other —
+      // with a second timer of their own, the page could paint unpinned while
+      // the scroll still sat at the threshold, ~a viewport short of the target.
+      window.dispatchEvent(new CustomEvent('sw:portal-done'));
       const targetY = (totalW + Math.max(CROSSFADE, 0.7)) * vh;
       const lenis = window.__lenis;
       if (lenis) {
