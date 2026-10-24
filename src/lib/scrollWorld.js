@@ -305,7 +305,11 @@ function mountScrollWorld(container, config) {
   // so one flick can't skip two stations. Past the last rest beat the next
   // step goes to the end of the track, where the portal hand-off takes over.
   // Idle-snap above stays as the fallback for input this can't see (dragging
-  // the scrollbar). Enabled by `config.stepScroll` + `config.restBeats`. ----
+  // the scrollbar). Enabled by `config.stepScroll` + `config.restBeats`.
+  // `config.stepInterrupt` sets what a NEW gesture does mid-flight: 'lock'
+  // (default) ignores it; 'boost' re-aims at the stop after the current target
+  // and speeds up (each extra gesture adds 1x, up to STEP_BOOST_MAX), or turns
+  // back to the stop behind when the gesture reverses direction. ----
   const STEP_ON = !!config.stepScroll && REST_FR.length > 0 && !reduce;
   // A step's duration is proportional to the distance it covers:
   // `stepTrackSeconds` is how long crossing the whole track would take.
@@ -316,17 +320,32 @@ function mountScrollWorld(container, config) {
   // Sine rather than cubic: peaks at ~1.6x the average speed instead of 3x,
   // so a long step reads as a steady flight, not a lurch through the middle.
   const easeInOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+  const STEP_BOOST = config.stepInterrupt === 'boost';
+  const STEP_BOOST_MAX = 4;
   let stepping = false, stepTimer = null, lastWheelT = 0, burstUsed = false, touchY0 = null;
+  let stepTargetY = 0, stepDir = 0, stepSpeed = 1;
   // Only inside the flight itself: below its end the real page scrolls natively.
   const stepActive = () => STEP_ON && !gated && !portalLocking && (window.scrollY || window.pageYOffset) < totalW * vh - 1;
   function step(dir) {
-    if (stepping) return;
+    const boosting = stepping && STEP_BOOST;
+    if (stepping && !boosting) return;
     const y = window.scrollY || window.pageYOffset;
     const end = totalW * vh;
     const stops = REST_FR.map(f => f * end).concat(end);
-    const targetY = dir > 0 ? stops.find(s => s > y + 2) : stops.slice().reverse().find(s => s < y - 2);
+    // Mid-flight in the same direction, count from where the camera is
+    // already headed; past the last stop there's nothing further, so just
+    // hurry on to the current target.
+    const from = boosting && dir === stepDir ? stepTargetY : y;
+    const next = dir > 0 ? stops.find(s => s > from + 2) : stops.slice().reverse().find(s => s < from - 2);
+    const targetY = next != null ? next : (boosting && dir === stepDir ? stepTargetY : null);
     if (targetY == null) return;
-    const dur = Math.max(STEP_MIN_S, STEP_TRACK_S * Math.abs(targetY - y) / end);
+    stepSpeed = boosting ? Math.min(stepSpeed + 1, STEP_BOOST_MAX) : 1;
+    stepTargetY = targetY; stepDir = dir;
+    const dur = Math.max(STEP_MIN_S, STEP_TRACK_S * Math.abs(targetY - y) / end / stepSpeed);
+    // A re-aim starts with the camera already moving: ease out only, or
+    // easing in again would stall it mid-flight.
+    const easing = boosting ? easeOutCubic : easeInOutSine;
     stepping = true;
     clearTimeout(idleTimer);
     // Released on a timer rather than Lenis' onComplete, which never fires if
@@ -335,7 +354,7 @@ function mountScrollWorld(container, config) {
     clearTimeout(stepTimer);
     stepTimer = setTimeout(() => { stepping = false; stepTimer = null; }, dur * 1000 + 80);
     const lenis = window.__lenis;
-    if (lenis && lenis.scrollTo) lenis.scrollTo(targetY, { duration: dur, easing: easeInOutSine, force: true });
+    if (lenis && lenis.scrollTo) lenis.scrollTo(targetY, { duration: dur, easing, force: true });
     else window.scrollTo({ top: targetY, behavior: 'smooth' });
   }
   function onStepWheel(e) {
@@ -345,7 +364,7 @@ function mountScrollWorld(container, config) {
     const now = performance.now();
     if (now - lastWheelT >= WHEEL_QUIET_MS) burstUsed = false;
     lastWheelT = now;
-    if (stepping || burstUsed || Math.abs(e.deltaY) < 1) return;
+    if (burstUsed || Math.abs(e.deltaY) < 1 || (stepping && !STEP_BOOST)) return;
     burstUsed = true;
     step(e.deltaY > 0 ? 1 : -1);
   }

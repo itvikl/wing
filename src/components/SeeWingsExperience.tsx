@@ -134,6 +134,10 @@ export function SeeWingsExperience({
       // Seconds a step takes to cross the whole track — the same
       // single-section assumption as restBeats above.
       stepTrackSeconds: FLIGHT_SECONDS / STEP_PLAYBACK_RATE,
+      // Trial switch, not a setting: ?flow=boost lets a gesture mid-flight
+      // speed the camera on to a further stop (or turn it back) instead of
+      // being ignored, so both behaviours can be compared side by side.
+      stepInterrupt: new URLSearchParams(window.location.search).get('flow') === 'boost' ? 'boost' : 'lock',
       // Native per-section copy/cta is intentionally omitted — the chapter
       // headlines are rendered by SeeWingsCues instead, driven by the same
       // total scroll range (trackVh).
