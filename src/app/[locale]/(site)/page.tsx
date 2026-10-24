@@ -6,8 +6,6 @@ import { computeTrackVh } from '@/lib/seeWingsTiming';
 import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
 import { PortalReveal } from '@/components/PortalReveal';
 import { ScrollProgress } from '@/components/ScrollProgress';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { LeadForm } from '@/components/LeadForm';
 
 // Every string on the site comes from the Firestore content doc (see
@@ -54,16 +52,16 @@ export default async function HomePage({ params: { locale } }: { params: { local
         brandCta={nav('cta')}
         media={media.seeWings}
         opening={opening}
+        seamlessHandoff
+        persistentTopbar
       />
 
       <SmoothScrollProvider>
-        <PortalReveal trackVh={trackVh}>
+        <PortalReveal>
           <ScrollProgress trackVh={trackVh} />
-          <Header />
           <main>
-            <LeadForm />
+            <LeadForm variant="overlay" />
           </main>
-          <Footer />
         </PortalReveal>
       </SmoothScrollProvider>
     </>

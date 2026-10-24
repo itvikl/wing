@@ -35,10 +35,14 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
  *
  * That handoff only fires once per page load, so scrolling back up into the
  * video and back down again needs its own path: once the initial reveal has
- * happened, pinning instead tracks scroll position directly against
- * `trackVh` (the same threshold scrollWorld.js's own `isDoneNow` uses) —
- * instant both ways, no 700ms wait, since there's no stage animation to sync
- * with on a return trip.
+ * happened, pinning instead tracks scroll position directly — instant both
+ * ways, no 700ms wait, since there's no stage animation to sync with on a
+ * return trip. The threshold is where this content's own top edge sits in
+ * the document (the zero-height marker below), not `trackVh`: scrollWorld.js
+ * pads its track ~0.7vh past the point the stage goes `.sw-done`, and
+ * unpinning at the stage's threshold left that padding on screen as a blank
+ * band of track background above the Header. Staying pinned until the real
+ * top edge arrives keeps the Header at the viewport top through that band.
  *
  * Safety nets so this can never leave real content permanently unreachable:
  * reduced-motion visitors skip the gate entirely (unpinned from the start,
@@ -58,7 +62,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
  * guaranteed to have already happened, so flipping to opacity:1 lands under
  * cover of the now-real stage instead of before it exists.
  */
-export function PortalReveal({ children, trackVh }: { children: ReactNode; trackVh: number }) {
+export function PortalReveal({ children }: { children: ReactNode }) {
   const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [revealed, setRevealed] = useState(reducedMotion);
   const [mounted, setMounted] = useState(false);
@@ -70,6 +74,7 @@ export function PortalReveal({ children, trackVh }: { children: ReactNode; track
   const skipGate = useRef(reducedMotion());
   const revealedOnce = useRef(skipGate.current);
   const contentRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<HTMLDivElement>(null);
   const [spacerHeight, setSpacerHeight] = useState(0);
 
   useEffect(() => {
@@ -110,18 +115,20 @@ export function PortalReveal({ children, trackVh }: { children: ReactNode; track
   useEffect(() => {
     if (skipGate.current) return;
     function onScroll() {
-      if (!revealedOnce.current) return;
-      setRevealed(window.scrollY >= trackVh * window.innerHeight - 1);
+      if (!revealedOnce.current || !markerRef.current) return;
+      setRevealed(markerRef.current.getBoundingClientRect().top <= 1);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [trackVh]);
+  }, []);
 
   return (
     <>
       <noscript>
         <style>{'.portal-reveal{position:static !important;pointer-events:auto !important;opacity:1 !important;} .portal-reveal-spacer{display:none !important;}'}</style>
       </noscript>
+      {/* Always in flow, so it marks this content's top edge whether pinned or not. */}
+      <div ref={markerRef} aria-hidden />
       {!revealed && <div className="portal-reveal-spacer" aria-hidden style={{ height: spacerHeight }} />}
       <div
         ref={contentRef}

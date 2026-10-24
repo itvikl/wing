@@ -29,12 +29,15 @@ export function SeeWingsSplash({
   body,
   homeHref,
   trackVh,
+  persist = false,
 }: {
   eyebrow: string;
   title: string;
   body: string;
   homeHref: string;
   trackVh: number;
+  /** Keep the mark in the topbar corner after the hand-off (no Header logo to defer to). */
+  persist?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -49,7 +52,7 @@ export function SeeWingsSplash({
   // scrolling back up past that point correctly brings the mark back too.
   const [portalDone, setPortalDone] = useState(false);
   useMotionValueEvent(scrollY, 'change', (y) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || persist) return;
     setPortalDone(y >= trackVh * window.innerHeight - 1);
   });
 

@@ -79,9 +79,10 @@ export const CUE_BEATS_S = [0, 3.5, 8.8, 12.3, 15];
 // Re-derive both the window and scale if the clip is ever re-rendered.
 export const BOULEVARD_ZOOM = { from: 2.3, to: 6.0, scale: 1.12 };
 
-// The flight's stop points: each wheel burst / swipe / arrow key flies to the
-// next one (scrollWorld.js's step-scroll), and a scrollbar drag settles on the
-// nearest once it goes idle (its idle-snap) — both read the restBeats config.
+// The flight's stop points, on mouse/trackpad only: each wheel burst / arrow
+// key flies to the next one (scrollWorld.js's step-scroll), and a scrollbar
+// drag settles on the nearest once it goes idle (its idle-snap) — both read
+// the restBeats config. Touch devices scrub freely (see SeeWingsExperience).
 // Deliberately NOT evenly spaced and NOT the
 // CUE_BEATS_S boundaries: these are the same per-frame-sharp timestamps
 // CUE_BEATS_S's windows were built around (see its comment), picked by

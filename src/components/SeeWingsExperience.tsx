@@ -55,6 +55,8 @@ export function SeeWingsExperience({
   brandCta,
   media,
   opening,
+  seamlessHandoff = false,
+  persistentTopbar = false,
 }: {
   locale: Locale;
   sections: SeeWingsSection[];
@@ -71,6 +73,18 @@ export function SeeWingsExperience({
    * Hero is left empty.
    */
   opening?: SeeWingsOpening;
+  /**
+   * The page parks the clip's own last frame under the stage (the home
+   * page's glass LeadForm), so the hand-off dissolves in place instead of
+   * zooming: the zoom would push the picture away from its own copy.
+   */
+  seamlessHandoff?: boolean;
+  /**
+   * The flight's topbar (and the flying logo in its corner) stays on after
+   * the hand-off as the page's only nav, so the bar never swaps for the
+   * site's solid Header. For pages that render no Header of their own.
+   */
+  persistentTopbar?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -107,11 +121,18 @@ export function SeeWingsExperience({
     const targetLocale = locale === 'en' ? 'he' : 'en';
     const langHref = `/${targetLocale}${pathWithoutLocale}`;
 
+    // Phones and tablets scrub freely: people swipe a lot there, and every
+    // swipe should move the flight. Stepping (and the idle-snap back onto a
+    // stop) made most swipes feel like they did nothing. Mouse and trackpad
+    // keep the stop-to-stop flight.
+    const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
     const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
       // where the topbar mark would sit and takes over that role instead.
       cta: { label: brandCta, href: `${homeHref}#contact` },
       lang: { label: targetLocale, href: langHref },
+      keepTopbar: persistentTopbar,
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
       loadingHint: locale === 'he' ? 'טוען את החוויה' : 'loading the experience',
       navLinks: navLinks.map((n) => ({
@@ -127,10 +148,10 @@ export function SeeWingsExperience({
       // because there's a single continuous section with no connectors today,
       // so "fraction of this clip" and "fraction of the whole track" are the
       // same number; re-derive if a second scene/connector ever returns.
-      restBeats: STATION_REST_S.map((s) => s / FLIGHT_SECONDS),
-      // Each wheel burst / swipe / arrow key flies to the next rest beat
-      // instead of scrubbing freely (see scrollWorld.js's step-scroll).
-      stepScroll: true,
+      restBeats: touch ? [] : STATION_REST_S.map((s) => s / FLIGHT_SECONDS),
+      // Each wheel burst / arrow key flies to the next rest beat instead of
+      // scrubbing freely (see scrollWorld.js's step-scroll).
+      stepScroll: !touch,
       // Seconds a step takes to cross the whole track — the same
       // single-section assumption as restBeats above.
       stepTrackSeconds: FLIGHT_SECONDS / STEP_PLAYBACK_RATE,
@@ -179,7 +200,7 @@ export function SeeWingsExperience({
       engine.dispose();
       Object.keys(SW_THEME_VARS).forEach((k) => root.style.removeProperty(k));
     };
-  }, [locale, sections, navLinks, brandCta, media, pathname]);
+  }, [locale, sections, navLinks, brandCta, media, pathname, persistentTopbar]);
 
   const homeHref = locale === 'en' ? '/' : `/${locale}`;
 
@@ -192,6 +213,7 @@ export function SeeWingsExperience({
             ...SW_THEME_VARS,
             '--sw-font-display': 'var(--font-display)',
             '--sw-font-body': 'var(--font-sans)',
+            ...(seamlessHandoff ? { '--sw-handoff-scale': '1' } : {}),
           } as React.CSSProperties
         }
       />
@@ -215,6 +237,7 @@ export function SeeWingsExperience({
         body={opening?.title ? opening.body : sections[0].body}
         homeHref={homeHref}
         trackVh={trackVh}
+        persist={persistentTopbar}
       />
       <SeeWingsCues cues={cues} trackVh={trackVh} ctaLabel={ctaPrimary} ctaHref={`${homeHref}#contact`} />
     </>

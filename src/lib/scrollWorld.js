@@ -31,7 +31,8 @@
    MOBILE (the clipMobile/connectorsMobile variants are the opt-in mobile version;
    the rest of the phone handling below is always on)
      The engine is phone-aware out of the box: on a coarse-pointer / ≤860px viewport it
-       - loads `clipMobile` / `connectorsMobile` when provided (encode these smaller +
+       - loads `clipMobile` / `connectorsMobile` when provided, in portrait only (a
+         landscape phone gets the desktop clip) — encode these smaller +
          tighter-GOP — seek cost on a phone decoder is dominated by frames-from-keyframe,
          so a 720p, -g 4 file scrubs far smoother than the 1080p desktop master; see
          pipeline.md). Falls back to the desktop `clip` if no mobile variant is given.
@@ -71,6 +72,10 @@ function mountScrollWorld(container, config) {
   const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
   const smallMQ = window.matchMedia('(max-width: 860px)');
   const isMobile = () => coarse || smallMQ.matches;
+  // The mobile clip is a portrait (3:4) crop, so it only fits a portrait
+  // screen: a landscape phone or tablet loads the desktop clip instead.
+  const portraitMQ = window.matchMedia('(orientation: portrait)');
+  const wantsMobileClip = () => isMobile() && portraitMQ.matches;
   const SECTIONS = config.sections || [];
   const CONNECTORS = config.connectors || [];
   const CONNECTORS_M = config.connectorsMobile || [];
@@ -91,6 +96,9 @@ function mountScrollWorld(container, config) {
 
   injectCSS();
   container.classList.add('sw-root');
+  // The host has no header of its own after the flight, so the topbar stays
+  // on as the page's nav instead of fading out at the hand-off.
+  if (config.keepTopbar) container.classList.add('sw-keep-topbar');
 
   // ---- build the interleaved segment chain: dive0, conn0, dive1, … diveN-1 ----
   const SEGMENTS = [];
@@ -205,7 +213,8 @@ function mountScrollWorld(container, config) {
   SECTIONS.forEach((s, i) => {
     const c = el('article', 'sw-copy'); c.style.setProperty('--sw-accent', s.accent || '');
     c.innerHTML =
-      `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` +
+      // A single-scene flight has nothing to count ("01 / 01").
+      (N > 1 ? `<span class="sw-copy__num">${pad(i + 1)} / ${pad(N)}</span>` : '') +
       (s.eyebrow ? `<span class="sw-copy__eyebrow">${esc(s.eyebrow)}</span>` : '') +
       (s.title ? `<h2 class="sw-copy__title">${esc(s.title)}</h2>` : '') +
       (s.body ? `<p class="sw-copy__body">${esc(s.body)}</p>` : '') +
@@ -450,7 +459,7 @@ function mountScrollWorld(container, config) {
     if (reduce || s.loading || !s.clip) return;
     s.loading = true;
     // Serve the lighter mobile encode on phones when one was provided.
-    const url = (isMobile() && s.clipM) ? s.clipM : s.clip;
+    const url = (wantsMobileClip() && s.clipM) ? s.clipM : s.clip;
     fetch(url).then(r => r.ok ? readBlob(r, s === gateSeg ? onGateProgress : null) : Promise.reject(new Error('404')))
       .then(blob => {
         const v = document.createElement('video');
@@ -945,11 +954,14 @@ function injectCSS() {
     .sw-topbar,.sw-scrollbar,.sw-hint,.sw-route,.sw-copylayer::before{animation:none;} }
   .sw-topbar,.sw-route,.sw-scrollbar,.sw-sky,.sw-copylayer{transition:opacity .4s;}
   .sw-root.sw-done .sw-topbar,.sw-root.sw-done .sw-route,.sw-root.sw-done .sw-scrollbar,.sw-root.sw-done .sw-sky,.sw-root.sw-done .sw-copylayer{opacity:0;pointer-events:none;}
+  .sw-root.sw-keep-topbar.sw-done .sw-topbar{opacity:1;pointer-events:auto;}
   /* Stage gets its own, slightly longer hand-off: a forward zoom + dissolve
      instead of a plain fade — reads as "flying into" the page underneath,
-     matching the flythrough itself rather than just cutting the video off. */
+     matching the flythrough itself rather than just cutting the video off.
+     A host that parks the clip's own last frame underneath sets
+     --sw-handoff-scale:1, so the dissolve lands on the same picture. */
   .sw-stage{transition:opacity .6s ease-in,transform .6s ease-in;transform-origin:center center;}
-  .sw-root.sw-done .sw-stage{opacity:0;transform:scale(1.4);pointer-events:none;}
+  .sw-root.sw-done .sw-stage{opacity:0;transform:scale(var(--sw-handoff-scale,1.4));pointer-events:none;}
   `;
   // Wrap in a cascade layer so the page's own theme tokens (unlayered
   // :root / .sw-root { --sw-bg / --sw-ink / --sw-accent … }) always win over
