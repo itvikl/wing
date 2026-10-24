@@ -96,7 +96,8 @@ function mountScrollWorld(container, config) {
   const SEGMENTS = [];
   SECTIONS.forEach((s, i) => {
     const dive = { kind: 'dive', si: i, clip: s.clip, clipM: s.clipMobile, still: s.still, stillM: s.stillMobile,
-                   accent: s.accent, w: s.scroll || DIVE_W, linger: s.linger || 0 };
+                   accent: s.accent, w: s.scroll || DIVE_W, linger: s.linger || 0, zoomBeats: s.zoomBeats || [],
+                   restStills: s.restStills || [] };
     SEGMENTS.push(dive);
     s._seg = dive;
     // A connector is optional: if connectors[i] is falsy, the two dives simply
@@ -186,6 +187,15 @@ function mountScrollWorld(container, config) {
     const poster = (isMobile() && s.stillM) ? s.stillM : s.still;
     if (poster) img.src = poster;
     scene.appendChild(img); stage.appendChild(scene);
+    // Sharp stills of single clip frames, faded in over the video while the
+    // flight rests on that frame (see raf) — a fast camera move bakes motion
+    // blur into the footage itself, which no encode can take back out.
+    s.rests = (s.restStills || []).map(r => {
+      const ri = el('img', 'sw-scene__rest'); ri.alt = ''; ri.decoding = 'async';
+      ri.src = (isMobile() && r.srcMobile) ? r.srcMobile : r.src;
+      scene.appendChild(ri);
+      return { t: r.t, img: ri, on: false };
+    });
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
     s.loading = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
   });
@@ -222,6 +232,149 @@ function mountScrollWorld(container, config) {
   // (where the copy peaks) and moves quicker near the seams. L=0 linear, L=1 full
   // mid-scene pause. f(0)=0, f(1)=1 always, so seam frames are untouched.
   const lingerEase = (x, L) => { L = clamp(L); const c = x - 0.5; return (1 - L) * x + L * (4 * c * c * c + 0.5); };
+  const smoothstep = (a, b, x) => { const c = clamp((x - a) / (b - a)); return c * c * (3 - 2 * c); };
+  // Crops out a band along a clip's own timeline (e.g. foreground pedestrians
+  // walking through a shot) without touching any other moment — a config-driven
+  // alternative to a single global object-position, which can only nudge the
+  // same crop for every frame of every scene. `beats` is [{from,to,scale}]: the
+  // video is scaled up (top-anchored, so the crop is pushed off the BOTTOM, not
+  // split evenly) between from..to, ramping over ZOOM_RAMP_S on each side so it
+  // reads as the camera settling rather than a cut. Scales from overlapping
+  // beats take the max, so authors don't have to worry about ordering.
+  const ZOOM_RAMP_S = 0.5;
+  const zoomForTime = (beats, t) => {
+    let z = 1;
+    for (const b of beats || []) {
+      const ramp = Math.min(smoothstep(b.from - ZOOM_RAMP_S, b.from, t), 1 - smoothstep(b.to, b.to + ZOOM_RAMP_S, t));
+      z = Math.max(z, 1 + (b.scale - 1) * clamp(ramp));
+    }
+    return z;
+  };
+  // ---- idle-snap: once scrolling genuinely stops, ease to the nearest "rest"
+  // beat instead of leaving the reader wherever momentum happened to drop them.
+  // `config.restBeats` is [0..1] fractions of the TOTAL track (not seconds —
+  // the engine doesn't know the caller's seconds-per-track mapping once
+  // sections/connectors are involved; the caller does that conversion, see
+  // SeeWingsExperience). Debounced on scrollY going idle (no new scroll event
+  // for IDLE_MS), never on raw wheel/touch deltas — this project already tried
+  // intercepting the gesture itself once (see seeWingsTiming.ts's SECTION_VH
+  // comment) and it fought the reader's own scroll direction. Watching the
+  // RESULT (scroll position has stopped changing) instead of the INPUT means
+  // it only ever nudges where you already landed, after you've finished
+  // scrolling — it can't fight a flick mid-flight because it never runs
+  // during one. ----
+  const REST_FR = (config.restBeats || []).slice().sort((a, b) => a - b);
+  const IDLE_MS = 220;
+  const SNAP_DURATION_S = 0.7;
+  let idleTimer = null, snapping = false;
+  function armIdleSnap() {
+    if (!REST_FR.length || reduce) return;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(trySnap, IDLE_MS);
+  }
+  function trySnap() {
+    // gated: first-frame load lock. portalLocking/portalPlayed: the end-of-
+    // flight hand-off already owns scroll — never fight either lock, and
+    // never snap once the reader has scrolled on into the real page below.
+    if (snapping || stepping || gated || portalLocking || portalPlayed) return;
+    const y = window.scrollY || window.pageYOffset;
+    if (y <= 0 || y >= totalW * vh - 1) return;
+    let targetF = REST_FR[0], bestDist = Infinity;
+    for (const f of REST_FR) {
+      const d = Math.abs(f * totalW * vh - y);
+      if (d < bestDist) { bestDist = d; targetF = f; }
+    }
+    const targetY = targetF * totalW * vh;
+    if (Math.abs(targetY - y) < 2) return;
+    snapping = true;
+    const lenis = window.__lenis;
+    if (lenis && lenis.scrollTo) {
+      lenis.scrollTo(targetY, { duration: SNAP_DURATION_S, onComplete: () => { snapping = false; } });
+    } else {
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      setTimeout(() => { snapping = false; }, SNAP_DURATION_S * 1000 + 80);
+    }
+  }
+  // ---- step-scroll: every gesture flies to the NEXT rest beat in the
+  // direction the reader scrolled — one wheel burst / swipe / key press = one
+  // station, never a partial scrub. Unlike the old snap-back (see
+  // seeWingsTiming.ts's SECTION_VH comment) it always moves WITH the gesture,
+  // so it can't fight the reader's direction. A trackpad flick arrives as a
+  // long burst of wheel events (inertia keeps firing for ~1s); only the first
+  // event of a burst counts, and a new burst needs WHEEL_QUIET_MS of silence,
+  // so one flick can't skip two stations. Past the last rest beat the next
+  // step goes to the end of the track, where the portal hand-off takes over.
+  // Idle-snap above stays as the fallback for input this can't see (dragging
+  // the scrollbar). Enabled by `config.stepScroll` + `config.restBeats`. ----
+  const STEP_ON = !!config.stepScroll && REST_FR.length > 0 && !reduce;
+  // A step's duration is proportional to the distance it covers:
+  // `stepTrackSeconds` is how long crossing the whole track would take.
+  const STEP_TRACK_S = config.stepTrackSeconds || 6.4;
+  const STEP_MIN_S = 0.5;
+  const WHEEL_QUIET_MS = 180;
+  const SWIPE_MIN_PX = 40;
+  // Sine rather than cubic: peaks at ~1.6x the average speed instead of 3x,
+  // so a long step reads as a steady flight, not a lurch through the middle.
+  const easeInOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
+  let stepping = false, stepTimer = null, lastWheelT = 0, burstUsed = false, touchY0 = null;
+  // Only inside the flight itself: below its end the real page scrolls natively.
+  const stepActive = () => STEP_ON && !gated && !portalLocking && (window.scrollY || window.pageYOffset) < totalW * vh - 1;
+  function step(dir) {
+    if (stepping) return;
+    const y = window.scrollY || window.pageYOffset;
+    const end = totalW * vh;
+    const stops = REST_FR.map(f => f * end).concat(end);
+    const targetY = dir > 0 ? stops.find(s => s > y + 2) : stops.slice().reverse().find(s => s < y - 2);
+    if (targetY == null) return;
+    const dur = Math.max(STEP_MIN_S, STEP_TRACK_S * Math.abs(targetY - y) / end);
+    stepping = true;
+    clearTimeout(idleTimer);
+    // Released on a timer rather than Lenis' onComplete, which never fires if
+    // something stops the animation midway — that would leave every later
+    // gesture ignored for the rest of the visit.
+    clearTimeout(stepTimer);
+    stepTimer = setTimeout(() => { stepping = false; stepTimer = null; }, dur * 1000 + 80);
+    const lenis = window.__lenis;
+    if (lenis && lenis.scrollTo) lenis.scrollTo(targetY, { duration: dur, easing: easeInOutSine, force: true });
+    else window.scrollTo({ top: targetY, behavior: 'smooth' });
+  }
+  function onStepWheel(e) {
+    if (!stepActive() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    // Capture + stopImmediatePropagation keeps the raw wheel from Lenis too.
+    e.preventDefault(); e.stopImmediatePropagation();
+    const now = performance.now();
+    if (now - lastWheelT >= WHEEL_QUIET_MS) burstUsed = false;
+    lastWheelT = now;
+    if (stepping || burstUsed || Math.abs(e.deltaY) < 1) return;
+    burstUsed = true;
+    step(e.deltaY > 0 ? 1 : -1);
+  }
+  function onStepTouchStart(e) { touchY0 = e.touches.length === 1 ? e.touches[0].clientY : null; }
+  // Lenis treats any touch event as native scroll taking over and stops its
+  // running animation. So moves are kept from it while a step is flying, and
+  // the swipe's own step starts only after its touchend has reached Lenis.
+  function onStepTouchMove(e) {
+    if (!stepActive()) return;
+    if (e.cancelable) e.preventDefault();
+    if (stepping) e.stopImmediatePropagation();
+  }
+  function onStepTouchEnd(e) {
+    if (touchY0 == null || !stepActive()) { touchY0 = null; return; }
+    const dy = touchY0 - e.changedTouches[0].clientY;
+    touchY0 = null;
+    if (Math.abs(dy) >= SWIPE_MIN_PX) setTimeout(() => step(dy > 0 ? 1 : -1), 0);
+  }
+  function onStepKey(e) {
+    if (!stepActive() || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    let dir = 0;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || ((e.key === ' ' || e.key === 'Spacebar') && !e.shiftKey)) dir = 1;
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp' || ((e.key === ' ' || e.key === 'Spacebar') && e.shiftKey)) dir = -1;
+    if (!dir) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    step(dir);
+  }
   let vh = window.innerHeight, stageX = 0, totalW = 0, activeIndex = -1, ticking = false;
   // One-shot "portal" hand-off: instead of the real page underneath continuing to
   // reveal itself as the user keeps scrolling (which always reads as "scrolling",
@@ -405,6 +558,28 @@ function mountScrollWorld(container, config) {
       const dur = s.video.duration || 1;
       const t = clamp(s.cur, 0, 0.999) * dur;
       if (Math.abs(s.video.currentTime - t) > eps) { try { s.video.currentTime = t; } catch (e) {} }
+      if (s.zoomBeats.length) {
+        const z = zoomForTime(s.zoomBeats, t);
+        s.video.style.transformOrigin = '50% 0%';
+        s.video.style.transform = z > 1.001 ? `scale(${z})` : '';
+      }
+      if (s.rests.length) {
+        // Only once the flight has fully settled: never mid-step, and never
+        // while the clip is still easing onto the frame.
+        const settled = !stepping && Math.abs(s.cur - s.target) < 0.0015;
+        for (const r of s.rests) {
+          const on = settled && Math.abs(t - r.t) < 0.1 && r.img.complete && r.img.naturalWidth > 0;
+          if (on !== r.on) {
+            r.on = on;
+            // Enter from just short of the frame (.is-pre, no transition) so it
+            // settles forward like the camera's last metre; leave the other way.
+            if (on) { r.img.classList.add('is-pre'); void r.img.offsetWidth; r.img.classList.remove('is-pre'); }
+            r.img.classList.toggle('is-on', on);
+          }
+          // Same crop as the video under it, or the swap would visibly jump.
+          r.img.style.transform = s.video.style.transform;
+        }
+      }
     }
     requestAnimationFrame(raf);
   }
@@ -525,8 +700,15 @@ function mountScrollWorld(container, config) {
 
   // Particles are a per-frame cost we can't afford alongside video scrubbing on a phone.
   seedParticles(particles, reduce || coarse);
-  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(read); } }
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(read); } armIdleSnap(); }
   window.addEventListener('scroll', onScroll, { passive: true });
+  if (STEP_ON) {
+    window.addEventListener('wheel', onStepWheel, { passive: false, capture: true });
+    window.addEventListener('touchstart', onStepTouchStart, { passive: true, capture: true });
+    window.addEventListener('touchmove', onStepTouchMove, { passive: false, capture: true });
+    window.addEventListener('touchend', onStepTouchEnd, { passive: true, capture: true });
+    window.addEventListener('keydown', onStepKey, { capture: true });
+  }
   // Mobile browsers fire `resize` every time the URL bar slides in/out. Re-running
   // layout() there rebuilds the track height and yanks the scroll position, so on
   // touch we ignore height-only changes and only relayout when the width actually
@@ -557,6 +739,13 @@ function mountScrollWorld(container, config) {
     window.removeEventListener('touchmove', blockInput, { capture: true });
     window.removeEventListener('keydown', blockScrollKeys, { capture: true });
     if (portalTimeout) { clearTimeout(portalTimeout); portalTimeout = null; }
+    if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+    if (stepTimer) { clearTimeout(stepTimer); stepTimer = null; }
+    window.removeEventListener('wheel', onStepWheel, { capture: true });
+    window.removeEventListener('touchstart', onStepTouchStart, { capture: true });
+    window.removeEventListener('touchmove', onStepTouchMove, { capture: true });
+    window.removeEventListener('touchend', onStepTouchEnd, { capture: true });
+    window.removeEventListener('keydown', onStepKey, { capture: true });
     objectUrls.forEach((u) => URL.revokeObjectURL(u));
     objectUrls.length = 0;
   }
@@ -647,8 +836,16 @@ function injectCSS() {
      painted yet. The hand-off fades the whole stage, background included. */
   .sw-stage{position:fixed;inset:0;z-index:10;pointer-events:none;background:var(--sw-bg);}
   .sw-scene{position:absolute;inset:0;opacity:0;overflow:hidden;will-change:opacity;}
-  .sw-scene__video,.sw-scene__still{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;max-width:none !important;object-fit:cover !important;object-position:center 42%;}
+  .sw-scene__video,.sw-scene__still,.sw-scene__rest{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;max-width:none !important;object-fit:cover !important;object-position:center 42%;}
   .sw-scene__still{will-change:transform;transition:opacity .5s ease;} .sw-scene.has-clip .sw-scene__still{opacity:0;} .sw-scene__video{z-index:1;}
+  /* Rest still: a focus pull rather than a plain swap. It eases in from a soft,
+     slightly short frame to sharp and full size, and on leaving defocuses while
+     pushing on, matching the camera's forward motion both ways. The scale
+     property (not transform) because raf owns the inline transform for the
+     zoom crop. */
+  .sw-scene__rest{transform-origin:50% 0%;z-index:2;opacity:0;pointer-events:none;filter:blur(6px);scale:1.012;transition:opacity .45s ease-in,filter .45s ease-in,scale .45s ease-in;}
+  .sw-scene__rest.is-pre{scale:.988;transition:none;}
+  .sw-scene__rest.is-on{opacity:1;filter:blur(0);scale:1;transition:opacity .8s cubic-bezier(.22,.61,.36,1),filter 1.3s cubic-bezier(.22,.61,.36,1),scale 1.3s cubic-bezier(.22,.61,.36,1);}
   /* Chrome eases in over the opening frame instead of popping on at mount:
      the topbar, hint, scrollbar and especially the copylayer's side gradient
      appeared in a single frame and read as the screen suddenly going green
@@ -710,14 +907,14 @@ function injectCSS() {
     .sw-copy{left:clamp(18px,5vw,64px);right:clamp(18px,5vw,64px);top:auto;bottom:clamp(64px,14vh,120px);transform:none;width:auto;max-width:560px;}
     .sw-copy{bottom:calc(clamp(56px,12dvh,110px) + env(safe-area-inset-bottom));}
     .sw-copy__title{font-size:clamp(1.9rem,7.5vw,2.7rem);}
-    .sw-copy__body{max-width:none;font-size:clamp(.98rem,3.6vw,1.1rem);} .sw-scene__video,.sw-scene__still{object-position:center 46%;}
+    .sw-copy__body{max-width:none;font-size:clamp(.98rem,3.6vw,1.1rem);} .sw-scene__video,.sw-scene__still,.sw-scene__rest{object-position:center 46%;}
     .sw-hint{bottom:calc(20px + env(safe-area-inset-bottom));}
     .sw-route{gap:16px;inset-inline-end:6px;} .sw-route__label{display:none;}
   }
   /* Portrait phones crop a 16:9 clip hard; keep the framing centred so the focal
      subject (which the camera dives toward) stays in view. */
   @media (max-width:860px) and (orientation:portrait){
-    .sw-scene__video,.sw-scene__still{object-position:center 44%;}
+    .sw-scene__video,.sw-scene__still,.sw-scene__rest{object-position:center 44%;}
   }
   /* Touch: give the route dots a finger-sized hit area without growing the visible dot. */
   @media (hover:none) and (pointer:coarse){

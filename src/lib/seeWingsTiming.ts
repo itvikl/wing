@@ -37,19 +37,69 @@
 //
 // NOTE this is still a PER-SCENE value — adding a second scene would double
 // the track, so re-tune here if scenes ever return.
-export const SECTION_VH = 22;
+//
+// Halved from 22 once the idle-snap landed (see STATION_REST_S below): the
+// long track existed to stop captions flashing by unread on a fast flick —
+// but once every flick settles on a clean station regardless of speed, that
+// job belongs to the snap, not to sheer scroll distance. 22vh of effort to
+// get through four stations read as "a lot" on its own. Re-tune by feel.
+export const SECTION_VH = 11;
 
 // Where each caption window starts and ends, in seconds of the flight clip.
 // The clip scrubs linearly against scroll (no linger — see SeeWingsExperience),
-// so a point in the video and a point on the track are the same fraction, and
-// these cut the caption windows on the clip's own beats instead of six equal
-// slices that ignored what was on screen: alley → boulevard with the tower at
-// its end → climb up the facade → over the roof (pool, view) → back down
-// through the penthouse glass → the living room, where the CTA holds.
+// so a point in the video and a point on the track are the same fraction.
+//
+// Cut down from six equal-ish slices to four narrative beats (alley+boulevard
+// "old meets new Jerusalem" / the building reveal+climb / the roof & view /
+// the penthouse+CTA), AND re-picked against a per-frame blur measurement of
+// main.mp4 (ffmpeg blurdetect), not just content — the render's motion blur
+// tracks camera speed, so a boundary placed mid-move lands on a soft frame.
+// Each window's steady "resting" caption now centers on a frame that's
+// actually sharp: ~0s (4.7 blur, sharpest in the clip), ~5.2s (6.2, building
+// + WINGS sign legible), ~10.1s (5.3, aerial pool/skyline), ~14.9s (6.0,
+// living room). The facade climb (~6.5-9.5s, blur up to 11.3) has NO sharp
+// frame at any timestamp — it's left as a pure transition between windows 2
+// and 3 instead of a rest point, by design, not an oversight.
 // Re-cut these whenever the clip is re-rendered. SeeWingsCues falls back to
 // equal windows if the admin's cue count ever stops matching.
 export const FLIGHT_SECONDS = 15;
-export const CUE_BEATS_S = [0, 2.4, 5.6, 8.8, 11, 12.8, 15];
+export const CUE_BEATS_S = [0, 3.5, 8.8, 12.3, 15];
+
+// Scoped crop for the boulevard reveal (~2.3-6.0s): foreground pedestrians
+// walk through the bottom ~10% of frame right where the WINGS sign sits.
+// object-position can't fix this — on a typical desktop viewport (shorter
+// than 16:9) object-fit:cover already crops the SIDES, not top/bottom, so a
+// vertical object-position shift has nothing to move (verified against the
+// live engine, not assumed). This instead scales the clip up, top-anchored,
+// for just this window — see scrollWorld.js's zoomForTime/zoomBeats — so the
+// extra height is pushed off the bottom instead of split across all 4 edges.
+// scale 1.12 derived from where the walkers actually sit in main.mp4: they
+// start around 90% down the frame, and 0.90 * 1.12 ≈ 1.0 pushes that band
+// just past the bottom edge while the sign (~85% down) stays in frame.
+// Re-derive both the window and scale if the clip is ever re-rendered.
+export const BOULEVARD_ZOOM = { from: 2.3, to: 6.0, scale: 1.12 };
+
+// The flight's stop points: each wheel burst / swipe / arrow key flies to the
+// next one (scrollWorld.js's step-scroll), and a scrollbar drag settles on the
+// nearest once it goes idle (its idle-snap) — both read the restBeats config.
+// Deliberately NOT evenly spaced and NOT the
+// CUE_BEATS_S boundaries: these are the same per-frame-sharp timestamps
+// CUE_BEATS_S's windows were built around (see its comment), picked by
+// content, not by a fixed interval — the climb has no sharp frame at any
+// timestamp, so it's never a landing spot, only ever crossed mid-transition.
+// 3.0 was picked by hand (the boulevard opening up with the tower at its end)
+// rather than by sharpness, so it doesn't follow the rule above.
+export const STATION_REST_S = [0, 3.0, 5.2, 10.1, 14.9];
+
+// Sharp re-renders of the clip's own frame at a stop, faded in over the video
+// while the flight rests there (scrollWorld.js's restStills). For stops where
+// the camera is mid-move and the footage itself is motion-blurred.
+export const STATION_STILLS = [{ t: 3.0, src: '/scroll-world/img/stop-3.0.jpg' }];
+
+// How fast a step plays the flight between two stops, as a multiple of the
+// clip's own speed: 1 = real time, so a hop across 4.9s of footage takes 4.9s.
+// A flat 1.6s per step (~3x real time on the long hops) read as rushing past.
+export const STEP_PLAYBACK_RATE = 1;
 
 // Scroll length (vh) of a connector clip — the short bridging shot between
 // two dives. Was 0.85 — at that length it blew past in a couple of scroll

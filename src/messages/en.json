@@ -8,9 +8,9 @@
     "cta": "Request Access"
   },
   "hero": {
-    "eyebrow": "Wings Real Estate — Jerusalem",
-    "headline": "Exclusive addresses, quietly offered",
-    "subheadline": "A curated selection of properties in Jerusalem, available to a limited circle before they ever reach the open market.",
+    "eyebrow": "Jerusalem, Then and Now",
+    "headline": "From the Old City's Alleys to Jerusalem's New Skyline",
+    "subheadline": ["Between the historic walls and the boulevards rising around them,", "Wings brings you Jerusalem's most exclusive addresses — before they ever reach the open market."],
     "cta": "Request Private Access"
   },
   "about": {
@@ -37,12 +37,10 @@
     "ctaPrimary": "Request Access",
     "ctaSecondary": "Back to Wings",
     "cues": [
-      { "eyebrow": "Who We Are", "title": "An end-to-end path to a home in Jerusalem" },
-      { "eyebrow": "Where We Operate", "title": "Curated locations across Jerusalem" },
-      { "eyebrow": "Selected Opportunities", "title": "A few addresses worth knowing about" },
-      { "eyebrow": "Why Wings", "title": "What sets an exclusive process apart" },
-      { "eyebrow": "Meet the Team", "title": "The people behind every address" },
-      { "eyebrow": "Get in Touch", "title": "Request private access" }
+      { "eyebrow": "Jerusalem, Then and Now", "title": "From the Old City's Alleys to the New Skyline", "body": "Right here, in the heart of Jerusalem, two cities meet — the one you know, and the one you're about to." },
+      { "eyebrow": "Your Address in the Heart of the City", "title": "WINGS — A Boutique Tower on Jerusalem's Main Boulevard", "body": "One tower, in a location that won't come again — on the skyline of Israel's capital." },
+      { "eyebrow": "Living Above the City", "title": "A Rooftop, a Pool, and a 360° View of Jerusalem", "body": "Everything that defines true luxury living — at a level Jerusalem hasn't seen before." },
+      { "eyebrow": "Your Next Home Is Waiting", "title": "We'll Find You Your Property", "body": "Personal guidance from the first call to the keys in your hand — leave your details and we'll be in touch, in complete discretion." }
     ]
   },
   "map": {

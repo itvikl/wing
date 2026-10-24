@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { mountScrollWorld } from '@/lib/scrollWorld';
-import { SECTION_VH, CONN_VH, computeTrackVh } from '@/lib/seeWingsTiming';
+import { SECTION_VH, CONN_VH, computeTrackVh, BOULEVARD_ZOOM, STATION_REST_S, STATION_STILLS, FLIGHT_SECONDS, STEP_PLAYBACK_RATE } from '@/lib/seeWingsTiming';
 import { SeeWingsCues } from './SeeWingsCues';
 import { SeeWingsSplash } from './SeeWingsSplash';
 import type { Locale } from '@/i18n/request';
@@ -122,6 +122,18 @@ export function SeeWingsExperience({
       diveScroll: SECTION_VH,
       connScroll: CONN_VH,
       crossfade: 0.14,
+      // Fractions of the total track (not seconds — the engine is agnostic to
+      // seconds-per-track, see scrollWorld.js's idle-snap comment). Valid only
+      // because there's a single continuous section with no connectors today,
+      // so "fraction of this clip" and "fraction of the whole track" are the
+      // same number; re-derive if a second scene/connector ever returns.
+      restBeats: STATION_REST_S.map((s) => s / FLIGHT_SECONDS),
+      // Each wheel burst / swipe / arrow key flies to the next rest beat
+      // instead of scrubbing freely (see scrollWorld.js's step-scroll).
+      stepScroll: true,
+      // Seconds a step takes to cross the whole track — the same
+      // single-section assumption as restBeats above.
+      stepTrackSeconds: FLIGHT_SECONDS / STEP_PLAYBACK_RATE,
       // Native per-section copy/cta is intentionally omitted — the chapter
       // headlines are rendered by SeeWingsCues instead, driven by the same
       // total scroll range (trackVh).
@@ -136,6 +148,10 @@ export function SeeWingsExperience({
           clipMobile: sceneMedia?.clipMobile,
           accent: i === sections.length - 1 ? GOLD_LIGHT : GOLD,
           scroll: SECTION_VH,
+          // Only the single current flight scene has a boulevard to crop; a
+          // future second scene wouldn't automatically inherit this window.
+          zoomBeats: i === 0 ? [BOULEVARD_ZOOM] : undefined,
+          restStills: i === 0 ? STATION_STILLS : undefined,
           // Linear on purpose. linger (was 0.55) eases scroll→time so the
           // camera settles mid-scene, which suited three short dives with one
           // caption each. With one 15s flight and six captions, mid-scene is
