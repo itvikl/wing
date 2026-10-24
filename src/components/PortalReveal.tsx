@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * The real page (Header onward) needs to read as "revealed from behind the
@@ -27,11 +28,20 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
  * only while pinned, reserves that same scroll distance so the page's total
  * length never changes across the fixed/static switch.
  *
- * Unpinning (back to normal static flow, real scrolling, real clicks) is
- * gated on scrollWorld.js's 'sw:portal' event plus the same ~700ms it takes
- * that event's own zoom+dissolve to finish and jump the real scroll position
- * to the track's end (see scrollWorld.js's playPortalTransition) — unpinning
- * any earlier would open a gap before the scroll position catches up to it.
+ * Unpinning (back to normal static flow, real scrolling, real clicks) waits
+ * for scrollWorld.js's 'sw:portal-done' event, which it fires right before
+ * jumping the real scroll position to the track's end (see its
+ * playPortalTransition). The unpin is flushed synchronously inside that
+ * listener so it lands in the same task as the jump. This used to run on a
+ * 700ms timer of its own, matched by hand to the engine's; whenever React's
+ * render landed between the two, one frame painted the content static while
+ * scroll still sat at the threshold, ~625px below where it belonged.
+ *
+ * The content is at least one viewport tall for the same reason: the jump
+ * targets the top of this content, and anything shorter left the browser
+ * unable to scroll that far, so the header settled 56px down with an empty
+ * band above it. lvh rather than vh: once a phone's URL bar has slid away the
+ * visible area is taller than 100vh, which left a strip of bare body below.
  *
  * That handoff only fires once per page load, so scrolling back up into the
  * video and back down again needs its own path: once the initial reveal has
@@ -97,18 +107,12 @@ export function PortalReveal({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (revealedOnce.current) return;
-    let timer: ReturnType<typeof setTimeout>;
-    const onPortal = () => {
-      timer = setTimeout(() => {
-        revealedOnce.current = true;
-        setRevealed(true);
-      }, 700);
+    const onPortalDone = () => {
+      revealedOnce.current = true;
+      flushSync(() => setRevealed(true));
     };
-    window.addEventListener('sw:portal', onPortal);
-    return () => {
-      window.removeEventListener('sw:portal', onPortal);
-      clearTimeout(timer);
-    };
+    window.addEventListener('sw:portal-done', onPortalDone);
+    return () => window.removeEventListener('sw:portal-done', onPortalDone);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to arm once
   }, []);
 
@@ -132,7 +136,7 @@ export function PortalReveal({ children }: { children: ReactNode }) {
       {!revealed && <div className="portal-reveal-spacer" aria-hidden style={{ height: spacerHeight }} />}
       <div
         ref={contentRef}
-        className="portal-reveal"
+        className="portal-reveal min-h-screen min-h-lvh"
         style={
           revealed
             ? undefined

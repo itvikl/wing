@@ -2,7 +2,7 @@
 
 import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { useState } from 'react';
-import { CUE_BEATS_S, FLIGHT_SECONDS } from '@/lib/seeWingsTiming';
+import { CUE_BEATS_S, FLIGHT_SECONDS, flightVh } from '@/lib/seeWingsTiming';
 
 type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
 
@@ -57,10 +57,7 @@ export function SeeWingsCues({
   ctaHref: string;
 }) {
   const { scrollY } = useScroll();
-  const progress = useTransform(scrollY, (y) => {
-    const vh = typeof window === 'undefined' ? 1 : window.innerHeight;
-    return Math.min(1, Math.max(0, y / (trackVh * vh)));
-  });
+  const progress = useTransform(scrollY, (y) => Math.min(1, Math.max(0, y / (trackVh * flightVh()))));
   const [active, setActive] = useState(0);
   // This component is scroll-position-driven, entirely separate from the
   // vanilla scroll-world engine's own `.sw-done` hand-off — so without this,

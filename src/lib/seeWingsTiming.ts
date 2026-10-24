@@ -108,6 +108,18 @@ export const STEP_PLAYBACK_RATE = 1;
 // of whooshing past.
 export const CONN_VH = 1.3;
 
+// The viewport height the flight's track was laid out against, in px. Use
+// this, not window.innerHeight, wherever a vh value from this file becomes a
+// scroll position. On Android Chrome the URL bar slides away after the first
+// scroll and innerHeight grows ~80px, but scrollWorld.js deliberately keeps
+// its layout (relaying out would yank the scroll position). Measured against
+// the live height, the overlays put the end of the flight 22 × 80px past the
+// engine's: the last caption stayed up over the lead form after the hand-off.
+export function flightVh() {
+  if (typeof window === 'undefined') return 1;
+  return (window as Window & { __swVh?: number }).__swVh ?? window.innerHeight;
+}
+
 // Total scroll length of the whole flight: every dive gets SECTION_VH, and
 // every *actually present* connector (a null slot just crossfades directly,
 // no extra scroll) gets CONN_VH. Shared between SeeWingsExperience and
