@@ -24,12 +24,15 @@ export default async function ProjectsPage({ params: { locale } }: { params: { l
   setRequestLocale(locale);
 
   return (
-    <>
+    // At least one screen tall with the content stretching, so a short page
+    // still puts the Footer at the bottom of the screen. dvh tracks a phone's
+    // URL bar; min-h-screen is the fallback where dvh isn't supported.
+    <div className="flex min-h-screen min-h-dvh flex-col">
       <Header />
-      <main>
+      <main className="flex-1">
         <Projects />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

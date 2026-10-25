@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
-import { getSiteMedia } from '@/lib/content/store';
+import { getSiteMedia, hasProjects } from '@/lib/content/store';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
 import { computeTrackVh } from '@/lib/seeWingsTiming';
 import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
@@ -30,6 +30,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
     body: (hero.raw('subheadline') as string[]).join(' ').trim(),
   };
   const media = await getSiteMedia();
+  const showProjects = await hasProjects(locale);
   const sections = t.raw('sections') as SeeWingsSection[];
   const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] }[];
   const trackVh = computeTrackVh(sections.length, media.seeWings.connectors);
@@ -39,7 +40,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
     { id: 'why-us', label: nav('advantages') },
     { id: 'team', label: nav('team') },
     { id: 'contact', label: nav('contact') },
-  ];
+  ].filter((link) => link.id !== 'projects' || showProjects);
 
   return (
     <>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
-import { getSiteMedia } from '@/lib/content/store';
+import { getSiteMedia, hasProjects } from '@/lib/content/store';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
 
 // Every string on the site comes from the Firestore content doc (see
@@ -29,6 +29,7 @@ export default async function SeeWingsPage({ params: { locale } }: { params: { l
     body: (hero.raw('subheadline') as string[]).join(' ').trim(),
   };
   const media = await getSiteMedia();
+  const showProjects = await hasProjects(locale);
   const sections = t.raw('sections') as SeeWingsSection[];
   const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] }[];
   const navLinks = [
@@ -37,7 +38,7 @@ export default async function SeeWingsPage({ params: { locale } }: { params: { l
     { id: 'why-us', label: nav('advantages') },
     { id: 'team', label: nav('team') },
     { id: 'contact', label: nav('contact') },
-  ];
+  ].filter((link) => link.id !== 'projects' || showProjects);
 
   return (
     <SeeWingsExperience

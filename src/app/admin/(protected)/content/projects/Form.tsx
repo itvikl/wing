@@ -43,8 +43,8 @@ export function ProjectsForm({
   const { data, setData, saving, saved, error, handleSubmit } = useSectionForm<Data>(
     {
       labels: {
-        he: { eyebrow: initial.he.eyebrow, title: initial.he.title, cta: initial.he.cta, viewDetails: initial.he.viewDetails, close: initial.he.close },
-        en: { eyebrow: initial.en.eyebrow, title: initial.en.title, cta: initial.en.cta, viewDetails: initial.en.viewDetails, close: initial.en.close },
+        he: { eyebrow: initial.he.eyebrow, title: initial.he.title, cta: initial.he.cta, viewDetails: initial.he.viewDetails, close: initial.he.close, empty: initial.he.empty ?? '' },
+        en: { eyebrow: initial.en.eyebrow, title: initial.en.title, cta: initial.en.cta, viewDetails: initial.en.viewDetails, close: initial.en.close, empty: initial.en.empty ?? '' },
       },
       rows: toRows(initial.he.items, initial.en.items, initial.images),
     },
@@ -62,6 +62,7 @@ export function ProjectsForm({
         <TextField label="כפתור פנייה" value={value.cta} onChange={(v) => update({ cta: v })} />
         <TextField label="תווית 'לצפייה בפרטים'" value={value.viewDetails} onChange={(v) => update({ viewDetails: v })} />
         <TextField label="תווית 'סגירה'" value={value.close} onChange={(v) => update({ close: v })} />
+        <TextField label="הודעה כשאין הזדמנויות" value={value.empty ?? ''} onChange={(v) => update({ empty: v })} />
       </div>
     );
   }

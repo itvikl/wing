@@ -193,6 +193,18 @@ export function SeeWingsExperience({
       }),
       connectors: media.connectors,
     });
+    // Every link to #contact (the topbar CTA, the last caption's button, the
+    // Contact nav item) flies to the end of the flight on a page whose lead
+    // form sits beneath it: a plain hash jump can't reach the form while
+    // PortalReveal keeps it pinned behind the stage. Pages without the form
+    // (/see-wings) still navigate home as before.
+    const onContactClick = (e: MouseEvent) => {
+      const link = (e.target as Element | null)?.closest?.('a');
+      if (!link || link.hash !== '#contact' || link.pathname !== window.location.pathname) return;
+      if (!document.getElementById('contact')) return;
+      if (engine.flyToEnd?.()) e.preventDefault();
+    };
+    document.addEventListener('click', onContactClick, true);
     let cancelled = false;
     Promise.resolve(engine.firstPainted).then(() => { if (!cancelled) setSsrPoster(false); });
     // Without this, a remount (StrictMode's dev double-invoke, or any future
@@ -202,6 +214,7 @@ export function SeeWingsExperience({
     // wiped via the innerHTML reset above.
     return () => {
       cancelled = true;
+      document.removeEventListener('click', onContactClick, true);
       engine.dispose();
       Object.keys(SW_THEME_VARS).forEach((k) => root.style.removeProperty(k));
     };

@@ -5,7 +5,7 @@
     "projects": "Opportunities",
     "team": "Our Team",
     "contact": "Contact",
-    "cta": "Request Access"
+    "cta": "Contact Us"
   },
   "hero": {
     "eyebrow": "Jerusalem, Then and Now",
@@ -34,7 +34,7 @@
         "tags": []
       }
     ],
-    "ctaPrimary": "Request Access",
+    "ctaPrimary": "Contact Us",
     "ctaSecondary": "Back to Wings",
     "cues": [
       { "eyebrow": "Jerusalem, Then and Now", "title": "From the Old City's Alleys to the New Skyline", "body": "Right here, in the heart of Jerusalem, two cities meet — the one you know, and the one you're about to." },
@@ -53,23 +53,8 @@
     "cta": "Inquire",
     "viewDetails": "View Details",
     "close": "Close",
-    "items": [
-      {
-        "title": "Opportunity — Talbiya",
-        "location": "Talbiya, Jerusalem",
-        "description": "A boutique building steps from the President's Residence, offered before public listing — walking distance to the city's diplomatic quarter."
-      },
-      {
-        "title": "Opportunity — Rechavia",
-        "location": "Rechavia, Jerusalem",
-        "description": "A quiet garden apartment in Jerusalem's most established address, with the kind of long-term value that rarely reaches the open market."
-      },
-      {
-        "title": "Opportunity — German Colony",
-        "location": "German Colony, Jerusalem",
-        "description": "A renovated townhouse on a tree-lined street, minutes from Emek Refaim's cafes and the First Station promenade."
-      }
-    ]
+    "empty": "There are no projects to show right now",
+    "items": []
   },
   "whyUs": {
     "eyebrow": "Why Wings",

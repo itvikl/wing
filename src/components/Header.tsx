@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { getSiteMedia } from '@/lib/content/store';
+import { getSiteMedia, hasProjects } from '@/lib/content/store';
+import type { ContentLocale } from '@/lib/content/schema';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { MagneticButton } from './motion/MagneticButton';
 import { NavLinks } from './NavLinks';
@@ -11,6 +12,7 @@ export async function Header() {
   const t = await getTranslations('nav');
   const media = await getSiteMedia();
   const locale = await getLocale();
+  const showProjects = await hasProjects(locale as ContentLocale);
   const contactHref = locale === 'en' ? '/contact' : `/${locale}/contact`;
 
   const links = [
@@ -19,7 +21,7 @@ export async function Header() {
     { id: 'why-us', label: t('advantages') },
     { id: 'team', label: t('team') },
     { id: 'contact', label: t('contact') },
-  ];
+  ].filter((link) => link.id !== 'projects' || showProjects);
 
   return (
     <header className="sticky top-0 z-50 bg-primary text-neutral-100">

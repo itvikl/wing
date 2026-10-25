@@ -84,6 +84,9 @@ export const projectsTextSchema = z.object({
   cta: z.string(),
   viewDetails: z.string(),
   close: z.string(),
+  // Shown on /projects when no opportunity is published. Optional: content
+  // saved before it existed has no such key (the defaults fill it in).
+  empty: z.string().optional(),
   items: z.array(projectItemSchema),
 });
 

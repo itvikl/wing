@@ -57,6 +57,16 @@ export async function getLocaleText(locale: ContentLocale): Promise<LocaleText> 
   };
 }
 
+/**
+ * Whether the admin has published any opportunities. A row with no title is
+ * a blank one left in the list, not a project. With none, every nav link to
+ * the Opportunities page disappears and the page itself shows a short notice.
+ */
+export async function hasProjects(locale: ContentLocale) {
+  const text = await getLocaleText(locale);
+  return text.projects.items.some((item) => item.title.trim());
+}
+
 export async function getSiteMedia() {
   const content = await getContent();
   return content.media;

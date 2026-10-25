@@ -471,6 +471,34 @@ function mountScrollWorld(container, config) {
     window.scrollTo({ top: seg.start + (seg.end - seg.start) * 0.5, behavior: reduce ? 'auto' : 'smooth' });
   }
 
+  // Flies the rest of the track in one go and lets the portal hand-off take
+  // over at the end: for a "contact" CTA whose form sits beneath the flight,
+  // which a hash link can't reach while the host keeps it pinned behind the
+  // stage. A shortcut rather than the tour, so it's quick: FLY_END_MAX_S for
+  // the whole track, proportionally less for what's left of it. Returns false
+  // when there's nothing to fly (already past the end, mid hand-off, reduced
+  // motion), so the caller can fall back to the plain link.
+  const FLY_END_MAX_S = 2.4;
+  function flyToEnd() {
+    const y = window.scrollY || window.pageYOffset;
+    const end = totalW * vh;
+    if (reduce || portalLocking || y >= end - 1) return false;
+    const dur = Math.max(0.8, FLY_END_MAX_S * (end - y) / end);
+    // Borrows the step lock: wheel steps, idle-snap and rest stills all stand
+    // aside while it flies.
+    stepping = true;
+    clearTimeout(idleTimer);
+    clearTimeout(stepTimer);
+    stepTimer = setTimeout(() => { stepping = false; stepTimer = null; }, dur * 1000 + 80);
+    // A couple of px past the end, so rounding can't leave it a hair short of
+    // the threshold that fires the hand-off (the track is padded past it).
+    const targetY = end + 2;
+    const lenis = window.__lenis;
+    if (lenis && lenis.scrollTo) lenis.scrollTo(targetY, { duration: dur, easing: easeInOutSine, force: true });
+    else window.scrollTo({ top: targetY, behavior: 'smooth' });
+    return true;
+  }
+
   function loadClip(s) {
     // Under prefers-reduced-motion we never load the clips at all — the stills stay up
     // and simply cross-dissolve as you scroll. No scrubbed video motion, no decode cost.
@@ -831,7 +859,7 @@ function mountScrollWorld(container, config) {
   const firstStill = SEGMENTS[0].img;
   const firstPainted = (firstStill.src ? firstStill.decode() : Promise.resolve()).catch(() => {});
 
-  return { dispose, firstPainted };
+  return { dispose, firstPainted, flyToEnd };
 }
 
 function seedParticles(host, reduce) {
