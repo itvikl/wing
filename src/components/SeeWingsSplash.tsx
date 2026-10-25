@@ -94,6 +94,19 @@ export function SeeWingsSplash({
       aria-hidden={false}
       style={portalDone ? { opacity: 0, transition: 'opacity .5s ease-in', pointerEvents: 'none' } : undefined}
     >
+      {/* Brand-green scrim behind the mark and copy, so they hold up against a
+          bright still (the lit arch sits right behind the headline). Lives here
+          rather than as a filter on the opening still, which has to stay
+          pixel-identical to the engine's for the hand-off; fades with the copy. */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          opacity: mounted ? textOpacity : 1,
+          background:
+            'radial-gradient(ellipse 80% 55% at 50% 56%, rgba(5,32,26,0.5) 0%, rgba(5,32,26,0.3) 45%, rgba(5,32,26,0) 78%), linear-gradient(to top, rgba(5,32,26,0.5), rgba(5,32,26,0) 45%)',
+        }}
+      />
       {mounted ? (
         <motion.a
           href={homeHref}
@@ -135,10 +148,10 @@ export function SeeWingsSplash({
         }}
       >
         <div>
-          <span className="block font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
+          <span className="splash-eyebrow block font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
             {eyebrow}
           </span>
-          <h1 className="mt-3 max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-100 [text-shadow:0_2px_24px_rgba(5,32,26,0.7)] md:text-5xl">
+          <h1 className="splash-title max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-100 [text-shadow:0_1px_2px_rgba(5,32,26,0.85),0_2px_24px_rgba(5,32,26,0.7)] md:text-5xl">
             {title}
           </h1>
           {body && (
@@ -146,7 +159,7 @@ export function SeeWingsSplash({
             // pulled up as far as it can go without colliding with the logo above,
             // the block still doesn't have room for a 3-line body without running
             // into the "01 / N" counter and scroll hint pinned near the bottom.
-            <p className="mx-auto mt-4 hidden max-w-xl text-base text-neutral-200 [text-shadow:0_2px_16px_rgba(5,32,26,0.7)] [@media(min-height:781px)]:block md:text-lg">
+            <p className="splash-body mx-auto mt-4 hidden max-w-xl text-base text-neutral-200 [text-shadow:0_1px_2px_rgba(5,32,26,0.85),0_2px_16px_rgba(5,32,26,0.7)] [@media(min-height:781px)]:block md:text-lg">
               {body}
             </p>
           )}

@@ -58,3 +58,88 @@
     opacity: 0;
   }
 }
+
+/* Opening-screen copy entrance (SeeWingsSplash). The eyebrow fades in while
+   its tracking settles, the headline is uncovered by a soft-edged sweep in
+   the reading direction, then the body fades up. Plain CSS so it runs from
+   the server markup, before hydration. */
+.splash-eyebrow {
+  animation: splash-eyebrow 2.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+.splash-title {
+  /* A mask three times the headline's width: opaque, a wide feather, then
+     clear. Sliding it across uncovers the text like light passing over it. */
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* The mask clips to the box, so the box is padded out past the text-shadow's
+     glow (and pulled back with margins, keeping the 12px gap to the eyebrow);
+     content-box keeps max-width measuring the text, not the padding. */
+  box-sizing: content-box;
+  padding: 24px;
+  margin: -12px -24px -24px;
+  animation: splash-title-ltr 3.6s cubic-bezier(0.45, 0, 0.2, 1) 0.9s both;
+}
+[dir='rtl'] .splash-title {
+  -webkit-mask-image: linear-gradient(270deg, #000 40%, transparent 60%);
+  mask-image: linear-gradient(270deg, #000 40%, transparent 60%);
+  animation-name: splash-title-rtl;
+}
+.splash-body {
+  animation: splash-body 2.4s cubic-bezier(0.22, 1, 0.36, 1) 3.4s both;
+}
+@keyframes splash-eyebrow {
+  from {
+    opacity: 0;
+    letter-spacing: var(--splash-eyebrow-from, 0.45em);
+  }
+}
+/* On a phone the wide starting tracking would push the eyebrow onto a second
+   line mid-animation, then snap back to one; start it tighter there. */
+@media (max-width: 640px) {
+  .splash-eyebrow {
+    --splash-eyebrow-from: 0.28em;
+  }
+}
+/* Starting at 90% rather than 100% puts the feather's leading edge right at
+   the text's edge, so the sweep doesn't open on a stretch of nothing. */
+@keyframes splash-title-ltr {
+  from {
+    -webkit-mask-position: 90% 0;
+    mask-position: 90% 0;
+    transform: translateY(6px);
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+}
+@keyframes splash-title-rtl {
+  from {
+    -webkit-mask-position: 10% 0;
+    mask-position: 10% 0;
+    transform: translateY(6px);
+  }
+  to {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+}
+@keyframes splash-body {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-eyebrow,
+  .splash-title,
+  .splash-body {
+    animation: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
