@@ -135,6 +135,7 @@ export function SeeWingsExperience({
       keepTopbar: persistentTopbar,
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
       loadingHint: locale === 'he' ? 'טוען את החוויה' : 'loading the experience',
+      menuLabel: locale === 'he' ? 'תפריט' : 'Menu',
       navLinks: navLinks.map((n) => ({
         label: n.label,
         href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,

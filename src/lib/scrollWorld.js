@@ -172,6 +172,36 @@ function mountScrollWorld(container, config) {
     const c = el('a', 'sw-topcta'); c.href = config.cta.href || '#'; c.textContent = config.cta.label;
     topEnd.appendChild(c);
   }
+  // Phones have no room for the centered pill nav beside the CTA, so it hides
+  // there (see the ≤860px block) and this button drops the same links down as
+  // a panel instead. Closes on a pick, a tap outside, Escape or a scroll.
+  let menuBtn = null;
+  let menuOpen = false;
+  let menuOpenedAt = 0;
+  function setMenu(open) {
+    if (!menuBtn || open === menuOpen) return;
+    menuOpen = open;
+    menuOpenedAt = window.scrollY;
+    topbar.classList.toggle('is-menu-open', open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+  }
+  if (nav.parentNode) {
+    menuBtn = el('button', 'sw-menu'); menuBtn.type = 'button';
+    menuBtn.setAttribute('aria-label', config.menuLabel || 'Menu');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.appendChild(el('i'));
+    menuBtn.addEventListener('click', () => setMenu(!menuOpen));
+    nav.addEventListener('click', (e) => { if (e.target.closest('.sw-nav__item')) setMenu(false); });
+    topEnd.appendChild(menuBtn);
+  }
+  const onMenuOutside = (e) => { if (menuOpen && !topbar.contains(e.target)) setMenu(false); };
+  const onMenuKey = (e) => { if (menuOpen && e.key === 'Escape') { setMenu(false); menuBtn.focus(); } };
+  // A real scroll, not the tail of a swipe's momentum still settling as the
+  // button is tapped.
+  const onMenuScroll = () => { if (menuOpen && Math.abs(window.scrollY - menuOpenedAt) > 40) setMenu(false); };
+  document.addEventListener('pointerdown', onMenuOutside);
+  document.addEventListener('keydown', onMenuKey);
+  window.addEventListener('scroll', onMenuScroll, { passive: true });
   if (topEnd.children.length) topbar.appendChild(topEnd);
 
   const stage = el('div', 'sw-stage');
@@ -820,6 +850,9 @@ function mountScrollWorld(container, config) {
     openGate();
     disposed = true;
     window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('scroll', onMenuScroll);
+    document.removeEventListener('pointerdown', onMenuOutside);
+    document.removeEventListener('keydown', onMenuKey);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('orientationchange', layout);
     window.removeEventListener('load', layout);
@@ -924,6 +957,17 @@ function injectCSS() {
   .sw-toplang{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);padding:8px 14px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s;}
   .sw-toplang:hover{background:var(--sw-accent) !important;color:#fff !important;}
   .sw-topcta{text-decoration:none;font-weight:600;font-size:.9rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
+  /* Phone menu button, glass-pilled like .sw-toplang; three bars that fold
+     into an X while the panel is open. Hidden until the ≤860px block. */
+  .sw-menu{display:none;position:relative;flex:none;width:36px;height:36px;padding:0;cursor:pointer;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent) !important;backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);border-radius:999px;}
+  .sw-menu i,.sw-menu i::before,.sw-menu i::after{position:absolute;width:16px;height:1.5px;border-radius:2px;background:currentColor;transition:transform .25s ease,background .2s;}
+  .sw-menu i{left:50%;top:50%;margin:-.75px 0 0 -8px;}
+  .sw-menu i::before,.sw-menu i::after{content:"";left:0;}
+  .sw-menu i::before{top:-5px;} .sw-menu i::after{top:5px;}
+  .sw-topbar.is-menu-open .sw-menu i{background:transparent;}
+  .sw-topbar.is-menu-open .sw-menu i::before{transform:translateY(5px) rotate(45deg);}
+  .sw-topbar.is-menu-open .sw-menu i::after{transform:translateY(-5px) rotate(-45deg);}
+  @keyframes sw-menu-in{from{opacity:0;transform:translateY(-6px)}}
   /* Opaque: whatever the host pins behind the stage (PortalReveal parks the
      real page there) must never show through a scene whose poster hasn't
      painted yet. The hand-off fades the whole stage, background included. */
@@ -994,6 +1038,12 @@ function injectCSS() {
   .sw-track{position:relative;z-index:1;width:100%;pointer-events:none;background:var(--sw-bg);}
   @media (max-width:860px){
     .sw-nav{display:none;}
+    .sw-menu{display:block;}
+    /* The menu's panel: a compact dark-glass card in the site's green and
+       gold, hanging under the button at the topbar's end edge. */
+    .sw-topbar.is-menu-open .sw-nav{display:flex;flex-direction:column;gap:0;top:calc(100% - 6px);left:auto;right:auto;inset-inline-end:clamp(18px,5vw,64px);transform:none;min-width:176px;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--sw-bg) 84%,transparent);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--sw-accent) 28%,transparent);box-shadow:0 14px 32px rgba(0,0,0,.28);animation:sw-menu-in .22s ease-out;}
+    .sw-topbar.is-menu-open .sw-nav__item{color:#F7F6F3 !important;font-size:.9rem;padding:10px 14px;border-radius:10px;text-align:start;}
+    .sw-topbar.is-menu-open .sw-nav__item:hover,.sw-topbar.is-menu-open .sw-nav__item:focus-visible{color:var(--sw-accent) !important;background:color-mix(in srgb,#fff 6%,transparent);}
     .sw-copylayer::before,.sw-copylayer:dir(rtl)::before{width:100%;height:42%;top:auto;bottom:0;background:linear-gradient(0deg,color-mix(in srgb,var(--sw-bg) 88%,transparent) 0%,color-mix(in srgb,var(--sw-bg) 55%,transparent) 30%,color-mix(in srgb,var(--sw-bg) 18%,transparent) 62%,transparent 100%);}
     /* Anchor copy to the bottom, clear of the home indicator / collapsing URL bar.
        dvh + env() are progressive: browsers that lack them keep the vh fallback line. */
