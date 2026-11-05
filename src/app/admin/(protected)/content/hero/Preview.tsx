@@ -17,10 +17,13 @@ export function HeroPreview({ data }: { data: Record<ContentLocale, HeroText> })
           {value.eyebrow || '—'}
         </span>
         <h2 className="mt-3 font-display text-2xl font-bold leading-tight text-neutral-100">{value.headline || '—'}</h2>
+        {value.subheadline.join(' ').trim() && (
+          <p className="mt-3 text-sm text-neutral-200">{value.subheadline.join(' ').trim()}</p>
+        )}
       </div>
       <PreviewNote>
-        כך נראית הכותרת שקופצת על מסך הטיסה בגלילה הראשונה (מתגית+כותרת בלבד). תת-הכותרת והכפתור אינם מוצגים כרגע
-        באתר בשום מקום.
+        התגית והכותרת מופיעות במסך הפתיחה, ושוב בכיתוב הראשון של הטיסה. תת-הכותרת מופיעה רק בכיתוב הראשון של הטיסה,
+        בתחנה הראשונה אחרי מסך הפתיחה. הכפתור אינו מוצג כרגע באתר.
       </PreviewNote>
     </div>
   );

@@ -268,7 +268,8 @@ export function SeeWingsForm({
               ראשי (Hero)
             </Link>{' '}
             — תגית: <span className="font-medium text-primary-dark">{initial.hero.he.eyebrow || '—'}</span>, כותרת:{' '}
-            <span className="font-medium text-primary-dark">{initial.hero.he.headline || '—'}</span>
+            <span className="font-medium text-primary-dark">{initial.hero.he.headline || '—'}</span>, והטקסט שלה הוא
+            תת-הכותרת מאותו עמוד.
           </p>
         </div>
 

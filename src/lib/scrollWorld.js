@@ -942,7 +942,7 @@ function injectCSS() {
      it) there's nothing to balance the CTA against, so the nav drifted to
      the start edge instead of staying centered. */
   .sw-nav{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:4px;padding:5px;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);border-radius:999px;}
-  .sw-nav__item{font:inherit;font-size:.82rem;text-decoration:none;color:var(--sw-bg) !important;border:0;background:transparent;cursor:pointer;padding:7px 14px;border-radius:999px;transition:color .25s,background .25s;}
+  .sw-nav__item{font:inherit;font-size:1rem;text-decoration:none;color:var(--sw-bg) !important;border:0;background:transparent;cursor:pointer;padding:7px 14px;border-radius:999px;transition:color .25s,background .25s;}
   .sw-nav__item:hover{color:var(--sw-accent) !important;} .sw-nav__item.is-active{color:#fff !important;background:var(--sw-accent) !important;}
   /* margin-inline-start:auto pins it to the end of .sw-topbar (right in LTR,
      left in RTL) regardless of whether a brand mark sits at the other end —
@@ -954,9 +954,9 @@ function injectCSS() {
   /* Pilled like .sw-nav__item (not plain text) — the topbar sits directly on
      the raw photo with no darkening overlay, so anything without its own
      background risks vanishing against light stone. */
-  .sw-toplang{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);padding:8px 14px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s;}
+  .sw-toplang{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);padding:8px 14px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s;}
   .sw-toplang:hover{background:var(--sw-accent) !important;color:#fff !important;}
-  .sw-topcta{text-decoration:none;font-weight:600;font-size:.9rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
+  .sw-topcta{text-decoration:none;font-weight:600;font-size:1rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
   /* Phone menu button, glass-pilled like .sw-toplang; three bars that fold
      into an X while the panel is open. Hidden until the ≤860px block. */
   .sw-menu{display:none;position:relative;flex:none;width:36px;height:36px;padding:0;cursor:pointer;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent) !important;backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);border-radius:999px;}
@@ -992,8 +992,10 @@ function injectCSS() {
   .sw-topbar,.sw-scrollbar,.sw-hint,.sw-route{animation:sw-in .9s ease-out .25s backwards;}
   .sw-copylayer::before{animation:sw-in 1.8s ease-out .4s backwards;}
   .sw-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
-  .sw-copylayer::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:min(58vw,780px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
-  .sw-copylayer:dir(rtl)::before{background:linear-gradient(270deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 82%,transparent) 34%,color-mix(in srgb,var(--sw-bg) 40%,transparent) 62%,transparent 100%);}
+  /* Wide and dark enough to reach past the end of a caption's longest line:
+     the thin, single-weight display face washes out wherever the shade fades. */
+  .sw-copylayer::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:min(66vw,880px);background:linear-gradient(90deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 86%,transparent) 42%,color-mix(in srgb,var(--sw-bg) 55%,transparent) 70%,transparent 100%);}
+  .sw-copylayer:dir(rtl)::before{background:linear-gradient(270deg,var(--sw-bg) 0%,color-mix(in srgb,var(--sw-bg) 86%,transparent) 42%,color-mix(in srgb,var(--sw-bg) 55%,transparent) 70%,transparent 100%);}
   .sw-copy{position:absolute;inset-inline-start:clamp(18px,5vw,64px);top:50%;transform:translateY(-50%);width:min(42vw,460px);opacity:0;will-change:opacity,transform;}
   /* direction:ltr keeps "01 / 03" in numeric order — without it, an RTL page
      (Hebrew) reorders the digit/slash runs and it reads back to front. */
@@ -1020,7 +1022,7 @@ function injectCSS() {
   .sw-route__label:dir(rtl){transform:translateY(-50%) translateX(-6px);}
   .sw-route__dot:hover .sw-route__label:dir(rtl),.sw-route__dot:focus-visible .sw-route__label:dir(rtl),.sw-route__dot.is-active .sw-route__label:dir(rtl){transform:translateY(-50%) translateX(0);}
   .sw-route__dot:hover .sw-route__label,.sw-route__dot:focus-visible .sw-route__label,.sw-route__dot.is-active .sw-route__label{opacity:1;transform:translateY(-50%) translateX(0);}
-  .sw-hint{position:fixed;left:50%;bottom:26px;z-index:30;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sw-ink-soft);transition:opacity .3s;}
+  .sw-hint{position:fixed;left:50%;bottom:26px;z-index:30;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:.875rem;letter-spacing:.14em;white-space:nowrap;text-transform:uppercase;color:var(--sw-ink-soft);transition:opacity .3s;}
   .sw-hint i{width:22px;height:34px;border-radius:12px;border:2px solid color-mix(in srgb,var(--sw-ink) 28%,transparent);position:relative;}
   .sw-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--sw-accent);transform:translateX(-50%);animation:sw-wheel 1.7s ease-in-out infinite;}
   @keyframes sw-wheel{0%{opacity:0;top:6px}40%{opacity:1}100%{opacity:0;top:17px}}
@@ -1042,9 +1044,11 @@ function injectCSS() {
     /* The menu's panel: a compact dark-glass card in the site's green and
        gold, hanging under the button at the topbar's end edge. */
     .sw-topbar.is-menu-open .sw-nav{display:flex;flex-direction:column;gap:0;top:calc(100% - 6px);left:auto;right:auto;inset-inline-end:clamp(18px,5vw,64px);transform:none;min-width:176px;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--sw-bg) 84%,transparent);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--sw-accent) 28%,transparent);box-shadow:0 14px 32px rgba(0,0,0,.28);animation:sw-menu-in .22s ease-out;}
-    .sw-topbar.is-menu-open .sw-nav__item{color:#F7F6F3 !important;font-size:.9rem;padding:10px 14px;border-radius:10px;text-align:start;}
+    .sw-topbar.is-menu-open .sw-nav__item{color:#F7F6F3 !important;font-size:1rem;padding:10px 14px;border-radius:10px;text-align:start;}
     .sw-topbar.is-menu-open .sw-nav__item:hover,.sw-topbar.is-menu-open .sw-nav__item:focus-visible{color:var(--sw-accent) !important;background:color-mix(in srgb,#fff 6%,transparent);}
-    .sw-copylayer::before,.sw-copylayer:dir(rtl)::before{width:100%;height:42%;top:auto;bottom:0;background:linear-gradient(0deg,color-mix(in srgb,var(--sw-bg) 88%,transparent) 0%,color-mix(in srgb,var(--sw-bg) 55%,transparent) 30%,color-mix(in srgb,var(--sw-bg) 18%,transparent) 62%,transparent 100%);}
+    /* Tall enough to sit behind the captions, which SeeWingsCues centers
+       vertically on phones too, not just the bottom of the screen. */
+    .sw-copylayer::before,.sw-copylayer:dir(rtl)::before{width:100%;height:78%;top:auto;bottom:0;background:linear-gradient(0deg,color-mix(in srgb,var(--sw-bg) 90%,transparent) 0%,color-mix(in srgb,var(--sw-bg) 70%,transparent) 45%,color-mix(in srgb,var(--sw-bg) 30%,transparent) 75%,transparent 100%);}
     /* Anchor copy to the bottom, clear of the home indicator / collapsing URL bar.
        dvh + env() are progressive: browsers that lack them keep the vh fallback line. */
     .sw-copy{left:clamp(18px,5vw,64px);right:clamp(18px,5vw,64px);top:auto;bottom:clamp(64px,14vh,120px);transform:none;width:auto;max-width:560px;}

@@ -10,7 +10,7 @@ export async function Footer() {
 
   return (
     <footer className="bg-primary-dark text-neutral-100">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-10 text-sm text-neutral-200 md:flex-row md:justify-between">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-10 text-base text-neutral-200 md:flex-row md:justify-between">
         <p>&copy; {year} Wings Real Estate. {t('rights')}</p>
         <div className="flex items-center gap-6">
           {phoneNumber && (

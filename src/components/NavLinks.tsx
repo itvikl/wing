@@ -41,7 +41,7 @@ export function NavLinks({ links }: { links: Link[] }) {
   }, [links, onHome]);
 
   return (
-    <nav className="hidden items-center gap-8 text-sm md:flex">
+    <nav className="hidden items-center gap-8 text-base md:flex">
       {links.map((link) => {
         const isRouted = ROUTED_IDS.has(link.id);
         const routedHref = `${localeBase}/${link.id}`;

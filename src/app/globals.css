@@ -3,11 +3,18 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --font-display: var(--font-didot), var(--font-hebrew-display), serif;
+    --font-sans: var(--font-didot), var(--font-hebrew-sans), serif;
+  }
   html {
     scroll-behavior: smooth;
   }
   body {
     @apply bg-neutral-bg text-primary-dark antialiased;
+    /* GFS Didot only comes in one weight; smearing a fake bold over its hairlines
+       ruins it. The Hebrew fallbacks have real weights and still get theirs. */
+    font-synthesis-weight: none;
   }
 }
 
@@ -61,8 +68,8 @@
 
 /* Opening-screen copy entrance (SeeWingsSplash). The eyebrow fades in while
    its tracking settles, the headline is uncovered by a soft-edged sweep in
-   the reading direction, then the body fades up. Plain CSS so it runs from
-   the server markup, before hydration. */
+   the reading direction. Plain CSS so it runs from the server markup, before
+   hydration. */
 .splash-eyebrow {
   animation: splash-eyebrow 2.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
 }
@@ -87,9 +94,6 @@
   -webkit-mask-image: linear-gradient(270deg, #000 40%, transparent 60%);
   mask-image: linear-gradient(270deg, #000 40%, transparent 60%);
   animation-name: splash-title-rtl;
-}
-.splash-body {
-  animation: splash-body 2.4s cubic-bezier(0.22, 1, 0.36, 1) 3.4s both;
 }
 @keyframes splash-eyebrow {
   from {
@@ -128,16 +132,12 @@
     mask-position: 100% 0;
   }
 }
-@keyframes splash-body {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
+/* The RTL selector is listed too: it outranks plain .splash-title, so without
+   it a Hebrew headline kept its mask parked at the hidden end and never showed. */
 @media (prefers-reduced-motion: reduce) {
   .splash-eyebrow,
   .splash-title,
-  .splash-body {
+  [dir='rtl'] .splash-title {
     animation: none;
     -webkit-mask-image: none;
     mask-image: none;

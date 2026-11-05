@@ -16,8 +16,8 @@ export async function Projects() {
   // greets someone arriving by an old or typed URL.
   if (!items.length) {
     return (
-      <section id="projects" className="flex min-h-[60vh] items-center justify-center bg-neutral-bg px-6 py-24">
-        <p className="text-center text-lg text-neutral-muted">{t('empty')}</p>
+      <section id="projects" className="flex min-h-[60vh] items-center justify-center px-6 py-24">
+        <p className="text-center text-xl text-neutral-200">{t('empty')}</p>
       </section>
     );
   }

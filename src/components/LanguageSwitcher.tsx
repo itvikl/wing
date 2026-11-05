@@ -16,8 +16,11 @@ export function LanguageSwitcher() {
   // (it then redirects on to the unprefixed URL, per localePrefix as-needed).
   const href = `/${targetLocale}${pathWithoutLocale}`;
 
+  // No prefetch: the middleware rewrites that cookie on the prefetch's response
+  // too, so merely rendering this link on an English page turned the cookie to
+  // Hebrew, and the next bare link (/about) was redirected to /he/about.
   return (
-    <Link href={href} className="text-sm font-medium uppercase tracking-wide hover:text-accent-light">
+    <Link href={href} prefetch={false} className="text-base font-medium uppercase tracking-wide hover:text-accent-light">
       {targetLocale}
     </Link>
   );

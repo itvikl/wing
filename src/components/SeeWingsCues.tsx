@@ -128,21 +128,23 @@ function CueBlock({
 
   return (
     <motion.div className="absolute inset-x-0 top-0" style={{ opacity, y }}>
-      <span className="font-display text-[.8rem] font-bold uppercase tracking-[0.16em] text-accent-light">
+      {/* A tight shadow plus a hairline stroke in the text's own color: GFS
+          Didot has one thin weight, and its hairlines vanish on bright frames. */}
+      <span className="font-display text-base font-bold uppercase tracking-[0.16em] text-accent-light [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_12px_rgba(5,32,26,0.7)] [-webkit-text-stroke:0.25px_currentColor] md:text-lg">
         {cue.eyebrow}
       </span>
-      <h2 className="mt-3 font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold leading-[1.05] text-neutral-100 [text-shadow:0_2px_20px_rgba(5,32,26,0.7)]">
+      <h2 className="mt-3 font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold leading-[1.05] text-neutral-100 [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_14px_rgba(5,32,26,0.7),0_2px_28px_rgba(5,32,26,0.6)] [-webkit-text-stroke:0.45px_currentColor]">
         {cue.title}
       </h2>
       {cue.body && (
-        <p className="mt-4 max-w-md text-base text-neutral-200 [text-shadow:0_2px_16px_rgba(5,32,26,0.7)] md:text-lg">
+        <p className="mt-4 max-w-md text-lg text-neutral-200 [text-shadow:0_2px_16px_rgba(5,32,26,0.7)] md:text-xl">
           {cue.body}
         </p>
       )}
       {!!cue.extra?.length && (
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1">
           {cue.extra.map((field, i) => (
-            <div key={i} className="flex gap-1.5 text-sm text-neutral-200 [text-shadow:0_2px_12px_rgba(5,32,26,0.7)]">
+            <div key={i} className="flex gap-1.5 text-base text-neutral-200 [text-shadow:0_2px_12px_rgba(5,32,26,0.7)]">
               <dt className="font-semibold text-accent-light">{field.label}</dt>
               <dd>{field.value}</dd>
             </div>
@@ -153,7 +155,7 @@ function CueBlock({
         <div className="pointer-events-auto mt-7" style={{ pointerEvents: active ? 'auto' : 'none' }}>
           <a
             href={ctaHref}
-            className="inline-block rounded-full bg-accent px-8 py-3 text-sm font-semibold text-primary-dark transition-transform hover:-translate-y-0.5"
+            className="inline-block rounded-full bg-accent px-8 py-3 text-base font-semibold text-primary-dark transition-transform hover:-translate-y-0.5"
           >
             {ctaLabel}
           </a>

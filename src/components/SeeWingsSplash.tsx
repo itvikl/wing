@@ -14,7 +14,8 @@ const TARGET_SIDE = 28; // px from the inline-start edge (left in LTR, right in 
 const FLIGHT_END = 0.22; // fraction of the 0.5vh fade window where the flight completes
 
 /**
- * Centered logo + tagline shown only at the very top of the page. As soon as
+ * Centered logo, eyebrow and headline shown only at the very top of the page.
+ * The line that used to sit under them now opens the flight's first caption. As soon as
  * scrolling begins, the mark itself flies up into the header's top corner
  * (replacing the topbar's own brand mark, which this suppresses via the
  * `brand` config being omitted) while the tagline text simply fades out.
@@ -27,14 +28,12 @@ const FLIGHT_END = 0.22; // fraction of the 0.5vh fade window where the flight c
 export function SeeWingsSplash({
   eyebrow,
   title,
-  body,
   homeHref,
   trackVh,
   persist = false,
 }: {
   eyebrow: string;
   title: string;
-  body: string;
   homeHref: string;
   trackVh: number;
   /** Keep the mark in the topbar corner after the hand-off (no Header logo to defer to). */
@@ -140,7 +139,7 @@ export function SeeWingsSplash({
         style={{
           opacity: mounted ? textOpacity : 1,
           // On short mobile viewports, anchoring purely below the logo (50% + fixed
-          // offset) can push a long title/body down far enough to collide with the
+          // offset) can push a long title down far enough to collide with the
           // fixed "01 / N" scene counter and the scroll hint pinned near the bottom.
           // min() keeps the natural centered position on tall screens but pulls the
           // block up once the viewport is too short to fit both without overlap.
@@ -148,21 +147,12 @@ export function SeeWingsSplash({
         }}
       >
         <div>
-          <span className="splash-eyebrow block font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
+          <span className="splash-eyebrow block font-display text-base font-bold uppercase tracking-[0.2em] text-accent-light [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_12px_rgba(5,32,26,0.7)] [-webkit-text-stroke:0.25px_currentColor] md:text-lg">
             {eyebrow}
           </span>
-          <h1 className="splash-title max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-100 [text-shadow:0_1px_2px_rgba(5,32,26,0.85),0_2px_24px_rgba(5,32,26,0.7)] md:text-5xl">
+          <h1 className="splash-title max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-100 [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_14px_rgba(5,32,26,0.7),0_2px_24px_rgba(5,32,26,0.7)] [-webkit-text-stroke:0.45px_currentColor] md:text-5xl">
             {title}
           </h1>
-          {body && (
-            // Hidden on very short viewports (e.g. iPhone SE-class phones) — even
-            // pulled up as far as it can go without colliding with the logo above,
-            // the block still doesn't have room for a 3-line body without running
-            // into the "01 / N" counter and scroll hint pinned near the bottom.
-            <p className="splash-body mx-auto mt-4 hidden max-w-xl text-base text-neutral-200 [text-shadow:0_1px_2px_rgba(5,32,26,0.85),0_2px_16px_rgba(5,32,26,0.7)] [@media(min-height:781px)]:block md:text-lg">
-              {body}
-            </p>
-          )}
         </div>
       </motion.div>
     </div>

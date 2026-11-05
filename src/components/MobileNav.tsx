@@ -50,7 +50,7 @@ export function MobileNav({ links }: { links: Link[] }) {
 
       {open && (
         <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-primary-soft bg-primary px-6 py-6 shadow-lg">
-          <nav className="flex flex-col gap-1 text-base">
+          <nav className="flex flex-col gap-1 text-lg">
             {links.map((link) => {
               const href = ROUTED_IDS.has(link.id)
                 ? `${localeBase}/${link.id}`

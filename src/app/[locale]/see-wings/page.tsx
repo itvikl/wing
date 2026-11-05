@@ -23,11 +23,7 @@ export default async function SeeWingsPage({ params: { locale } }: { params: { l
   const t = await getTranslations('seeWings');
   const nav = await getTranslations('nav');
   const hero = await getTranslations('hero');
-  const opening = {
-    eyebrow: hero('eyebrow'),
-    title: hero('headline'),
-    body: (hero.raw('subheadline') as string[]).join(' ').trim(),
-  };
+  const opening = { eyebrow: hero('eyebrow'), title: hero('headline') };
   const media = await getSiteMedia();
   const showProjects = await hasProjects(locale);
   const sections = t.raw('sections') as SeeWingsSection[];

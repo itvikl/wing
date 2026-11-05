@@ -62,8 +62,13 @@ export const SECTION_VH = 11;
 // and 3 instead of a rest point, by design, not an oversight.
 // Re-cut these whenever the clip is re-rendered. SeeWingsCues falls back to
 // equal windows if the admin's cue count ever stops matching.
+//
+// The first boundary moved from 3.5 to 4.1 once the 3.0s stop existed (see
+// STATION_REST_S): at 3.5 that stop sat inside the first caption's fade-out,
+// so the flight came to rest on a headline at ~77% opacity. At 4.1 both the
+// 3.0 and 5.2 stops land on a fully opaque caption.
 export const FLIGHT_SECONDS = 15;
-export const CUE_BEATS_S = [0, 3.5, 8.8, 12.3, 15];
+export const CUE_BEATS_S = [0, 4.1, 8.8, 12.3, 15];
 
 // Scoped crop for the boulevard reveal (~2.3-6.0s): foreground pedestrians
 // walk through the bottom ~10% of frame right where the WINGS sign sits.

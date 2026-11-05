@@ -67,17 +67,17 @@ export function ProjectsGallery({
   const active = openIndex !== null ? items[openIndex] : null;
 
   return (
-    <section id="projects" className="bg-neutral-bg py-16 sm:py-20 md:py-24">
+    <section id="projects" className="py-16 sm:py-20 md:py-24">
       <div className="mx-auto max-w-6xl px-6 text-center">
         <Reveal>
-          <span className="text-xs uppercase tracking-[0.2em] text-accent-dark">{eyebrow}</span>
-          <h2 className="mt-4 font-display text-3xl font-semibold text-primary-dark text-balance md:text-4xl">
+          <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg">{eyebrow}</span>
+          <h2 className="mt-4 font-display text-3xl font-semibold text-neutral-100 text-balance md:text-4xl">
             {title}
           </h2>
         </Reveal>
 
         <Reveal index={1} className="mt-4">
-          <p className="text-sm text-neutral-muted">{viewDetailsLabel} →</p>
+          <p className="text-base text-neutral-200">{viewDetailsLabel} →</p>
         </Reveal>
       </div>
 
@@ -118,8 +118,8 @@ export function ProjectsGallery({
               />
               <div className="absolute inset-0 flex flex-col justify-end p-8 text-neutral-100">
                 <h3 className="font-display text-2xl font-semibold">{item.title}</h3>
-                <p className="mt-1 text-sm text-neutral-200">{item.location}</p>
-                <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-accent-light px-5 py-2 text-sm text-accent-light transition-colors group-hover:bg-accent-light group-hover:text-primary-dark">
+                <p className="mt-1 text-base text-neutral-200">{item.location}</p>
+                <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-accent-light px-5 py-2 text-base text-accent-light transition-colors group-hover:bg-accent-light group-hover:text-primary-dark">
                   {viewDetailsLabel}
                 </span>
               </div>
@@ -170,12 +170,12 @@ export function ProjectsGallery({
                 </button>
               </div>
               <div className="p-8">
-                <span className="text-xs uppercase tracking-[0.2em] text-accent-dark">{active.location}</span>
+                <span className="text-base uppercase tracking-[0.2em] text-accent-dark md:text-lg">{active.location}</span>
                 <h3 className="mt-3 font-display text-2xl font-semibold text-primary-dark">{active.title}</h3>
-                <p className="mt-4 text-neutral-muted">{active.description}</p>
+                <p className="mt-4 text-lg text-neutral-muted">{active.description}</p>
                 <MagneticButton
                   href={contactHref}
-                  className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-sm font-medium text-primary-dark transition-colors hover:bg-accent-light"
+                  className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light"
                 >
                   {ctaLabel}
                 </MagneticButton>

@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { PageBackdrop } from '@/components/PageBackdrop';
 import { LeadForm } from '@/components/LeadForm';
 
 // Every string on the site comes from the Firestore content doc (see
@@ -27,7 +28,8 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
     // At least one screen tall with the content stretching, so a short page
     // still puts the Footer at the bottom of the screen. dvh tracks a phone's
     // URL bar; min-h-screen is the fallback where dvh isn't supported.
-    <div className="flex min-h-screen min-h-dvh flex-col">
+    <div className="relative isolate flex min-h-screen min-h-dvh flex-col">
+      <PageBackdrop />
       <Header />
       <main className="flex-1">
         <LeadForm />

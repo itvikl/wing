@@ -45,17 +45,20 @@ export function LeadForm({ variant = 'section' }: { variant?: 'section' | 'overl
     }
   }
 
-  const field = overlay
-    ? 'rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-white placeholder:text-white/70 backdrop-blur-md transition-colors focus:border-accent-light focus:bg-white/15 focus:outline-none'
-    : 'rounded-lg border border-primary-soft bg-primary px-4 py-3 text-neutral-100 placeholder:text-neutral-200 focus:border-accent focus:outline-none';
+  const field =
+    'rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-white placeholder:text-white/70 backdrop-blur-md transition-colors focus:border-accent-light focus:bg-white/15 focus:outline-none';
+  // The same glass card on the home page's last frame and over the inner
+  // pages' PageBackdrop.
+  const card =
+    'w-full max-w-xl rounded-3xl border border-white/20 bg-primary-dark/35 px-6 py-10 text-center shadow-[0_30px_80px_-20px_rgba(5,32,26,0.6),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-2xl backdrop-saturate-150 sm:px-10 sm:py-12';
 
   const content = (
     <>
-      <span className="text-xs uppercase tracking-[0.2em] text-accent-light">{t('eyebrow')}</span>
+      <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg">{t('eyebrow')}</span>
       <h2 className="mt-4 font-display text-3xl font-semibold text-balance md:text-4xl">{t('title')}</h2>
 
       {status === 'success' ? (
-        <p className="mt-10 text-lg text-accent-light">{t('success')}</p>
+        <p className="mt-10 text-xl text-accent-light">{t('success')}</p>
       ) : (
         <form onSubmit={handleSubmit} className="mt-10 grid gap-4 text-start">
           <input name="name" type="text" required placeholder={t('name')} className={field} />
@@ -65,11 +68,11 @@ export function LeadForm({ variant = 'section' }: { variant?: 'section' | 'overl
           <button
             type="submit"
             disabled={status === 'submitting'}
-            className="mt-2 rounded-full bg-accent px-8 py-3 text-sm font-medium text-primary-dark transition-colors hover:bg-accent-light disabled:opacity-60"
+            className="mt-2 rounded-full bg-accent px-8 py-3 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light disabled:opacity-60"
           >
             {status === 'submitting' ? '…' : t('submit')}
           </button>
-          {status === 'error' ? <p className="text-sm text-red-400">{t('error')}</p> : null}
+          {status === 'error' ? <p className="text-base text-red-400">{t('error')}</p> : null}
         </form>
       )}
     </>
@@ -77,8 +80,8 @@ export function LeadForm({ variant = 'section' }: { variant?: 'section' | 'overl
 
   if (!overlay) {
     return (
-      <section id="contact" className="bg-primary-dark py-16 text-neutral-100 sm:py-20 md:py-24">
-        <div className="mx-auto max-w-xl px-6 text-center">{content}</div>
+      <section id="contact" className="flex justify-center px-4 py-16 text-white sm:px-6 sm:py-20 md:py-24">
+        <div className={card}>{content}</div>
       </section>
     );
   }
@@ -101,9 +104,7 @@ export function LeadForm({ variant = 'section' }: { variant?: 'section' | 'overl
         <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_55%,rgba(5,32,26,0.45),transparent_75%)]" />
       </div>
 
-      <div className="w-full max-w-xl rounded-3xl border border-white/20 bg-primary-dark/35 px-6 py-10 text-center shadow-[0_30px_80px_-20px_rgba(5,32,26,0.6),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-2xl backdrop-saturate-150 sm:px-10 sm:py-12">
-        {content}
-      </div>
+      <div className={card}>{content}</div>
     </section>
   );
 }

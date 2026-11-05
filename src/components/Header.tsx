@@ -38,7 +38,7 @@ export async function Header() {
           </div>
           <MagneticButton
             href={contactHref}
-            className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-primary-dark transition-colors hover:bg-accent-light sm:px-5"
+            className="rounded-full bg-accent px-4 py-2 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light sm:px-5"
           >
             {t('cta')}
           </MagneticButton>

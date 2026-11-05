@@ -35,14 +35,14 @@ export function GalleryWall({
   return (
     <motion.section
       ref={sectionRef}
-      className="overflow-hidden bg-primary-dark py-20 sm:py-28"
+      className="overflow-hidden py-20 sm:py-28"
       initial={reduceMotion ? undefined : { scale: 1.22, opacity: 0, filter: 'blur(14px)' }}
       animate={played ? { scale: 1, opacity: 1, filter: 'blur(0px)' } : undefined}
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       style={{ transformOrigin: '50% 40%' }}
     >
       <div className="mx-auto max-w-4xl px-6 text-center">
-        <span className="text-xs uppercase tracking-[0.2em] text-accent-light">{eyebrow}</span>
+        <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg">{eyebrow}</span>
         <h1 className="mt-4 text-balance font-display text-3xl font-semibold text-neutral-100 md:text-4xl">
           {title}
         </h1>
@@ -63,7 +63,9 @@ export function GalleryWall({
           />
         )}
 
-        <div className="relative grid grid-cols-2 gap-x-6 gap-y-14 sm:gap-x-10 md:grid-cols-4">
+        {/* Flex rather than a grid, so a row short of four cards (or a lone
+            third card on a phone) sits centered instead of leaving empty columns. */}
+        <div className="relative flex flex-wrap justify-center gap-x-6 gap-y-14 sm:gap-x-10">
           {members.map((member, index) => (
             <FrameCard
               key={member.name}
@@ -100,7 +102,7 @@ function FrameCard({
 
   return (
     <motion.div
-      className="flex flex-col"
+      className="flex w-[calc(50%-0.75rem)] flex-col sm:w-[calc(50%-1.25rem)] md:w-[calc(25%-1.875rem)]"
       initial={
         reduceMotion
           ? undefined
@@ -129,8 +131,8 @@ function FrameCard({
         </div>
 
         <div className="mt-3 border-t border-accent/30 pt-3">
-          <h2 className="font-display text-base font-semibold text-neutral-100">{member.name}</h2>
-          <p className="mt-0.5 text-[0.7rem] uppercase tracking-[0.16em] text-accent-light">
+          <h2 className="font-display text-lg font-semibold text-neutral-100">{member.name}</h2>
+          <p className="mt-0.5 text-sm uppercase tracking-[0.16em] text-accent-light">
             {member.role}
           </p>
         </div>
@@ -145,7 +147,7 @@ function FrameCard({
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="pt-3 text-sm leading-relaxed text-neutral-200">{member.bio}</p>
+            <p className="pt-3 text-base leading-relaxed text-neutral-200">{member.bio}</p>
           </motion.div>
         )}
       </AnimatePresence>

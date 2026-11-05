@@ -42,9 +42,11 @@ export async function getLocaleText(locale: ContentLocale): Promise<LocaleText> 
   const content = await getContent();
   const text = content.text[locale];
 
-  // The flight experience's first on-screen caption (cues[0]) is the only place
-  // Hero's eyebrow/headline actually render on the live site — see admin's Hero
-  // page. Enforced here so every reader (site + admin previews) sees one truth.
+  // The flight experience's first caption (cues[0]) echoes Hero's eyebrow and
+  // headline, and is the only place Hero's subheadline renders: the opening
+  // screen shows just the logo, eyebrow and headline, and the line under them
+  // waits for the flight's first stop. Enforced here so every reader (site +
+  // admin previews) sees one truth.
   const [firstCue, ...restCues] = text.seeWings.cues;
   if (!firstCue) return text;
 
@@ -52,7 +54,15 @@ export async function getLocaleText(locale: ContentLocale): Promise<LocaleText> 
     ...text,
     seeWings: {
       ...text.seeWings,
-      cues: [{ ...firstCue, eyebrow: text.hero.eyebrow, title: text.hero.headline }, ...restCues],
+      cues: [
+        {
+          ...firstCue,
+          eyebrow: text.hero.eyebrow,
+          title: text.hero.headline,
+          body: text.hero.subheadline.join(' ').trim(),
+        },
+        ...restCues,
+      ],
     },
   };
 }

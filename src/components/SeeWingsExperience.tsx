@@ -17,8 +17,8 @@ export type SeeWingsSection = {
   tags: string[];
 };
 
-/** The opening screen's copy (eyebrow, headline, line under it). */
-export type SeeWingsOpening = { eyebrow: string; title: string; body: string };
+/** The opening screen's copy. Hero's subheadline isn't here: it's cue 0's body (see getLocaleText). */
+export type SeeWingsOpening = { eyebrow: string; title: string };
 
 type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
 type NavLink = { id: string; label: string };
@@ -253,7 +253,6 @@ export function SeeWingsExperience({
       <SeeWingsSplash
         eyebrow={opening?.title ? opening.eyebrow : sections[0].eyebrow}
         title={opening?.title || sections[0].title}
-        body={opening?.title ? opening.body : sections[0].body}
         homeHref={homeHref}
         trackVh={trackVh}
         persist={persistentTopbar}
