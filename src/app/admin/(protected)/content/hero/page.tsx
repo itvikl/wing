@@ -7,8 +7,12 @@ export default async function HeroAdminPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-primary-dark">ראשי (Hero)</h1>
-      <p className="mt-2 text-neutral-muted">הבאנר הראשון שמופיע בכניסה לאתר.</p>
-      <HeroForm initial={{ he: content.text.he.hero, en: content.text.en.hero }} />
+      <p className="mt-2 text-neutral-muted">מסך הפתיחה: הלוגו, התגית והכותרת שמופיעים בכניסה לאתר, לפני שמתחילים לגלול.</p>
+      <HeroForm
+        initial={{ he: content.text.he.hero, en: content.text.en.hero }}
+        // The See Wings page saves both locales together, so one flag says it.
+        firstCueOwn={!!content.text.he.seeWings.firstCueOwn}
+      />
     </div>
   );
 }

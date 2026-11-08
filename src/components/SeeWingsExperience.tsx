@@ -17,7 +17,7 @@ export type SeeWingsSection = {
   tags: string[];
 };
 
-/** The opening screen's copy. Hero's subheadline isn't here: it's cue 0's body (see getLocaleText). */
+/** The opening screen's copy: Hero's eyebrow and headline. */
 export type SeeWingsOpening = { eyebrow: string; title: string };
 
 type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };

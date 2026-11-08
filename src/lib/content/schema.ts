@@ -71,6 +71,9 @@ export const seeWingsTextSchema = z.object({
   ctaPrimary: z.string(),
   ctaSecondary: z.string(),
   cues: z.array(cueSchema),
+  // Set once the first cue has been saved as copy of its own. Until then it
+  // echoes Hero (see getLocaleText), as it did before it could be edited.
+  firstCueOwn: z.boolean().optional(),
 });
 
 export const mapTextSchema = z.object({

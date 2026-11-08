@@ -33,7 +33,7 @@ type CueRow = { he: Cue; en: Cue };
 type Data = {
   cta: Record<ContentLocale, { ctaPrimary: string; ctaSecondary: string }>;
   scenes: SceneRow[];
-  /** Cues after the first — the first cue is Hero's eyebrow/headline and isn't editable here. */
+  /** Every cue, the first included: it's a caption of its own, apart from Hero's opening screen. */
   cues: CueRow[];
   connectors: (string | null)[];
 };
@@ -97,13 +97,10 @@ function toSceneRows(he: SectionText[], en: SectionText[], media: SeeWingsMediaS
 }
 
 function toCueRows(he: Cue[], en: Cue[]): CueRow[] {
-  // Index 0 is Hero-derived and excluded — see saveSeeWingsText call below.
-  const heRest = he.slice(1);
-  const enRest = en.slice(1);
-  const length = Math.max(heRest.length, enRest.length);
+  const length = Math.max(he.length, en.length);
   return Array.from({ length }, (_, i) => ({
-    he: { ...BLANK_CUE, ...heRest[i] },
-    en: { ...BLANK_CUE, ...enRest[i] },
+    he: { ...BLANK_CUE, ...he[i] },
+    en: { ...BLANK_CUE, ...en[i] },
   }));
 }
 
@@ -113,7 +110,6 @@ export function SeeWingsForm({
   initial: {
     he: SeeWingsText;
     en: SeeWingsText;
-    hero: Record<ContentLocale, { eyebrow: string; headline: string }>;
     media: { sections: SeeWingsMediaSection[]; connectors: (string | null)[] };
   };
 }) {
@@ -137,15 +133,18 @@ export function SeeWingsForm({
 
     await saveSeeWingsText('he', {
       sections: heSections,
-      cues: [{ eyebrow: initial.hero.he.eyebrow, title: initial.hero.he.headline, body: '', extra: [] }, ...data.cues.map((c) => c.he)],
+      cues: data.cues.map((c) => c.he),
       ctaPrimary: data.cta.he.ctaPrimary,
       ctaSecondary: data.cta.he.ctaSecondary,
+      // The first cue now saves as its own copy instead of echoing Hero.
+      firstCueOwn: true,
     });
     await saveSeeWingsText('en', {
       sections: enSections,
-      cues: [{ eyebrow: initial.hero.en.eyebrow, title: initial.hero.en.headline, body: '', extra: [] }, ...data.cues.map((c) => c.en)],
+      cues: data.cues.map((c) => c.en),
       ctaPrimary: data.cta.en.ctaPrimary,
       ctaSecondary: data.cta.en.ctaSecondary,
+      firstCueOwn: true,
     });
     await saveSeeWingsMedia(
       data.scenes.map((s) => ({
@@ -276,13 +275,12 @@ export function SeeWingsForm({
 
         <div className="mt-4 rounded-xl border border-dashed border-neutral-200 bg-neutral-100 p-4">
           <p className="text-xs text-neutral-muted">
-            הכותרת הראשונה מגיעה אוטומטית מעמוד{' '}
+            הכותרת הראשונה ברשימה היא התחנה הראשונה, שמופיעה מיד כשמתחילים לגלול. את מסך הפתיחה עצמו (הלוגו, התגית
+            והכותרת לפני הגלילה) עורכים בעמוד{' '}
             <Link href="/admin/content/hero" className="font-medium text-accent-dark underline">
               ראשי (Hero)
-            </Link>{' '}
-            — תגית: <span className="font-medium text-primary-dark">{initial.hero.he.eyebrow || '—'}</span>, כותרת:{' '}
-            <span className="font-medium text-primary-dark">{initial.hero.he.headline || '—'}</span>, והטקסט שלה הוא
-            תת-הכותרת מאותו עמוד.
+            </Link>
+            .
           </p>
         </div>
 
@@ -356,10 +354,6 @@ export function SeeWingsForm({
         fields={fields}
         preview={
           <SeeWingsPreview
-            heroCue={{
-              he: { eyebrow: initial.hero.he.eyebrow, title: initial.hero.he.headline },
-              en: { eyebrow: initial.hero.en.eyebrow, title: initial.hero.en.headline },
-            }}
             scenes={data.scenes}
             cues={data.cues}
             cta={data.cta}

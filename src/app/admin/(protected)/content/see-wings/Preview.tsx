@@ -14,18 +14,16 @@ type CueText = { eyebrow: string; title: string; body?: string; extra?: { label:
 type CueRow = { he: CueText; en: CueText };
 
 export function SeeWingsPreview({
-  heroCue,
   scenes,
   cues,
   cta,
 }: {
-  heroCue: Record<ContentLocale, CueText>;
   scenes: SceneRow[];
   cues: CueRow[];
   cta: Record<ContentLocale, { ctaPrimary: string; ctaSecondary: string }>;
 }) {
   const [locale, setLocale] = usePreviewLocale();
-  const allCues = [heroCue[locale], ...cues.map((c) => c[locale])];
+  const allCues = cues.map((c) => c[locale]);
 
   return (
     <div>

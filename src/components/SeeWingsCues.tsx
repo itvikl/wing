@@ -8,11 +8,11 @@ type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: str
 
 const FADE = 0.22;
 // Mirrors SeeWingsSplash's own text fade-out window (0.15 * one viewport height).
-// cue[0] is forced to echo the hero splash's exact copy (see getLocaleText's
-// cues[0] override in content/store.ts), so without this offset its fade-in
-// starts at the same instant the splash starts fading out — the two identical
-// captions render on top of each other mid-scroll, most visible on short
-// mobile viewports where their vertical positions sit close together.
+// Without this offset cue[0]'s fade-in starts at the same instant the splash
+// starts fading out, and the two captions render on top of each other
+// mid-scroll, most visible on short mobile viewports where their vertical
+// positions sit close together. (cue[0] can also echo the splash's copy
+// outright; see getLocaleText's cues[0] fallback in content/store.ts.)
 const SPLASH_CLEAR_VH = 0.15;
 
 function smooth(x: number) {

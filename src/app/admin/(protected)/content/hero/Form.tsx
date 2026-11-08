@@ -2,7 +2,6 @@
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
 import { TextField } from '@/components/admin/fields';
-import { ParagraphListField } from '@/components/admin/ParagraphListField';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
 import { useSectionForm } from '@/components/admin/useSectionForm';
@@ -12,7 +11,7 @@ import type { ContentLocale } from '@/lib/content/schema';
 
 type Data = Record<ContentLocale, HeroText>;
 
-export function HeroForm({ initial }: { initial: Data }) {
+export function HeroForm({ initial, firstCueOwn }: { initial: Data; firstCueOwn: boolean }) {
   async function save(data: Data) {
     await saveHero('he', data.he);
     await saveHero('en', data.en);
@@ -23,23 +22,20 @@ export function HeroForm({ initial }: { initial: Data }) {
     const value = data[locale];
     const update = (patch: Partial<HeroText>) =>
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
+    // Only what the opening screen shows. subheadline and cta stay in the
+    // saved data untouched: neither renders anywhere (subheadline only fed the
+    // flight's first caption, which is edited on the See Wings page now).
     return (
       <div className="grid gap-4">
         <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} onChange={(v) => update({ eyebrow: v })} />
         <TextField label="כותרת ראשית" value={value.headline} onChange={(v) => update({ headline: v })} />
-        <ParagraphListField
-          label="תת-כותרת"
-          values={value.subheadline}
-          onChange={(subheadline) => update({ subheadline })}
-        />
-        <TextField label="טקסט כפתור" value={value.cta} onChange={(v) => update({ cta: v })} />
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="mt-8">
-      <SectionLayout fields={<LocaleTabs he={fields('he')} en={fields('en')} />} preview={<HeroPreview data={data} />} />
+      <SectionLayout fields={<LocaleTabs he={fields('he')} en={fields('en')} />} preview={<HeroPreview data={data} firstCueOwn={firstCueOwn} />} />
       <SaveBar saving={saving} saved={saved} error={error} />
     </form>
   );

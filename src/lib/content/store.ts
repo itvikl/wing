@@ -57,13 +57,14 @@ export async function getLocaleText(locale: ContentLocale): Promise<LocaleText> 
   const content = await getContent();
   const text = content.text[locale];
 
-  // The flight experience's first caption (cues[0]) echoes Hero's eyebrow and
-  // headline, and is the only place Hero's subheadline renders: the opening
-  // screen shows just the logo, eyebrow and headline, and the line under them
-  // waits for the flight's first stop. Enforced here so every reader (site +
-  // admin previews) sees one truth.
+  // Hero is the opening screen (logo, eyebrow, headline). The flight's first
+  // caption (cues[0]) used to be bound to it: Hero's eyebrow and headline
+  // again, with Hero's subheadline as its body. It's edited as a caption of
+  // its own now, but content saved before that still has a placeholder there,
+  // so until the See Wings page has saved it once (firstCueOwn) it keeps
+  // echoing Hero. Enforced here so every reader (site + admin) sees one truth.
   const [firstCue, ...restCues] = text.seeWings.cues;
-  if (!firstCue) return text;
+  if (!firstCue || text.seeWings.firstCueOwn) return text;
 
   return {
     ...text,
