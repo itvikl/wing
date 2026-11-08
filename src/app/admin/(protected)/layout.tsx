@@ -1,6 +1,7 @@
 import { requireAdmin } from '@/lib/auth/session';
 import { AdminNav } from '@/components/admin/AdminNav';
 import { LogoutButton } from '@/components/admin/LogoutButton';
+import { AdminLocaleProvider } from '@/components/admin/AdminLocale';
 
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdmin();
@@ -15,7 +16,10 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
           <LogoutButton />
         </div>
       </aside>
-      <main className="flex-1 p-6 md:p-10">{children}</main>
+      <main className="flex-1 p-6 md:p-10">
+        {/* One editing language across every section (see AdminLocale). */}
+        <AdminLocaleProvider>{children}</AdminLocaleProvider>
+      </main>
     </div>
   );
 }

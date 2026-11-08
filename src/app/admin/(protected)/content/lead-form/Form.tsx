@@ -24,15 +24,15 @@ export function LeadFormForm({ initial }: { initial: Data }) {
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת" value={value.title} onChange={(v) => update({ title: v })} />
-        <TextField label="שדה: שם מלא" value={value.name} onChange={(v) => update({ name: v })} />
-        <TextField label="שדה: טלפון" value={value.phone} onChange={(v) => update({ phone: v })} />
-        <TextField label="שדה: אימייל" value={value.email} onChange={(v) => update({ email: v })} />
-        <TextField label="שדה: הודעה" value={value.message} onChange={(v) => update({ message: v })} />
-        <TextField label="כפתור שליחה" value={value.submit} onChange={(v) => update({ submit: v })} />
-        <TextField label="הודעת הצלחה" value={value.success} onChange={(v) => update({ success: v })} />
-        <TextField label="הודעת שגיאה" value={value.error} onChange={(v) => update({ error: v })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
+        <TextField label="שדה: שם מלא" value={value.name} jump="name" onChange={(v) => update({ name: v })} />
+        <TextField label="שדה: טלפון" value={value.phone} jump="phone" onChange={(v) => update({ phone: v })} />
+        <TextField label="שדה: אימייל" value={value.email} jump="email" onChange={(v) => update({ email: v })} />
+        <TextField label="שדה: הודעה" value={value.message} jump="message" onChange={(v) => update({ message: v })} />
+        <TextField label="כפתור שליחה" value={value.submit} jump="submit" onChange={(v) => update({ submit: v })} />
+        <TextField label="הודעת הצלחה" value={value.success} jump="success" onChange={(v) => update({ success: v })} />
+        <TextField label="הודעת שגיאה" value={value.error} jump="error" onChange={(v) => update({ error: v })} />
       </div>
     );
   }

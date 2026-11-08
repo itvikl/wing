@@ -8,11 +8,14 @@ export function VideoUploadField({
   folder,
   value,
   onChange,
+  jump,
 }: {
   label: string;
   folder: string;
   value: string;
   onChange: (url: string) => void;
+  /** Target id for a preview's Jump (see AdminLocale). */
+  jump?: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [progressNote, setProgressNote] = useState<string | null>(null);
@@ -37,7 +40,7 @@ export function VideoUploadField({
   }
 
   return (
-    <div>
+    <div className="rounded-lg" data-jump-target={jump}>
       <span className="block text-sm font-medium text-primary-dark">{label}</span>
       <div className="mt-2 flex items-center gap-4">
         {value ? (

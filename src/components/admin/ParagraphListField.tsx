@@ -1,11 +1,14 @@
+/** `jump` targets the whole list; each paragraph is also `${jump}.${index}`. */
 export function ParagraphListField({
   label,
   values,
   onChange,
+  jump,
 }: {
   label: string;
   values: string[];
   onChange: (values: string[]) => void;
+  jump?: string;
 }) {
   function update(index: number, value: string) {
     onChange(values.map((v, i) => (i === index ? value : v)));
@@ -24,11 +27,11 @@ export function ParagraphListField({
   }
 
   return (
-    <div>
+    <div className="rounded-lg" data-jump-target={jump}>
       <span className="block text-sm font-medium text-primary-dark">{label}</span>
       <div className="mt-2 grid gap-3">
         {values.map((value, index) => (
-          <div key={index} className="flex gap-2">
+          <div key={index} className="flex gap-2 rounded-lg" data-jump-target={jump ? `${jump}.${index}` : undefined}>
             <textarea
               value={value}
               rows={2}

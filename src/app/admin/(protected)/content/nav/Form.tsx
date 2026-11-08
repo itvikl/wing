@@ -24,12 +24,12 @@ export function NavForm({ initial }: { initial: Data }) {
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="אודות" value={value.about} onChange={(v) => update({ about: v })} />
-        <TextField label="למה Wings" value={value.advantages} onChange={(v) => update({ advantages: v })} />
-        <TextField label="הזדמנויות" value={value.projects} onChange={(v) => update({ projects: v })} />
-        <TextField label="הצוות" value={value.team} onChange={(v) => update({ team: v })} />
-        <TextField label="צור קשר" value={value.contact} onChange={(v) => update({ contact: v })} />
-        <TextField label="כפתור קריאה לפעולה" value={value.cta} onChange={(v) => update({ cta: v })} />
+        <TextField label="אודות" value={value.about} jump="about" onChange={(v) => update({ about: v })} />
+        <TextField label="למה Wings" value={value.advantages} jump="advantages" onChange={(v) => update({ advantages: v })} />
+        <TextField label="הזדמנויות" value={value.projects} jump="projects" onChange={(v) => update({ projects: v })} />
+        <TextField label="הצוות" value={value.team} jump="team" onChange={(v) => update({ team: v })} />
+        <TextField label="צור קשר" value={value.contact} jump="contact" onChange={(v) => update({ contact: v })} />
+        <TextField label="כפתור קריאה לפעולה" value={value.cta} jump="cta" onChange={(v) => update({ cta: v })} />
       </div>
     );
   }

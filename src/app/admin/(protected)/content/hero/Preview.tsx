@@ -1,5 +1,6 @@
 'use client';
 
+import { Jump } from '@/components/admin/AdminLocale';
 import { PreviewLocaleToggle, usePreviewLocale } from '@/components/admin/PreviewLocaleToggle';
 import { PreviewNote } from '@/components/admin/SectionLayout';
 import type { HeroText } from './actions';
@@ -19,10 +20,10 @@ export function HeroPreview({ data, firstCueOwn }: { data: Record<ContentLocale,
         <div className="relative flex flex-col items-center px-6 py-10 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/logo.png" alt="" className="h-14 w-auto" />
-          <span className="mt-4 font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
+          <Jump to="eyebrow" as="span" className="mt-4 font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
             {value.eyebrow || '—'}
-          </span>
-          <h2 className="mt-2 font-display text-2xl font-bold leading-tight text-neutral-100">{value.headline || '—'}</h2>
+          </Jump>
+          <Jump to="headline" as="h2" className="mt-2 font-display text-2xl font-bold leading-tight text-neutral-100">{value.headline || '—'}</Jump>
         </div>
       </div>
       <PreviewNote>

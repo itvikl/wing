@@ -57,8 +57,8 @@ export function TeamForm({
       setData((prev) => ({ ...prev, labels: { ...prev.labels, [locale]: { ...prev.labels[locale], ...patch } } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת" value={value.title} onChange={(v) => update({ title: v })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
       </div>
     );
   }
@@ -78,26 +78,26 @@ export function TeamForm({
           onChange={(rows) => setData((prev) => ({ ...prev, rows }))}
           newItem={() => ({ he: { ...BLANK_MEMBER }, en: { ...BLANK_MEMBER }, image: null })}
           addLabel="הוספת איש צוות"
-          renderItem={(row, updateRow) => (
+          renderItem={(row, updateRow, index) => (
             <div className="grid gap-4">
               <LocaleTabs
                 he={
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <TextField label="שם מלא" value={row.he.name} onChange={(v) => updateRow({ he: { ...row.he, name: v } })} />
-                    <TextField label="ראשי תיבות (לעיגול)" value={row.he.initials} onChange={(v) => updateRow({ he: { ...row.he, initials: v } })} />
-                    <TextField label="תפקיד" value={row.he.role} onChange={(v) => updateRow({ he: { ...row.he, role: v } })} />
+                    <TextField label="שם מלא" value={row.he.name} jump={`rows.${index}.name`} onChange={(v) => updateRow({ he: { ...row.he, name: v } })} />
+                    <TextField label="ראשי תיבות (לעיגול)" value={row.he.initials} jump={`rows.${index}.initials`} onChange={(v) => updateRow({ he: { ...row.he, initials: v } })} />
+                    <TextField label="תפקיד" value={row.he.role} jump={`rows.${index}.role`} onChange={(v) => updateRow({ he: { ...row.he, role: v } })} />
                     <div className="sm:col-span-2">
-                      <TextAreaField label="ביוגרפיה" value={row.he.bio} onChange={(v) => updateRow({ he: { ...row.he, bio: v } })} />
+                      <TextAreaField label="ביוגרפיה" value={row.he.bio} jump={`rows.${index}.bio`} onChange={(v) => updateRow({ he: { ...row.he, bio: v } })} />
                     </div>
                   </div>
                 }
                 en={
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <TextField label="Full name" value={row.en.name} onChange={(v) => updateRow({ en: { ...row.en, name: v } })} />
-                    <TextField label="Initials" value={row.en.initials} onChange={(v) => updateRow({ en: { ...row.en, initials: v } })} />
-                    <TextField label="Role" value={row.en.role} onChange={(v) => updateRow({ en: { ...row.en, role: v } })} />
+                    <TextField label="Full name" value={row.en.name} jump={`rows.${index}.name`} onChange={(v) => updateRow({ en: { ...row.en, name: v } })} />
+                    <TextField label="Initials" value={row.en.initials} jump={`rows.${index}.initials`} onChange={(v) => updateRow({ en: { ...row.en, initials: v } })} />
+                    <TextField label="Role" value={row.en.role} jump={`rows.${index}.role`} onChange={(v) => updateRow({ en: { ...row.en, role: v } })} />
                     <div className="sm:col-span-2">
-                      <TextAreaField label="Bio" value={row.en.bio} onChange={(v) => updateRow({ en: { ...row.en, bio: v } })} />
+                      <TextAreaField label="Bio" value={row.en.bio} jump={`rows.${index}.bio`} onChange={(v) => updateRow({ en: { ...row.en, bio: v } })} />
                     </div>
                   </div>
                 }
@@ -106,6 +106,7 @@ export function TeamForm({
                 label="תמונת פרופיל"
                 folder="team"
                 value={row.image ?? ''}
+                jump={`rows.${index}.image`}
                 onChange={(url) => updateRow({ image: url || null })}
               />
             </div>

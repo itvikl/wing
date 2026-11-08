@@ -25,9 +25,9 @@ export function AboutForm({ initial }: { initial: Data }) {
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
     return (
       <div className="grid gap-4">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת" value={value.title} onChange={(v) => update({ title: v })} />
-        <ParagraphListField label="טקסט" values={value.body} onChange={(body) => update({ body })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
+        <ParagraphListField label="טקסט" values={value.body} jump="body" onChange={(body) => update({ body })} />
       </div>
     );
   }

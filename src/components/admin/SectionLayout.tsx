@@ -1,9 +1,22 @@
 import type { ReactNode } from 'react';
+import { AdminLocaleToggle } from './AdminLocale';
 
-export function SectionLayout({ fields, preview }: { fields: ReactNode; preview: ReactNode }) {
+export function SectionLayout({
+  fields,
+  preview,
+  languages = true,
+}: {
+  fields: ReactNode;
+  preview: ReactNode;
+  /** false for a section with nothing per language (the logo), so no switch is shown. */
+  languages?: boolean;
+}) {
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
-      <div>{fields}</div>
+      <div>
+        {languages && <AdminLocaleToggle />}
+        {fields}
+      </div>
       <div className="lg:sticky lg:top-6 lg:self-start">
         <div className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-muted">תצוגה מקדימה באתר</div>
         <div className="overflow-hidden rounded-2xl border border-neutral-200 shadow-sm">{preview}</div>

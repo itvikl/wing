@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import type { ContentLocale } from '@/lib/content/schema';
+import { useAdminLocale } from './AdminLocale';
 
+/** The preview follows the screen's editing language (see AdminLocale). */
 export function usePreviewLocale() {
-  return useState<ContentLocale>('he');
+  const { locale, setLocale } = useAdminLocale();
+  return [locale, setLocale] as const;
 }
 
 export function PreviewLocaleToggle({

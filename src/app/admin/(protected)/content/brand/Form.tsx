@@ -13,7 +13,8 @@ export function BrandForm({ initialLogo }: { initialLogo: string }) {
   return (
     <form onSubmit={handleSubmit} className="mt-8">
       <SectionLayout
-        fields={<ImageUploadField label="לוגו" folder="brand" value={data} onChange={setData} />}
+        languages={false}
+        fields={<ImageUploadField label="לוגו" folder="brand" jump="logo" value={data} onChange={setData} />}
         preview={<BrandPreview logo={data} />}
       />
       <SaveBar saving={saving} saved={saved} error={error} />

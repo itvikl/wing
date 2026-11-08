@@ -24,9 +24,9 @@ export function FooterForm({ initial }: { initial: Data }) {
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="טקסט זכויות יוצרים" value={value.rights} onChange={(v) => update({ rights: v })} />
-        <TextField label="תווית 'טלפון'" value={value.phone} onChange={(v) => update({ phone: v })} />
-        <TextField label="תווית 'וואטסאפ'" value={value.whatsapp} onChange={(v) => update({ whatsapp: v })} />
+        <TextField label="טקסט זכויות יוצרים" value={value.rights} jump="rights" onChange={(v) => update({ rights: v })} />
+        <TextField label="תווית 'טלפון'" value={value.phone} jump="phone" onChange={(v) => update({ phone: v })} />
+        <TextField label="תווית 'וואטסאפ'" value={value.whatsapp} jump="whatsapp" onChange={(v) => update({ whatsapp: v })} />
       </div>
     );
   }
@@ -50,22 +50,22 @@ export function FooterForm({ initial }: { initial: Data }) {
             <div className="mt-8 grid gap-4 border-t border-neutral-200 pt-6 sm:grid-cols-2">
               <TextField
                 label="מספר טלפון (tel:)"
-                value={links.phoneNumber}
+                value={links.phoneNumber} jump="phoneNumber"
                 onChange={(v) => updateLink({ phoneNumber: v })}
               />
               <TextField
                 label="קישור וואטסאפ (https://wa.me/...)"
-                value={links.whatsappLink}
+                value={links.whatsappLink} jump="whatsappLink"
                 onChange={(v) => updateLink({ whatsappLink: v })}
               />
               <TextField
                 label="קישור פייסבוק"
-                value={links.facebookUrl}
+                value={links.facebookUrl} jump="facebookUrl"
                 onChange={(v) => updateLink({ facebookUrl: v })}
               />
               <TextField
                 label="קישור אינסטגרם"
-                value={links.instagramUrl}
+                value={links.instagramUrl} jump="instagramUrl"
                 onChange={(v) => updateLink({ instagramUrl: v })}
               />
             </div>

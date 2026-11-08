@@ -178,8 +178,8 @@ export function SeeWingsForm({
       setData((prev) => ({ ...prev, cta: { ...prev.cta, [locale]: { ...prev.cta[locale], ...patch } } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="כפתור ראשי" value={value.ctaPrimary} onChange={(v) => update({ ctaPrimary: v })} />
-        <TextField label="כפתור משני" value={value.ctaSecondary} onChange={(v) => update({ ctaSecondary: v })} />
+        <TextField label="כפתור ראשי" value={value.ctaPrimary} jump="ctaPrimary" onChange={(v) => update({ ctaPrimary: v })} />
+        <TextField label="כפתור משני" value={value.ctaSecondary} jump="ctaSecondary" onChange={(v) => update({ ctaSecondary: v })} />
       </div>
     );
   }
@@ -214,26 +214,26 @@ export function SeeWingsForm({
             })}
             addLabel="הוספת סצנה"
             locked
-            renderItem={(scene, updateScene) => (
+            renderItem={(scene, updateScene, index) => (
               <div className="grid gap-4">
                 <p className="text-xs text-neutral-muted">מזהה סצנה: {scene.id}</p>
                 <LocaleTabs
                   he={
                     <div className="grid gap-3">
-                      <TextField label="תווית ניווט" value={scene.he.label} onChange={(v) => updateScene({ he: { ...scene.he, label: v } })} />
-                      <TextField label="תגית עליונה" value={scene.he.eyebrow} onChange={(v) => updateScene({ he: { ...scene.he, eyebrow: v } })} />
-                      <TextField label="כותרת" value={scene.he.title} onChange={(v) => updateScene({ he: { ...scene.he, title: v } })} />
-                      <TextAreaField label="טקסט" value={scene.he.body} onChange={(v) => updateScene({ he: { ...scene.he, body: v } })} />
-                      <TextField label="תגיות (מופרדות בפסיק)" value={scene.tagsHe} onChange={(v) => updateScene({ tagsHe: v })} />
+                      <TextField label="תווית ניווט" value={scene.he.label} jump={`scenes.${index}.label`} onChange={(v) => updateScene({ he: { ...scene.he, label: v } })} />
+                      <TextField label="תגית עליונה" value={scene.he.eyebrow} jump={`scenes.${index}.eyebrow`} onChange={(v) => updateScene({ he: { ...scene.he, eyebrow: v } })} />
+                      <TextField label="כותרת" value={scene.he.title} jump={`scenes.${index}.title`} onChange={(v) => updateScene({ he: { ...scene.he, title: v } })} />
+                      <TextAreaField label="טקסט" value={scene.he.body} jump={`scenes.${index}.body`} onChange={(v) => updateScene({ he: { ...scene.he, body: v } })} />
+                      <TextField label="תגיות (מופרדות בפסיק)" value={scene.tagsHe} jump={`scenes.${index}.tags`} onChange={(v) => updateScene({ tagsHe: v })} />
                     </div>
                   }
                   en={
                     <div className="grid gap-3">
-                      <TextField label="Nav label" value={scene.en.label} onChange={(v) => updateScene({ en: { ...scene.en, label: v } })} />
-                      <TextField label="Eyebrow" value={scene.en.eyebrow} onChange={(v) => updateScene({ en: { ...scene.en, eyebrow: v } })} />
-                      <TextField label="Title" value={scene.en.title} onChange={(v) => updateScene({ en: { ...scene.en, title: v } })} />
-                      <TextAreaField label="Body" value={scene.en.body} onChange={(v) => updateScene({ en: { ...scene.en, body: v } })} />
-                      <TextField label="Tags (comma-separated)" value={scene.tagsEn} onChange={(v) => updateScene({ tagsEn: v })} />
+                      <TextField label="Nav label" value={scene.en.label} jump={`scenes.${index}.label`} onChange={(v) => updateScene({ en: { ...scene.en, label: v } })} />
+                      <TextField label="Eyebrow" value={scene.en.eyebrow} jump={`scenes.${index}.eyebrow`} onChange={(v) => updateScene({ en: { ...scene.en, eyebrow: v } })} />
+                      <TextField label="Title" value={scene.en.title} jump={`scenes.${index}.title`} onChange={(v) => updateScene({ en: { ...scene.en, title: v } })} />
+                      <TextAreaField label="Body" value={scene.en.body} jump={`scenes.${index}.body`} onChange={(v) => updateScene({ en: { ...scene.en, body: v } })} />
+                      <TextField label="Tags (comma-separated)" value={scene.tagsEn} jump={`scenes.${index}.tags`} onChange={(v) => updateScene({ tagsEn: v })} />
                     </div>
                   }
                 />
@@ -290,13 +290,13 @@ export function SeeWingsForm({
             onChange={(cues) => setData((prev) => ({ ...prev, cues }))}
             newItem={() => ({ he: { ...BLANK_CUE }, en: { ...BLANK_CUE } })}
             addLabel="הוספת כותרת"
-            renderItem={(cue, updateCue) => (
+            renderItem={(cue, updateCue, index) => (
               <LocaleTabs
                 he={
                   <div className="grid gap-3">
-                    <TextField label="תגית עליונה" value={cue.he.eyebrow} onChange={(v) => updateCue({ he: { ...cue.he, eyebrow: v } })} />
-                    <TextField label="כותרת" value={cue.he.title} onChange={(v) => updateCue({ he: { ...cue.he, title: v } })} />
-                    <TextAreaField label="טקסט" value={cue.he.body} onChange={(v) => updateCue({ he: { ...cue.he, body: v } })} />
+                    <TextField label="תגית עליונה" value={cue.he.eyebrow} jump={`cues.${index}.eyebrow`} onChange={(v) => updateCue({ he: { ...cue.he, eyebrow: v } })} />
+                    <TextField label="כותרת" value={cue.he.title} jump={`cues.${index}.title`} onChange={(v) => updateCue({ he: { ...cue.he, title: v } })} />
+                    <TextAreaField label="טקסט" value={cue.he.body} jump={`cues.${index}.body`} onChange={(v) => updateCue({ he: { ...cue.he, body: v } })} />
                     <div>
                       <span className="text-sm font-medium text-primary-dark">שדות נוספים</span>
                       <div className="mt-1.5">
@@ -305,10 +305,10 @@ export function SeeWingsForm({
                           onChange={(extra) => updateCue({ he: { ...cue.he, extra } })}
                           newItem={() => ({ ...BLANK_CUE_FIELD })}
                           addLabel="הוספת שדה"
-                          renderItem={(field, updateField) => (
+                          renderItem={(field, updateField, fieldIndex) => (
                             <div className="grid gap-3 sm:grid-cols-2">
-                              <TextField label="שם השדה" value={field.label} onChange={(v) => updateField({ label: v })} />
-                              <TextField label="ערך" value={field.value} onChange={(v) => updateField({ value: v })} />
+                              <TextField label="שם השדה" value={field.label} jump={`cues.${index}.extra.${fieldIndex}.label`} onChange={(v) => updateField({ label: v })} />
+                              <TextField label="ערך" value={field.value} jump={`cues.${index}.extra.${fieldIndex}.value`} onChange={(v) => updateField({ value: v })} />
                             </div>
                           )}
                         />
@@ -318,9 +318,9 @@ export function SeeWingsForm({
                 }
                 en={
                   <div className="grid gap-3">
-                    <TextField label="Eyebrow" value={cue.en.eyebrow} onChange={(v) => updateCue({ en: { ...cue.en, eyebrow: v } })} />
-                    <TextField label="Title" value={cue.en.title} onChange={(v) => updateCue({ en: { ...cue.en, title: v } })} />
-                    <TextAreaField label="Body" value={cue.en.body} onChange={(v) => updateCue({ en: { ...cue.en, body: v } })} />
+                    <TextField label="Eyebrow" value={cue.en.eyebrow} jump={`cues.${index}.eyebrow`} onChange={(v) => updateCue({ en: { ...cue.en, eyebrow: v } })} />
+                    <TextField label="Title" value={cue.en.title} jump={`cues.${index}.title`} onChange={(v) => updateCue({ en: { ...cue.en, title: v } })} />
+                    <TextAreaField label="Body" value={cue.en.body} jump={`cues.${index}.body`} onChange={(v) => updateCue({ en: { ...cue.en, body: v } })} />
                     <div>
                       <span className="text-sm font-medium text-primary-dark">Extra fields</span>
                       <div className="mt-1.5">
@@ -329,10 +329,10 @@ export function SeeWingsForm({
                           onChange={(extra) => updateCue({ en: { ...cue.en, extra } })}
                           newItem={() => ({ ...BLANK_CUE_FIELD })}
                           addLabel="Add field"
-                          renderItem={(field, updateField) => (
+                          renderItem={(field, updateField, fieldIndex) => (
                             <div className="grid gap-3 sm:grid-cols-2">
-                              <TextField label="Field name" value={field.label} onChange={(v) => updateField({ label: v })} />
-                              <TextField label="Value" value={field.value} onChange={(v) => updateField({ value: v })} />
+                              <TextField label="Field name" value={field.label} jump={`cues.${index}.extra.${fieldIndex}.label`} onChange={(v) => updateField({ label: v })} />
+                              <TextField label="Value" value={field.value} jump={`cues.${index}.extra.${fieldIndex}.value`} onChange={(v) => updateField({ value: v })} />
                             </div>
                           )}
                         />

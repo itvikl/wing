@@ -1,14 +1,18 @@
+// `jump` marks the field as the target a preview element jumps to (see
+// AdminLocale's Jump): unique within the screen, the same in both languages.
 export function TextField({
   label,
   value,
   onChange,
+  jump,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  jump?: string;
 }) {
   return (
-    <label className="grid gap-1.5 text-sm">
+    <label className="grid gap-1.5 rounded-lg text-sm" data-jump-target={jump}>
       <span className="font-medium text-primary-dark">{label}</span>
       <input
         type="text"
@@ -25,14 +29,16 @@ export function TextAreaField({
   value,
   onChange,
   rows = 3,
+  jump,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   rows?: number;
+  jump?: string;
 }) {
   return (
-    <label className="grid gap-1.5 text-sm">
+    <label className="grid gap-1.5 rounded-lg text-sm" data-jump-target={jump}>
       <span className="font-medium text-primary-dark">{label}</span>
       <textarea
         value={value}

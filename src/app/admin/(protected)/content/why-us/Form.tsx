@@ -28,18 +28,18 @@ export function WhyUsForm({ initial }: { initial: Data }) {
     return (
       <div className="grid gap-6">
         <div className="grid gap-4">
-          <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} onChange={(v) => update({ eyebrow: v })} />
-          <TextField label="כותרת" value={value.title} onChange={(v) => update({ title: v })} />
+          <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
+          <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
         </div>
         <RepeatableList<Item>
           items={value.items}
           onChange={(items) => update({ items })}
           newItem={() => ({ title: '', body: '' })}
           addLabel="הוספת יתרון"
-          renderItem={(item, updateItem) => (
+          renderItem={(item, updateItem, index) => (
             <div className="grid gap-3">
-              <TextField label="כותרת" value={item.title} onChange={(v) => updateItem({ title: v })} />
-              <TextAreaField label="טקסט" value={item.body} onChange={(v) => updateItem({ body: v })} />
+              <TextField label="כותרת" value={item.title} jump={`items.${index}.title`} onChange={(v) => updateItem({ title: v })} />
+              <TextAreaField label="טקסט" value={item.body} jump={`items.${index}.body`} onChange={(v) => updateItem({ body: v })} />
             </div>
           )}
         />

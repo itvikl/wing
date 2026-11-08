@@ -143,3 +143,20 @@
     mask-image: none;
   }
 }
+
+/* Admin: the field a preview click jumped to (AdminLocale's jumpToField)
+   glows gold for a moment so the eye lands on it. */
+.admin-jump-flash {
+  animation: admin-jump-flash 1.6s ease-out;
+}
+@keyframes admin-jump-flash {
+  0%,
+  35% {
+    box-shadow: 0 0 0 3px rgba(181, 130, 56, 0.55);
+    background-color: rgba(255, 188, 125, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(181, 130, 56, 0);
+    background-color: rgba(255, 188, 125, 0);
+  }
+}

@@ -1,20 +1,28 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { useAdminLocale } from './AdminLocale';
 
+/**
+ * Both languages' fields, showing the one being edited. Inside the admin the
+ * language is screen-wide (AdminLocaleToggle) and these tabs aren't drawn;
+ * they only appear where there's no shared switch.
+ */
 export function LocaleTabs({ en, he }: { en: ReactNode; he: ReactNode }) {
-  const [active, setActive] = useState<'en' | 'he'>('he');
+  const { locale: active, setLocale: setActive, shared } = useAdminLocale();
 
   return (
     <div>
-      <div className="mb-4 flex gap-2">
-        <TabButton active={active === 'he'} onClick={() => setActive('he')} label="עברית" />
-        <TabButton active={active === 'en'} onClick={() => setActive('en')} label="English" />
-      </div>
-      <div dir="rtl" hidden={active !== 'he'}>
+      {!shared && (
+        <div className="mb-4 flex gap-2">
+          <TabButton active={active === 'he'} onClick={() => setActive('he')} label="עברית" />
+          <TabButton active={active === 'en'} onClick={() => setActive('en')} label="English" />
+        </div>
+      )}
+      <div dir="rtl" data-locale="he" hidden={active !== 'he'}>
         {he}
       </div>
-      <div dir="ltr" hidden={active !== 'en'}>
+      <div dir="ltr" data-locale="en" hidden={active !== 'en'}>
         {en}
       </div>
     </div>
