@@ -82,7 +82,16 @@ export const CUE_BEATS_S = [0, 4.1, 8.8, 12.3, 15];
 // start around 90% down the frame, and 0.90 * 1.12 ≈ 1.0 pushes that band
 // just past the bottom edge while the sign (~85% down) stays in frame.
 // Re-derive both the window and scale if the clip is ever re-rendered.
-export const BOULEVARD_ZOOM = { from: 2.3, to: 6.0, scale: 1.12 };
+//
+// rampIn/rampOut: eased over 1.5s and 1.8s of footage instead of the
+// engine's default 0.5. At 0.5 each end landed in ~20 frames of a step and
+// read as the screen jolting, worst on the release, which falls on the
+// facade climb: a top-anchored zoom-out lifts the picture while the camera
+// climbs, against the camera. The zoom-in now starts in the alley (still
+// clear of the 0s opening frame, which has to match the poster unzoomed),
+// riding the camera's own push forward; the release spreads over the climb,
+// which has no stop to land on.
+export const BOULEVARD_ZOOM = { from: 2.3, to: 6.0, scale: 1.12, rampIn: 1.5, rampOut: 1.8 };
 
 // The flight's stop points, on mouse/trackpad only: each wheel burst / arrow
 // key flies to the next one (scrollWorld.js's step-scroll), and a scrollbar

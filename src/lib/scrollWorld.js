@@ -293,11 +293,15 @@ function mountScrollWorld(container, config) {
   // split evenly) between from..to, ramping over ZOOM_RAMP_S on each side so it
   // reads as the camera settling rather than a cut. Scales from overlapping
   // beats take the max, so authors don't have to worry about ordering.
+  // A beat can set its own `rampIn`/`rampOut` (seconds): a top-anchored zoom
+  // releasing while the camera moves the other way reads as a jolt unless
+  // it's spread over enough footage.
   const ZOOM_RAMP_S = 0.5;
   const zoomForTime = (beats, t) => {
     let z = 1;
     for (const b of beats || []) {
-      const ramp = Math.min(smoothstep(b.from - ZOOM_RAMP_S, b.from, t), 1 - smoothstep(b.to, b.to + ZOOM_RAMP_S, t));
+      const rampIn = b.rampIn || ZOOM_RAMP_S, rampOut = b.rampOut || ZOOM_RAMP_S;
+      const ramp = Math.min(smoothstep(b.from - rampIn, b.from, t), 1 - smoothstep(b.to, b.to + rampOut, t));
       z = Math.max(z, 1 + (b.scale - 1) * clamp(ramp));
     }
     return z;
