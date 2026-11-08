@@ -35,7 +35,22 @@ function deepMerge<T>(base: T, override: unknown): T {
 export const getContent = cache(async (): Promise<SiteContent> => {
   const snap = await contentDoc().get();
   const stored = snap.exists ? snap.data() : null;
-  return deepMerge(defaultContent, stored);
+  const content = deepMerge(defaultContent, stored);
+  // deepMerge swaps arrays wholesale, so a stored sections array (saved before
+  // the admin form carried the phone encodes through) hid the default
+  // clipMobile and phones fell back to the 21MB desktop clip. Fill each
+  // stored scene's missing phone fields from the default scene with its id.
+  const defaultSections = defaultContent.media.seeWings.sections;
+  content.media.seeWings.sections = content.media.seeWings.sections.map((section) => {
+    const fallback = defaultSections.find((d) => d.id === section.id);
+    if (!fallback) return section;
+    return {
+      ...section,
+      stillMobile: section.stillMobile || fallback.stillMobile,
+      clipMobile: section.clipMobile || fallback.clipMobile,
+    };
+  });
+  return content;
 });
 
 export async function getLocaleText(locale: ContentLocale): Promise<LocaleText> {

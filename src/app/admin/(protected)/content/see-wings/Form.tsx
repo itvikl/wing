@@ -23,6 +23,10 @@ type SceneRow = {
   tagsEn: string;
   still: string;
   clip: string;
+  // Not editable here, only carried through: the save replaces the whole
+  // sections array, so leaving these out deleted the phone encodes.
+  stillMobile?: string;
+  clipMobile?: string;
 };
 type CueRow = { he: Cue; en: Cue };
 
@@ -86,6 +90,8 @@ function toSceneRows(he: SectionText[], en: SectionText[], media: SeeWingsMediaS
       tagsEn: (enS?.tags ?? []).join(', '),
       still: m?.still ?? '',
       clip: m?.clip ?? '',
+      stillMobile: m?.stillMobile,
+      clipMobile: m?.clipMobile,
     };
   });
 }
@@ -142,7 +148,14 @@ export function SeeWingsForm({
       ctaSecondary: data.cta.en.ctaSecondary,
     });
     await saveSeeWingsMedia(
-      data.scenes.map((s) => ({ id: s.id, still: s.still, clip: s.clip })),
+      data.scenes.map((s) => ({
+        id: s.id,
+        still: s.still,
+        clip: s.clip,
+        // Firestore rejects undefined fields, so only the ones that exist.
+        ...(s.stillMobile ? { stillMobile: s.stillMobile } : {}),
+        ...(s.clipMobile ? { clipMobile: s.clipMobile } : {}),
+      })),
       data.connectors.slice(0, Math.max(0, data.scenes.length - 1)),
     );
   }
