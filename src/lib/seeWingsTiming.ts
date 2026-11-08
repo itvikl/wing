@@ -104,12 +104,27 @@ export const BOULEVARD_ZOOM = { from: 2.3, to: 6.0, scale: 1.12, rampIn: 1.5, ra
 // timestamp, so it's never a landing spot, only ever crossed mid-transition.
 // 3.0 was picked by hand (the boulevard opening up with the tower at its end)
 // rather than by sharpness, so it doesn't follow the rule above.
-export const STATION_REST_S = [0, 3.0, 5.2, 10.1, 14.9];
+//
+// That stop is 3.03, not 3.0, because its rest still (STATION_STILLS) is
+// frame 72 of main.mp4, which starts at exactly 3.0s. These seconds are
+// fractions of a 15s track, the clip runs 14.958s, and the scrub settles a
+// hair short of its target, so "3.0" landed at 2.984s: frame 71, the frame
+// before the still. The camera moves fast there, so when the still faded out
+// on leaving, the picture under it stepped back a frame and then jumped on.
+// 3.03 lands mid-frame 72 from either direction. Re-check against
+// stop-3.0.jpg if the clip is re-rendered.
+export const STATION_REST_S = [0, 3.03, 5.2, 10.1, 14.9];
 
 // Sharp re-renders of the clip's own frame at a stop, faded in over the video
 // while the flight rests there (scrollWorld.js's restStills). For stops where
 // the camera is mid-move and the footage itself is motion-blurred.
-export const STATION_STILLS = [{ t: 3.0, src: '/scroll-world/img/stop-3.0.jpg' }];
+//
+// stop-3.0.jpg is frame 72 (3.0 to 3.0417s), so it shows only while the clip
+// rests on that frame: `t` is the frame's middle and `window` half a frame.
+// With the engine's default ±0.1s it also came up over the two frames either
+// side, which phones (free scrub, no stops) could settle on, and the camera
+// moves fast enough there that leaving such a frame jumped.
+export const STATION_STILLS = [{ t: 3.0208, window: 0.0208, src: '/scroll-world/img/stop-3.0.jpg' }];
 
 // How fast a step plays the flight between two stops, as a multiple of the
 // clip's own speed: 1 = real time, so a hop across 4.9s of footage takes 4.9s.

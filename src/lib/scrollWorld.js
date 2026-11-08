@@ -241,7 +241,7 @@ function mountScrollWorld(container, config) {
       const ri = el('img', 'sw-scene__rest'); ri.alt = ''; ri.decoding = 'async';
       ri.src = (isMobile() && r.srcMobile) ? r.srcMobile : r.src;
       scene.appendChild(ri);
-      return { t: r.t, img: ri, on: false };
+      return { t: r.t, window: r.window || 0.1, img: ri, on: false };
     });
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
     s.loading = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
@@ -686,7 +686,7 @@ function mountScrollWorld(container, config) {
         // while the clip is still easing onto the frame.
         const settled = !stepping && Math.abs(s.cur - s.target) < 0.0015;
         for (const r of s.rests) {
-          const on = settled && Math.abs(t - r.t) < 0.1 && r.img.complete && r.img.naturalWidth > 0;
+          const on = settled && Math.abs(t - r.t) < r.window && r.img.complete && r.img.naturalWidth > 0;
           if (on !== r.on) {
             r.on = on;
             // Enter from just short of the frame (.is-pre, no transition) so it
