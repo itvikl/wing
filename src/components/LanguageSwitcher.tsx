@@ -10,15 +10,14 @@ export function LanguageSwitcher() {
 
   const pathWithoutLocale = pathname.replace(/^\/(en|he)/, '');
   const targetLocale = locale === 'en' ? 'he' : 'en';
-  // Always prefixed, English included. The middleware remembers the last
-  // locale in a NEXT_LOCALE cookie, so a bare "/" from a Hebrew page got
-  // redirected straight back to /he. "/en/..." is what rewrites that cookie
-  // (it then redirects on to the unprefixed URL, per localePrefix as-needed).
+  // Always prefixed, English included: "/en/..." redirects on to the
+  // unprefixed URL (localePrefix as-needed). This used to matter for the
+  // NEXT_LOCALE cookie; the middleware no longer detects locales, so it's
+  // now just a working link either way.
   const href = `/${targetLocale}${pathWithoutLocale}`;
 
-  // No prefetch: the middleware rewrites that cookie on the prefetch's response
-  // too, so merely rendering this link on an English page turned the cookie to
-  // Hebrew, and the next bare link (/about) was redirected to /he/about.
+  // No prefetch: kept from when the middleware set a locale cookie on the
+  // prefetch's response too, which flipped the next bare link to Hebrew.
   return (
     <Link href={href} prefetch={false} className="text-base font-medium uppercase tracking-wide hover:text-accent-light">
       {targetLocale}

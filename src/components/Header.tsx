@@ -26,7 +26,7 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-50 bg-primary text-neutral-100">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:gap-6 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2">
+        <Link href={locale === 'en' ? '/' : `/${locale}`} className="flex shrink-0 items-center gap-2">
           <Image src={media.logo} alt="Wings" width={40} height={36} priority unoptimized={media.logo.startsWith('http')} />
         </Link>
 

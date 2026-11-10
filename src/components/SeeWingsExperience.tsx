@@ -114,8 +114,8 @@ export function SeeWingsExperience({
     const homeHref = locale === 'en' ? '/' : `/${locale}`;
     const routedHref = (id: string) => (locale === 'en' ? `/${id}` : `/${locale}/${id}`);
 
-    // Mirrors LanguageSwitcher's own logic (always locale-prefixed, so the
-    // NEXT_LOCALE cookie gets rewritten) — this custom-DOM topbar has no
+    // Mirrors LanguageSwitcher's own logic (always locale-prefixed) — this
+    // custom-DOM topbar has no
     // access to that React component, so the EN/HE toggle is rebuilt here.
     const pathWithoutLocale = pathname.replace(/^\/(en|he)/, '');
     const targetLocale = locale === 'en' ? 'he' : 'en';
@@ -141,11 +141,12 @@ export function SeeWingsExperience({
         href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,
       })),
       atmosphere: true,
-      // Stream the clip instead of downloading all of it (21MB desktop) before
-      // the page can scroll; both the hosting and the faststart clips support it.
-      // TEMPORARY: `?nostream` restores the whole-file download, to compare
-      // the two on real phones. Remove once that's settled.
-      stream: !new URLSearchParams(window.location.search).has('nostream'),
+      // Whole-file download, not streaming: compared side by side on real
+      // phones (the old ?nostream switch), streaming stalled whenever a swipe
+      // ran ahead of the ranges fetched so far and then jumped forward, while
+      // a clip already in memory scrubs smoothly. The cost is a longer wait
+      // before scroll opens (6.4MB phone clip, 21MB desktop).
+      stream: false,
       diveScroll: SECTION_VH,
       connScroll: CONN_VH,
       crossfade: 0.14,
