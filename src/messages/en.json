@@ -98,12 +98,12 @@
   },
   "leadForm": {
     "eyebrow": "Get in Touch",
-    "title": "Request private access",
+    "title": "Schedule a meeting and/or a call with a representative",
     "name": "Full name",
     "phone": "Phone",
     "email": "Email",
     "message": "What are you looking for?",
-    "submit": "Request Access",
+    "submit": "Schedule a Meeting",
     "success": "Thank you — we'll be in touch shortly.",
     "error": "Something went wrong. Please try again or reach us directly."
   },
