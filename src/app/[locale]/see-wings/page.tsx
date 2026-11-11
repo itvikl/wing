@@ -37,6 +37,10 @@ export default async function SeeWingsPage({ params: { locale } }: { params: { l
   const phone = phoneNumber
     ? { href: telHref(phoneNumber), label: phoneNumber, aria: `${text.footer.phone}: ${phoneNumber}` }
     : undefined;
+  const emailAddress = text.footer.emailAddress.trim();
+  const email = emailAddress
+    ? { href: `mailto:${emailAddress}`, label: emailAddress, aria: `${text.footer.email}: ${emailAddress}` }
+    : undefined;
   const navLinks = [
     { id: 'about', label: nav('about'), size: navSizes?.about },
     { id: 'projects', label: nav('projects'), size: navSizes?.projects },
@@ -58,6 +62,7 @@ export default async function SeeWingsPage({ params: { locale } }: { params: { l
       media={media.seeWings}
       opening={opening}
       phone={phone}
+      email={email}
     />
   );
 }

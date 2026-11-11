@@ -53,7 +53,10 @@ export function CustomCursor() {
   if (!enabled) return null;
 
   return (
-    <div data-custom-cursor className="pointer-events-none fixed inset-0 z-[100]" aria-hidden style={{ opacity: visible ? 1 : 0 }}>
+    // Above everything (z 2147483647, the maximum): the native cursor is hidden
+    // while this one is on, so any layer drawn over it (the email chooser, the
+    // accessibility menu) would leave the visitor with no pointer at all.
+    <div data-custom-cursor className="pointer-events-none fixed inset-0 z-[2147483647]" aria-hidden style={{ opacity: visible ? 1 : 0 }}>
       <motion.div
         className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent"
         style={{ left: x, top: y }}

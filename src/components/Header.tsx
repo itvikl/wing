@@ -8,13 +8,14 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { MagneticButton } from './motion/MagneticButton';
 import { NavLinks } from './NavLinks';
 import { MobileNav } from './MobileNav';
-import { PhoneGlyph } from './icons';
+import { MailGlyph, PhoneGlyph } from './icons';
 import { telHref } from '@/lib/contact';
 
 export async function Header() {
   const t = await getTranslations('nav');
   const footer = await getTranslations('footer');
   const phoneNumber = footer('phoneNumber');
+  const emailAddress = footer('emailAddress');
   const media = await getSiteMedia();
   const locale = await getLocale();
   const showProjects = await hasProjects(locale as ContentLocale);
@@ -49,6 +50,17 @@ export async function Header() {
             >
               <PhoneGlyph className="h-4 w-4 text-accent-light" />
               <span dir="ltr" className="hidden lg:inline">{phoneNumber}</span>
+            </a>
+          )}
+          {/* An icon only: the address is long, and shows in full in the footer. */}
+          {emailAddress && (
+            <a
+              href={`mailto:${emailAddress}`}
+              aria-label={`${footer('email')}: ${emailAddress}`}
+              title={emailAddress}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 hover:border-accent-light hover:text-accent-light"
+            >
+              <MailGlyph className="h-4 w-4 text-accent-light" />
             </a>
           )}
           <div className="hidden md:block">

@@ -28,7 +28,9 @@ export type SeeWingsMedia = {
   connectors: (string | null)[];
 };
 
-const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team']);
+// Contact included: the topbar's Contact link and its "Contact Us" button open
+// the contact page directly instead of flying the whole film to the form.
+const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
 
 const GOLD = '#B58238';
 const GOLD_LIGHT = '#FFBC7D';
@@ -61,6 +63,7 @@ export function SeeWingsExperience({
   seamlessHandoff = false,
   persistentTopbar = false,
   phone,
+  email,
 }: {
   locale: Locale;
   sections: SeeWingsSection[];
@@ -93,6 +96,8 @@ export function SeeWingsExperience({
   persistentTopbar?: boolean;
   /** The office number for the topbar's phone pill (admin Footer section); none hides it. */
   phone?: { href: string; label: string; aria: string };
+  /** The office email for the topbar (admin Footer section); none hides it. */
+  email?: { href: string; label: string; aria: string };
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -144,9 +149,10 @@ export function SeeWingsExperience({
     const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
       // where the topbar mark would sit and takes over that role instead.
-      cta: { label: brandCta, href: `${homeHref}#contact`, size: brandCtaSize },
+      cta: { label: brandCta, href: routedHref('contact'), size: brandCtaSize },
       lang: { label: targetLocale, href: langHref },
       phone,
+      email,
       keepTopbar: persistentTopbar,
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
       loadingHint: locale === 'he' ? 'טוען את החוויה' : 'loading the experience',
@@ -215,8 +221,8 @@ export function SeeWingsExperience({
       }),
       connectors: media.connectors,
     });
-    // Every link to #contact (the topbar CTA, the last caption's button, the
-    // Contact nav item) flies to the end of the flight on a page whose lead
+    // A link to #contact (the last caption's button, the skip link) flies to
+    // the end of the flight on a page whose lead
     // form sits beneath it: a plain hash jump can't reach the form while
     // PortalReveal keeps it pinned behind the stage. Pages without the form
     // (/see-wings) still navigate home as before.
@@ -240,7 +246,7 @@ export function SeeWingsExperience({
       engine.dispose();
       Object.keys(SW_THEME_VARS).forEach((k) => root.style.removeProperty(k));
     };
-  }, [locale, sections, navLinks, brandCta, brandCtaSize, media, pathname, persistentTopbar, phone]);
+  }, [locale, sections, navLinks, brandCta, brandCtaSize, media, pathname, persistentTopbar, phone, email]);
 
   const homeHref = locale === 'en' ? '/' : `/${locale}`;
 

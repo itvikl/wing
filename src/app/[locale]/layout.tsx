@@ -7,6 +7,7 @@ import { locales, type Locale } from '@/i18n/request';
 import { CustomCursor } from '@/components/motion/CustomCursor';
 import { Tracking } from '@/components/Tracking';
 import { WhatsAppFab } from '@/components/WhatsAppFab';
+import { EmailChooser } from '@/components/EmailChooser';
 import { AccessibilityProvider } from '@/components/AccessibilityMenu';
 import { A11Y_BOOT_SCRIPT } from '@/lib/a11y';
 import { whatsappHref } from '@/lib/contact';
@@ -82,6 +83,7 @@ export default async function LocaleLayout({
           <AccessibilityProvider>{children}</AccessibilityProvider>
           <WhatsAppFab href={whatsappHref(footer('whatsappLink'), footer('whatsappMessage'))} label={footer('whatsapp')} />
           <Tracking pixelId={pixelId} />
+          <EmailChooser />
         </NextIntlClientProvider>
       </body>
     </html>

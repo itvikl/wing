@@ -40,6 +40,10 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const phone = phoneNumber
     ? { href: telHref(phoneNumber), label: phoneNumber, aria: `${text.footer.phone}: ${phoneNumber}` }
     : undefined;
+  const emailAddress = text.footer.emailAddress.trim();
+  const email = emailAddress
+    ? { href: `mailto:${emailAddress}`, label: emailAddress, aria: `${text.footer.email}: ${emailAddress}` }
+    : undefined;
   const navLinks = [
     { id: 'about', label: nav('about'), size: navSizes?.about },
     { id: 'projects', label: nav('projects'), size: navSizes?.projects },
@@ -62,6 +66,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
         media={media.seeWings}
         opening={opening}
         phone={phone}
+        email={email}
         seamlessHandoff
         persistentTopbar
       />

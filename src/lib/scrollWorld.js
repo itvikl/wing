@@ -182,6 +182,21 @@ function mountScrollWorld(container, config) {
     p.appendChild(num);
     topEnd.appendChild(p);
   }
+  // `email` {href, label, aria}: an icon pill beside the phone where the bar
+  // has room (≥1100px), and the address as the last line of the phone menu,
+  // since the bar itself is full beside the flying logo on a phone.
+  if (config.email && config.email.href) {
+    const m = el('a', 'sw-topmail'); m.href = config.email.href;
+    m.setAttribute('aria-label', config.email.aria || config.email.label || '');
+    m.title = config.email.label || '';
+    m.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>';
+    topEnd.appendChild(m);
+    if (nav.parentNode) {
+      const mi = el('a', 'sw-nav__item sw-nav__mail'); mi.href = config.email.href;
+      mi.dir = 'ltr'; mi.textContent = config.email.label || '';
+      nav.appendChild(mi);
+    }
+  }
   if (config.lang && config.lang.label) {
     const l = el('a', 'sw-toplang'); l.href = config.lang.href || '#'; l.textContent = config.lang.label;
     topEnd.appendChild(l);
@@ -1126,6 +1141,12 @@ function injectCSS() {
   /* The number only where the centered pill nav leaves room beside it. */
   @media (min-width:1280px){.sw-topphone{padding:0 14px;} .sw-topphone span{display:inline;}}
   @media (max-width:860px){.sw-topphone{height:36px;min-width:36px;padding:0;}}
+  .sw-topmail{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--sw-bg) !important;background:color-mix(in srgb,#fff 55%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--sw-accent) 16%,transparent);width:38px;height:38px;border-radius:999px;transition:background .2s,color .2s;}
+  .sw-topmail svg{width:16px;height:16px;}
+  .sw-topmail:hover{background:var(--sw-accent) !important;color:#fff !important;}
+  @media (max-width:1099px){.sw-topmail{display:none;}}
+  .sw-nav__mail{display:none;}
+  @media (max-width:860px){.sw-topbar.is-menu-open .sw-nav__mail{display:block;margin-top:4px;padding-top:12px;border-top:1px solid color-mix(in srgb,#fff 12%,transparent);border-radius:0 0 10px 10px;font-size:.9rem;opacity:.9;text-align:start;}}
   .sw-topcta{text-decoration:none;font-weight:600;font-size:1rem;color:var(--sw-bg) !important;background:var(--sw-accent) !important;padding:10px 20px;border-radius:999px;white-space:nowrap;}
   /* Phone menu button, glass-pilled like .sw-toplang; three bars that fold
      into an X while the panel is open. Hidden until the ≤860px block. */
