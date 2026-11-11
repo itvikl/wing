@@ -36,9 +36,11 @@ export function GalleryWall({
     <motion.section
       ref={sectionRef}
       className="overflow-hidden py-20 sm:py-28"
-      initial={reduceMotion ? undefined : { scale: 1.22, opacity: 0, filter: 'blur(14px)' }}
+      // `initial` must match the server render whatever the motion setting
+      // (see motion/Reveal): reduced motion just lands instantly.
+      initial={{ scale: 1.22, opacity: 0, filter: 'blur(14px)' }}
       animate={played ? { scale: 1, opacity: 1, filter: 'blur(0px)' } : undefined}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       style={{ transformOrigin: '50% 40%' }}
     >
       <div className="mx-auto max-w-4xl px-6 text-center">
@@ -49,19 +51,19 @@ export function GalleryWall({
       </div>
 
       <div className="relative mx-auto mt-16 max-w-5xl px-6 sm:mt-20">
-        {!reduceMotion && (
-          <motion.div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 w-1/3"
-            initial={{ left: '-20%', opacity: 0 }}
-            animate={inView ? { left: '110%', opacity: [0, 0.16, 0] } : undefined}
-            transition={{ duration: 1.6, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              background: 'radial-gradient(closest-side, rgba(255,188,125,0.9), transparent 70%)',
-              mixBlendMode: 'screen',
-            }}
-          />
-        )}
+        {/* Always rendered so the tree matches the server's; reduced motion
+            just never sweeps it, leaving it invisible. */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 w-1/3"
+          initial={{ left: '-20%', opacity: 0 }}
+          animate={inView && !reduceMotion ? { left: '110%', opacity: [0, 0.16, 0] } : undefined}
+          transition={{ duration: 1.6, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            background: 'radial-gradient(closest-side, rgba(255,188,125,0.9), transparent 70%)',
+            mixBlendMode: 'screen',
+          }}
+        />
 
         {/* Flex rather than a grid, so a row short of four cards (or a lone
             third card on a phone) sits centered instead of leaving empty columns. */}
@@ -103,19 +105,19 @@ function FrameCard({
   return (
     <motion.div
       className="flex w-[calc(50%-0.75rem)] flex-col sm:w-[calc(50%-1.25rem)] md:w-[calc(25%-1.875rem)]"
-      initial={
-        reduceMotion
-          ? undefined
-          : { opacity: 0, x: entry.x, y: entry.y, rotate: entry.rotate, scale: 0.78, filter: 'blur(6px)' }
-      }
+      initial={{ opacity: 0, x: entry.x, y: entry.y, rotate: entry.rotate, scale: 0.78, filter: 'blur(6px)' }}
       animate={played ? { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)' } : undefined}
-      transition={{
-        duration: 0.6,
-        delay: 0.45 + index * 0.1,
-        type: 'spring',
-        stiffness: 210,
-        damping: 20,
-      }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : {
+              duration: 0.6,
+              delay: 0.45 + index * 0.1,
+              type: 'spring',
+              stiffness: 210,
+              damping: 20,
+            }
+      }
     >
       <button type="button" onClick={onToggle} aria-expanded={expanded} className="group text-start">
         <div className="rounded-[3px] bg-gradient-to-br from-accent-light via-accent to-accent-dark p-[5px] shadow-[0_16px_36px_-14px_rgba(0,0,0,0.65)] transition-transform duration-300 group-hover:-translate-y-1">

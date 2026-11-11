@@ -32,7 +32,9 @@ export function TiltCard({ children, className }: { children: ReactNode; classNa
       onMouseLeave={handleMouseLeave}
     >
       <motion.div
-        style={reduceMotion ? undefined : { rotateX: springX, rotateY: springY, transformStyle: 'preserve-3d' }}
+        // Same style on server and client (see Reveal); under reduced motion the
+        // mouse handler never moves the values, so the card just stays flat.
+        style={{ rotateX: springX, rotateY: springY, transformStyle: 'preserve-3d' }}
         className="h-full w-full"
       >
         {children}

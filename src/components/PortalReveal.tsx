@@ -54,10 +54,13 @@ import { flushSync } from 'react-dom';
  * band of track background above the Header. Staying pinned until the real
  * top edge arrives keeps the Header at the viewport top through that band.
  *
- * Safety nets so this can never leave real content permanently unreachable:
- * reduced-motion visitors skip the gate entirely (unpinned from the start,
- * since the portal lock itself is skipped for them too — see scrollWorld.js),
- * and a <noscript> override covers visitors with JS disabled, since this
+ * The gate runs the same for reduced-motion visitors: scrollWorld.js plays the
+ * flight (and its portal hand-off) for everyone, since the visitor's own
+ * scroll drives it. Bypassing the gate for them also seeded `revealed` from
+ * matchMedia during render, which the server can't match, so hydration broke.
+ *
+ * Safety net so this can never leave real content permanently unreachable:
+ * a <noscript> override covers visitors with JS disabled, since this
  * component can't run at all for them.
  *
  * Being pinned behind the stage only hides this content once the stage
@@ -73,16 +76,9 @@ import { flushSync } from 'react-dom';
  * cover of the now-real stage instead of before it exists.
  */
 export function PortalReveal({ children }: { children: ReactNode }) {
-  const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const [revealed, setRevealed] = useState(reducedMotion);
+  const [revealed, setRevealed] = useState(false);
   const [mounted, setMounted] = useState(false);
-  // Reduced-motion visitors bypass the gate entirely and must never be re-pinned by
-  // the scroll-position tracking below — that tracking exists only to make the real
-  // portal hand-off bidirectional, and previously ran for these visitors too (keyed
-  // off the same `revealedOnce` flag), re-hiding content again the instant they
-  // scrolled even one pixel before reaching the threshold.
-  const skipGate = useRef(reducedMotion());
-  const revealedOnce = useRef(skipGate.current);
+  const revealedOnce = useRef(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<HTMLDivElement>(null);
   const [spacerHeight, setSpacerHeight] = useState(0);
@@ -117,7 +113,6 @@ export function PortalReveal({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (skipGate.current) return;
     function onScroll() {
       if (!revealedOnce.current || !markerRef.current) return;
       setRevealed(markerRef.current.getBoundingClientRect().top <= 1);

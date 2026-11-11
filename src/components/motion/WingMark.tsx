@@ -25,9 +25,11 @@ export function WingMark({ className }: { className?: string }) {
         <motion.path
           key={stroke.d}
           d={stroke.d}
-          initial={reduceMotion ? undefined : { pathLength: 0, opacity: 0 }}
-          animate={reduceMotion ? undefined : { pathLength: 1, opacity: 1 }}
-          transition={{ duration: 1, delay: stroke.delay, ease: [0.22, 1, 0.36, 1] }}
+          // `initial` must match the server render (see Reveal); reduced motion
+          // just draws instantly.
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 1, delay: stroke.delay, ease: [0.22, 1, 0.36, 1] }}
         />
       ))}
     </svg>

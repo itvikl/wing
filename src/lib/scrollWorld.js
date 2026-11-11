@@ -68,7 +68,13 @@
    ========================================================================== */
 
 function mountScrollWorld(container, config) {
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The flight runs the same for everyone. It only moves when the visitor
+  // scrolls, and the OS motion setting is off on many ordinary machines
+  // (Windows' "Animation effects" switch reports prefers-reduced-motion), so
+  // honouring it here swapped the film for stills and visitors read that as a
+  // broken video. Only the decorative, self-running particles still respect it.
+  const reduce = false;
+  const reduceDecor = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Phone detection. `coarse` is captured once (input type doesn't change mid-session);
   // the ≤860px query is read live via isMobile() so a desktop resize/DevTools toggle
   // switches sources and seek behaviour without a reload.
@@ -823,7 +829,7 @@ function mountScrollWorld(container, config) {
   }
 
   // Particles are a per-frame cost we can't afford alongside video scrubbing on a phone.
-  seedParticles(particles, reduce || coarse);
+  seedParticles(particles, reduceDecor || coarse);
   function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(read); } armIdleSnap(); }
   window.addEventListener('scroll', onScroll, { passive: true });
   if (STEP_ON) {
