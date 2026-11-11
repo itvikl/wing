@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
-import { getSiteMedia } from '@/lib/content/store';
+import { getLocaleText, getSiteMedia } from '@/lib/content/store';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { PageBackdrop } from '@/components/PageBackdrop';
@@ -22,13 +22,14 @@ export const metadata: Metadata = {
   description: 'The people behind every address at Wings Real Estate, Jerusalem.',
 };
 
-type Member = { name: string; initials: string; role: string; bio: string };
+type Member = { name: string; initials: string; role: string; bio: string; sizes?: Record<string, number> };
 
 export default async function TeamPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
 
   const t = await getTranslations('team');
   const media = await getSiteMedia();
+  const text = await getLocaleText(locale);
   const members = (t.raw('members') as Member[]).map((member, index) => ({
     ...member,
     image: media.team.members[index] ?? null,
@@ -41,8 +42,8 @@ export default async function TeamPage({ params: { locale } }: { params: { local
     <div className="relative isolate flex min-h-screen min-h-dvh flex-col">
       <PageBackdrop />
       <Header />
-      <main className="flex-1">
-        <GalleryWall eyebrow={t('eyebrow')} title={t('title')} members={members} />
+      <main id="main-content" tabIndex={-1} className="flex-1">
+        <GalleryWall eyebrow={t('eyebrow')} title={t('title')} sizes={text.team.sizes} members={members} />
       </main>
       <Footer />
     </div>

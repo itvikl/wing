@@ -31,7 +31,7 @@ export default async function AboutPage({ params: { locale } }: { params: { loca
     <div className="relative isolate flex min-h-screen min-h-dvh flex-col">
       <PageBackdrop />
       <Header />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         <About />
       </main>
       <Footer />

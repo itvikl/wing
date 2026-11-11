@@ -1,5 +1,6 @@
 'use client';
 
+import { Sized } from '@/lib/textSize';
 import { Jump } from '@/components/admin/AdminLocale';
 import { PreviewLocaleToggle, usePreviewLocale } from '@/components/admin/PreviewLocaleToggle';
 import type { NavText } from './actions';
@@ -18,12 +19,12 @@ export function NavPreview({ data }: { data: Record<ContentLocale, NavText> }) {
           <div className="flex flex-wrap gap-3 text-xs">
             {links.map(({ key, label }) => (
               <Jump key={key} to={key} as="span" className="text-neutral-100/90">
-                {label || '—'}
+                <Sized scale={value.sizes?.[key]}>{label || '—'}</Sized>
               </Jump>
             ))}
           </div>
           <Jump to="cta" as="span" className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-primary-dark">
-            {value.cta || '—'}
+            <Sized scale={value.sizes?.cta}>{value.cta || '—'}</Sized>
           </Jump>
         </div>
       </div>

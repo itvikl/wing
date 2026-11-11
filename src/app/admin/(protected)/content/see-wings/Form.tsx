@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField, TextAreaField } from '@/components/admin/fields';
+import { FieldHeader, TextField, TextAreaField, sizeField } from '@/components/admin/fields';
 import { VideoUploadField } from '@/components/admin/VideoUploadField';
 import { RepeatableList } from '@/components/admin/RepeatableList';
 import { SectionLayout } from '@/components/admin/SectionLayout';
@@ -31,7 +31,8 @@ type SceneRow = {
 type CueRow = { he: Cue; en: Cue };
 
 type Data = {
-  cta: Record<ContentLocale, { ctaPrimary: string; ctaSecondary: string }>;
+  // The section's text sizes ride along here: the button is the only sized field outside the cues.
+  cta: Record<ContentLocale, { ctaPrimary: string; ctaSecondary: string; sizes: Record<string, number> }>;
   scenes: SceneRow[];
   /** Every cue, the first included: it's a caption of its own, apart from Hero's opening screen. */
   cues: CueRow[];
@@ -136,6 +137,7 @@ export function SeeWingsForm({
       cues: data.cues.map((c) => c.he),
       ctaPrimary: data.cta.he.ctaPrimary,
       ctaSecondary: data.cta.he.ctaSecondary,
+      sizes: data.cta.he.sizes,
       // The first cue now saves as its own copy instead of echoing Hero.
       firstCueOwn: true,
     });
@@ -144,6 +146,7 @@ export function SeeWingsForm({
       cues: data.cues.map((c) => c.en),
       ctaPrimary: data.cta.en.ctaPrimary,
       ctaSecondary: data.cta.en.ctaSecondary,
+      sizes: data.cta.en.sizes,
       firstCueOwn: true,
     });
     await saveSeeWingsMedia(
@@ -162,8 +165,8 @@ export function SeeWingsForm({
   const { data, setData, saving, saved, error, handleSubmit } = useSectionForm<Data>(
     {
       cta: {
-        he: { ctaPrimary: initial.he.ctaPrimary, ctaSecondary: initial.he.ctaSecondary },
-        en: { ctaPrimary: initial.en.ctaPrimary, ctaSecondary: initial.en.ctaSecondary },
+        he: { ctaPrimary: initial.he.ctaPrimary, ctaSecondary: initial.he.ctaSecondary, sizes: initial.he.sizes ?? {} },
+        en: { ctaPrimary: initial.en.ctaPrimary, ctaSecondary: initial.en.ctaSecondary, sizes: initial.en.sizes ?? {} },
       },
       scenes: toSceneRows(initial.he.sections, initial.en.sections, initial.media.sections),
       cues: toCueRows(initial.he.cues, initial.en.cues),
@@ -178,7 +181,7 @@ export function SeeWingsForm({
       setData((prev) => ({ ...prev, cta: { ...prev.cta, [locale]: { ...prev.cta[locale], ...patch } } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="כפתור ראשי" value={value.ctaPrimary} jump="ctaPrimary" onChange={(v) => update({ ctaPrimary: v })} />
+        <TextField label="כפתור ראשי" value={value.ctaPrimary} jump="ctaPrimary" {...sizeField(value.sizes, 'ctaPrimary', (sizes) => update({ sizes }))} onChange={(v) => update({ ctaPrimary: v })} />
         <TextField label="כפתור משני" value={value.ctaSecondary} jump="ctaSecondary" onChange={(v) => update({ ctaSecondary: v })} />
       </div>
     );
@@ -294,11 +297,11 @@ export function SeeWingsForm({
               <LocaleTabs
                 he={
                   <div className="grid gap-3">
-                    <TextField label="תגית עליונה" value={cue.he.eyebrow} jump={`cues.${index}.eyebrow`} onChange={(v) => updateCue({ he: { ...cue.he, eyebrow: v } })} />
-                    <TextField label="כותרת" value={cue.he.title} jump={`cues.${index}.title`} onChange={(v) => updateCue({ he: { ...cue.he, title: v } })} />
-                    <TextAreaField label="טקסט" value={cue.he.body} jump={`cues.${index}.body`} onChange={(v) => updateCue({ he: { ...cue.he, body: v } })} />
+                    <TextField label="תגית עליונה" value={cue.he.eyebrow} jump={`cues.${index}.eyebrow`} {...sizeField(cue.he.sizes, 'eyebrow', (sizes) => updateCue({ he: { ...cue.he, sizes } }))} onChange={(v) => updateCue({ he: { ...cue.he, eyebrow: v } })} />
+                    <TextField label="כותרת" value={cue.he.title} jump={`cues.${index}.title`} {...sizeField(cue.he.sizes, 'title', (sizes) => updateCue({ he: { ...cue.he, sizes } }))} onChange={(v) => updateCue({ he: { ...cue.he, title: v } })} />
+                    <TextAreaField label="טקסט" value={cue.he.body} jump={`cues.${index}.body`} {...sizeField(cue.he.sizes, 'body', (sizes) => updateCue({ he: { ...cue.he, sizes } }))} onChange={(v) => updateCue({ he: { ...cue.he, body: v } })} />
                     <div>
-                      <span className="text-sm font-medium text-primary-dark">שדות נוספים</span>
+                      <FieldHeader label="שדות נוספים" {...sizeField(cue.he.sizes, 'extra', (sizes) => updateCue({ he: { ...cue.he, sizes } }))} />
                       <div className="mt-1.5">
                         <RepeatableList<{ label: string; value: string }>
                           items={cue.he.extra}
@@ -318,11 +321,11 @@ export function SeeWingsForm({
                 }
                 en={
                   <div className="grid gap-3">
-                    <TextField label="Eyebrow" value={cue.en.eyebrow} jump={`cues.${index}.eyebrow`} onChange={(v) => updateCue({ en: { ...cue.en, eyebrow: v } })} />
-                    <TextField label="Title" value={cue.en.title} jump={`cues.${index}.title`} onChange={(v) => updateCue({ en: { ...cue.en, title: v } })} />
-                    <TextAreaField label="Body" value={cue.en.body} jump={`cues.${index}.body`} onChange={(v) => updateCue({ en: { ...cue.en, body: v } })} />
+                    <TextField label="Eyebrow" value={cue.en.eyebrow} jump={`cues.${index}.eyebrow`} {...sizeField(cue.en.sizes, 'eyebrow', (sizes) => updateCue({ en: { ...cue.en, sizes } }))} onChange={(v) => updateCue({ en: { ...cue.en, eyebrow: v } })} />
+                    <TextField label="Title" value={cue.en.title} jump={`cues.${index}.title`} {...sizeField(cue.en.sizes, 'title', (sizes) => updateCue({ en: { ...cue.en, sizes } }))} onChange={(v) => updateCue({ en: { ...cue.en, title: v } })} />
+                    <TextAreaField label="Body" value={cue.en.body} jump={`cues.${index}.body`} {...sizeField(cue.en.sizes, 'body', (sizes) => updateCue({ en: { ...cue.en, sizes } }))} onChange={(v) => updateCue({ en: { ...cue.en, body: v } })} />
                     <div>
-                      <span className="text-sm font-medium text-primary-dark">Extra fields</span>
+                      <FieldHeader label="Extra fields" {...sizeField(cue.en.sizes, 'extra', (sizes) => updateCue({ en: { ...cue.en, sizes } }))} />
                       <div className="mt-1.5">
                         <RepeatableList<{ label: string; value: string }>
                           items={cue.en.extra}

@@ -1,5 +1,6 @@
 'use client';
 
+import { Sized } from '@/lib/textSize';
 import { Jump } from '@/components/admin/AdminLocale';
 import { PreviewLocaleToggle, usePreviewLocale } from '@/components/admin/PreviewLocaleToggle';
 import { PreviewNote } from '@/components/admin/SectionLayout';
@@ -21,9 +22,9 @@ export function HeroPreview({ data, firstCueOwn }: { data: Record<ContentLocale,
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/logo.png" alt="" className="h-14 w-auto" />
           <Jump to="eyebrow" as="span" className="mt-4 font-display text-xs font-bold uppercase tracking-[0.2em] text-accent-light">
-            {value.eyebrow || '—'}
+            <Sized scale={value.sizes?.eyebrow}>{value.eyebrow || '—'}</Sized>
           </Jump>
-          <Jump to="headline" as="h2" className="mt-2 font-display text-2xl font-bold leading-tight text-neutral-100">{value.headline || '—'}</Jump>
+          <Jump to="headline" as="h2" className="mt-2 font-display text-2xl font-bold leading-tight text-neutral-100"><Sized scale={value.sizes?.headline}>{value.headline || '—'}</Sized></Jump>
         </div>
       </div>
       <PreviewNote>

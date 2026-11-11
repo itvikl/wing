@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Sized } from '@/lib/textSize';
 
-type Link = { id: string; label: string };
+type Link = { id: string; label: string; size?: number };
 
 const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
 
@@ -50,7 +51,7 @@ export function NavLinks({ links }: { links: Link[] }) {
 
         return (
           <a key={link.id} href={href} className="relative py-1 transition-colors hover:text-accent-light">
-            <span className={isActive ? 'text-accent-light' : undefined}>{link.label}</span>
+            <span className={isActive ? 'text-accent-light' : undefined}><Sized scale={link.size}>{link.label}</Sized></span>
             {isActive && (
               <motion.span
                 layoutId="nav-indicator"

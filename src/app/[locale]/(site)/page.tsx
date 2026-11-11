@@ -1,12 +1,15 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
-import { getSiteMedia, hasProjects } from '@/lib/content/store';
+import { getLocaleText, getSiteMedia, hasProjects } from '@/lib/content/store';
+import type { TextSizes } from '@/lib/content/schema';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
+import { telHref } from '@/lib/contact';
 import { computeTrackVh } from '@/lib/seeWingsTiming';
 import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
 import { PortalReveal } from '@/components/PortalReveal';
 import { ScrollProgress } from '@/components/ScrollProgress';
 import { LeadForm } from '@/components/LeadForm';
+import { Footer } from '@/components/Footer';
 
 // Every string on the site comes from the Firestore content doc (see
 // i18n/request.ts -> getLocaleText). That's a raw Admin SDK read, not a fetch,
@@ -24,18 +27,25 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const t = await getTranslations('seeWings');
   const nav = await getTranslations('nav');
   const hero = await getTranslations('hero');
-  const opening = { eyebrow: hero('eyebrow'), title: hero('headline') };
+  // Text sizes aren't strings, so they're read off the content itself rather than through t().
+  const text = await getLocaleText(locale);
+  const opening = { eyebrow: hero('eyebrow'), title: hero('headline'), sizes: text.hero.sizes };
   const media = await getSiteMedia();
   const showProjects = await hasProjects(locale);
   const sections = t.raw('sections') as SeeWingsSection[];
-  const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] }[];
+  const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[]; sizes?: TextSizes }[];
   const trackVh = computeTrackVh(sections.length, media.seeWings.connectors);
+  const navSizes = text.nav.sizes;
+  const phoneNumber = text.footer.phoneNumber.trim();
+  const phone = phoneNumber
+    ? { href: telHref(phoneNumber), label: phoneNumber, aria: `${text.footer.phone}: ${phoneNumber}` }
+    : undefined;
   const navLinks = [
-    { id: 'about', label: nav('about') },
-    { id: 'projects', label: nav('projects') },
-    { id: 'why-us', label: nav('advantages') },
-    { id: 'team', label: nav('team') },
-    { id: 'contact', label: nav('contact') },
+    { id: 'about', label: nav('about'), size: navSizes?.about },
+    { id: 'projects', label: nav('projects'), size: navSizes?.projects },
+    { id: 'why-us', label: nav('advantages'), size: navSizes?.advantages },
+    { id: 'team', label: nav('team'), size: navSizes?.team },
+    { id: 'contact', label: nav('contact'), size: navSizes?.contact },
   ].filter((link) => link.id !== 'projects' || showProjects);
 
   return (
@@ -46,9 +56,12 @@ export default async function HomePage({ params: { locale } }: { params: { local
         cues={cues}
         navLinks={navLinks}
         ctaPrimary={t('ctaPrimary')}
+        ctaPrimarySize={text.seeWings.sizes?.ctaPrimary}
         brandCta={nav('cta')}
+        brandCtaSize={navSizes?.cta}
         media={media.seeWings}
         opening={opening}
+        phone={phone}
         seamlessHandoff
         persistentTopbar
       />
@@ -57,8 +70,11 @@ export default async function HomePage({ params: { locale } }: { params: { local
         <PortalReveal>
           <ScrollProgress trackVh={trackVh} />
           <main>
-            <LeadForm variant="overlay" />
+            <LeadForm variant="overlay" sizes={text.leadForm.sizes} />
           </main>
+          {/* The page's only place for the phone, email and the legal pages
+              once the flight's topbar is all that's left above the form. */}
+          <Footer />
         </PortalReveal>
       </SmoothScrollProvider>
     </>

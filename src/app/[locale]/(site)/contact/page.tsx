@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { PageBackdrop } from '@/components/PageBackdrop';
 import { LeadForm } from '@/components/LeadForm';
+import { getLocaleText } from '@/lib/content/store';
 
 // Every string on the site comes from the Firestore content doc (see
 // i18n/request.ts -> getLocaleText). That's a raw Admin SDK read, not a fetch,
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
 
 export default async function ContactPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
+  const text = await getLocaleText(locale);
 
   return (
     // At least one screen tall with the content stretching, so a short page
@@ -31,8 +33,8 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
     <div className="relative isolate flex min-h-screen min-h-dvh flex-col">
       <PageBackdrop />
       <Header />
-      <main className="flex-1">
-        <LeadForm />
+      <main id="main-content" tabIndex={-1} className="flex-1">
+        <LeadForm sizes={text.leadForm.sizes} />
       </main>
       <Footer />
     </div>

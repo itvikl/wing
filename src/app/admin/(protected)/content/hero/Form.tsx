@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField } from '@/components/admin/fields';
+import { TextField, sizeField } from '@/components/admin/fields';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
 import { useSectionForm } from '@/components/admin/useSectionForm';
@@ -27,8 +27,8 @@ export function HeroForm({ initial, firstCueOwn }: { initial: Data; firstCueOwn:
     // flight's first caption, which is edited on the See Wings page now).
     return (
       <div className="grid gap-4">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת ראשית" value={value.headline} jump="headline" onChange={(v) => update({ headline: v })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" {...sizeField(value.sizes, 'eyebrow', (sizes) => update({ sizes }))} onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת ראשית" value={value.headline} jump="headline" {...sizeField(value.sizes, 'headline', (sizes) => update({ sizes }))} onChange={(v) => update({ headline: v })} />
       </div>
     );
   }

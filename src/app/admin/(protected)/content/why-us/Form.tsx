@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField, TextAreaField } from '@/components/admin/fields';
+import { TextField, TextAreaField, sizeField } from '@/components/admin/fields';
 import { RepeatableList } from '@/components/admin/RepeatableList';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
@@ -28,8 +28,8 @@ export function WhyUsForm({ initial }: { initial: Data }) {
     return (
       <div className="grid gap-6">
         <div className="grid gap-4">
-          <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
-          <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
+          <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" {...sizeField(value.sizes, 'eyebrow', (sizes) => update({ sizes }))} onChange={(v) => update({ eyebrow: v })} />
+          <TextField label="כותרת" value={value.title} jump="title" {...sizeField(value.sizes, 'title', (sizes) => update({ sizes }))} onChange={(v) => update({ title: v })} />
         </div>
         <RepeatableList<Item>
           items={value.items}
@@ -38,8 +38,8 @@ export function WhyUsForm({ initial }: { initial: Data }) {
           addLabel="הוספת יתרון"
           renderItem={(item, updateItem, index) => (
             <div className="grid gap-3">
-              <TextField label="כותרת" value={item.title} jump={`items.${index}.title`} onChange={(v) => updateItem({ title: v })} />
-              <TextAreaField label="טקסט" value={item.body} jump={`items.${index}.body`} onChange={(v) => updateItem({ body: v })} />
+              <TextField label="כותרת" value={item.title} jump={`items.${index}.title`} {...sizeField(item.sizes, 'title', (sizes) => updateItem({ sizes }))} onChange={(v) => updateItem({ title: v })} />
+              <TextAreaField label="טקסט" value={item.body} jump={`items.${index}.body`} {...sizeField(item.sizes, 'body', (sizes) => updateItem({ sizes }))} onChange={(v) => updateItem({ body: v })} />
             </div>
           )}
         />

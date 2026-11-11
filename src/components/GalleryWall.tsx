@@ -3,8 +3,10 @@
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion';
+import { Sized } from '@/lib/textSize';
+import type { TextSizes } from '@/lib/content/schema';
 
-type Member = { name: string; initials: string; role: string; bio: string; image: string | null };
+type Member = { name: string; initials: string; role: string; bio: string; image: string | null; sizes?: TextSizes };
 
 // Deterministic entry vectors for the assembly effect (avoids Math.random,
 // which would desync between SSR and hydration since this is a client component).
@@ -20,10 +22,13 @@ const ENTRY_PRESETS = [
 export function GalleryWall({
   eyebrow,
   title,
+  sizes,
   members,
 }: {
   eyebrow: string;
   title: string;
+  /** The section's text sizes (eyebrow, title); each member carries its own. */
+  sizes?: TextSizes;
   members: Member[];
 }) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -44,9 +49,9 @@ export function GalleryWall({
       style={{ transformOrigin: '50% 40%' }}
     >
       <div className="mx-auto max-w-4xl px-6 text-center">
-        <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg">{eyebrow}</span>
+        <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg"><Sized scale={sizes?.eyebrow}>{eyebrow}</Sized></span>
         <h1 className="mt-4 text-balance font-display text-3xl font-semibold text-neutral-100 md:text-4xl">
-          {title}
+          <Sized scale={sizes?.title}>{title}</Sized>
         </h1>
       </div>
 
@@ -133,9 +138,9 @@ function FrameCard({
         </div>
 
         <div className="mt-3 border-t border-accent/30 pt-3">
-          <h2 className="font-display text-lg font-semibold text-neutral-100">{member.name}</h2>
+          <h2 className="font-display text-lg font-semibold text-neutral-100"><Sized scale={member.sizes?.name}>{member.name}</Sized></h2>
           <p className="mt-0.5 text-sm uppercase tracking-[0.16em] text-accent-light">
-            {member.role}
+            <Sized scale={member.sizes?.role}>{member.role}</Sized>
           </p>
         </div>
       </button>
@@ -149,7 +154,7 @@ function FrameCard({
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="pt-3 text-base leading-relaxed text-neutral-200">{member.bio}</p>
+            <p className="pt-3 text-base leading-relaxed text-neutral-200"><Sized scale={member.sizes?.bio}>{member.bio}</Sized></p>
           </motion.div>
         )}
       </AnimatePresence>

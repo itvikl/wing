@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField } from '@/components/admin/fields';
+import { TextField, sizeField } from '@/components/admin/fields';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
 import { useSectionForm } from '@/components/admin/useSectionForm';
@@ -24,9 +24,11 @@ export function FooterForm({ initial }: { initial: Data }) {
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="טקסט זכויות יוצרים" value={value.rights} jump="rights" onChange={(v) => update({ rights: v })} />
-        <TextField label="תווית 'טלפון'" value={value.phone} jump="phone" onChange={(v) => update({ phone: v })} />
-        <TextField label="תווית 'וואטסאפ'" value={value.whatsapp} jump="whatsapp" onChange={(v) => update({ whatsapp: v })} />
+        <TextField label="טקסט זכויות יוצרים" value={value.rights} jump="rights" {...sizeField(value.sizes, 'rights', (sizes) => update({ sizes }))} onChange={(v) => update({ rights: v })} />
+        <TextField label="תווית 'טלפון'" value={value.phone} jump="phone" {...sizeField(value.sizes, 'phone', (sizes) => update({ sizes }))} onChange={(v) => update({ phone: v })} />
+        <TextField label="תווית 'וואטסאפ'" value={value.whatsapp} jump="whatsapp" {...sizeField(value.sizes, 'whatsapp', (sizes) => update({ sizes }))} onChange={(v) => update({ whatsapp: v })} />
+        <TextField label="תווית 'אימייל' (לקוראי מסך)" value={value.email} jump="email" onChange={(v) => update({ email: v })} />
+        <TextField label="הודעה ראשונה בוואטסאפ (ממולאת מראש)" value={value.whatsappMessage} jump="whatsappMessage" onChange={(v) => update({ whatsappMessage: v })} />
       </div>
     );
   }
@@ -49,14 +51,19 @@ export function FooterForm({ initial }: { initial: Data }) {
 
             <div className="mt-8 grid gap-4 border-t border-neutral-200 pt-6 sm:grid-cols-2">
               <TextField
-                label="מספר טלפון (tel:)"
+                label="מספר טלפון, כפי שיוצג באתר (למשל +972 2-123-4567)"
                 value={links.phoneNumber} jump="phoneNumber"
                 onChange={(v) => updateLink({ phoneNumber: v })}
               />
               <TextField
-                label="קישור וואטסאפ (https://wa.me/...)"
+                label="קישור וואטסאפ (https://wa.me/972501234567) — מפעיל את הכפתור הצף"
                 value={links.whatsappLink} jump="whatsappLink"
                 onChange={(v) => updateLink({ whatsappLink: v })}
+              />
+              <TextField
+                label="כתובת אימייל"
+                value={links.emailAddress} jump="emailAddress"
+                onChange={(v) => updateLink({ emailAddress: v })}
               />
               <TextField
                 label="קישור פייסבוק"

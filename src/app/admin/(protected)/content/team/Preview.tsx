@@ -1,12 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import { Sized } from '@/lib/textSize';
 import { Jump } from '@/components/admin/AdminLocale';
 import { PreviewLocaleToggle, usePreviewLocale } from '@/components/admin/PreviewLocaleToggle';
 import type { ContentLocale } from '@/lib/content/schema';
 
-type Member = { name: string; initials: string; role: string; bio: string };
-type Labels = { eyebrow: string; title: string };
+type Member = { name: string; initials: string; role: string; bio: string; sizes?: Record<string, number> };
+type Labels = { eyebrow: string; title: string; sizes?: Record<string, number> };
 type Row = { he: Member; en: Member; image: string | null };
 
 export function TeamPreview({
@@ -23,8 +24,8 @@ export function TeamPreview({
     <div>
       <PreviewLocaleToggle active={locale} onChange={setLocale} />
       <div dir={locale === 'he' ? 'rtl' : 'ltr'} className="bg-neutral-100 p-6 text-center">
-        <Jump to="eyebrow" as="span" className="text-xs uppercase tracking-[0.2em] text-accent-dark">{value.eyebrow || '—'}</Jump>
-        <Jump to="title" as="h2" className="mt-2 font-display text-lg font-semibold text-primary-dark">{value.title || '—'}</Jump>
+        <Jump to="eyebrow" as="span" className="text-xs uppercase tracking-[0.2em] text-accent-dark"><Sized scale={value.sizes?.eyebrow}>{value.eyebrow || '—'}</Sized></Jump>
+        <Jump to="title" as="h2" className="mt-2 font-display text-lg font-semibold text-primary-dark"><Sized scale={value.sizes?.title}>{value.title || '—'}</Sized></Jump>
         <div className="mt-4 grid grid-cols-2 gap-3">
           {rows.length ? (
             rows.map((row, index) => {
@@ -40,8 +41,8 @@ export function TeamPreview({
                       {member.initials || '—'}
                     </Jump>
                   )}
-                  <Jump to={`rows.${index}.name`} as="h3" className="mt-2 text-xs font-semibold text-primary-dark">{member.name || '—'}</Jump>
-                  <Jump to={`rows.${index}.role`} as="p" className="text-[10px] uppercase tracking-wide text-accent-dark">{member.role || '—'}</Jump>
+                  <Jump to={`rows.${index}.name`} as="h3" className="mt-2 text-xs font-semibold text-primary-dark"><Sized scale={member.sizes?.name}>{member.name || '—'}</Sized></Jump>
+                  <Jump to={`rows.${index}.role`} as="p" className="text-[10px] uppercase tracking-wide text-accent-dark"><Sized scale={member.sizes?.role}>{member.role || '—'}</Sized></Jump>
                 </div>
               );
             })

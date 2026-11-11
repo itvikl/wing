@@ -3,8 +3,10 @@
 import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
 import { useState } from 'react';
 import { CUE_BEATS_S, FLIGHT_SECONDS, flightVh } from '@/lib/seeWingsTiming';
+import { Sized, sizeStyle } from '@/lib/textSize';
+import type { TextSizes } from '@/lib/content/schema';
 
-type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
+type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[]; sizes?: TextSizes };
 
 const FADE = 0.22;
 // Mirrors SeeWingsSplash's own text fade-out window (0.15 * one viewport height).
@@ -50,11 +52,13 @@ export function SeeWingsCues({
   trackVh,
   ctaLabel,
   ctaHref,
+  ctaSize,
 }: {
   cues: Cue[];
   trackVh: number;
   ctaLabel: string;
   ctaHref: string;
+  ctaSize?: number;
 }) {
   const { scrollY } = useScroll();
   const progress = useTransform(scrollY, (y) => Math.min(1, Math.max(0, y / (trackVh * flightVh()))));
@@ -95,6 +99,7 @@ export function SeeWingsCues({
             active={active === i && !portalDone}
             ctaLabel={ctaLabel}
             ctaHref={ctaHref}
+            ctaSize={ctaSize}
           />
         ))}
       </div>
@@ -112,6 +117,7 @@ function CueBlock({
   active,
   ctaLabel,
   ctaHref,
+  ctaSize,
 }: {
   cue: Cue;
   progress: ReturnType<typeof useTransform<number, number>>;
@@ -122,6 +128,7 @@ function CueBlock({
   active: boolean;
   ctaLabel: string;
   ctaHref: string;
+  ctaSize?: number;
 }) {
   const opacity = useTransform(progress, (p) => cueOpacity(p, index, count, trackVh));
   const y = useTransform(progress, (p) => `${(1 - cueOpacity(p, index, count, trackVh)) * -48}px`);
@@ -131,20 +138,25 @@ function CueBlock({
       {/* A tight shadow plus a hairline stroke in the text's own color: GFS
           Didot has one thin weight, and its hairlines vanish on bright frames. */}
       <span className="font-display text-base font-bold uppercase tracking-[0.16em] text-accent-light [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_12px_rgba(5,32,26,0.7)] [-webkit-text-stroke:0.25px_currentColor] md:text-lg">
-        {cue.eyebrow}
+        <Sized scale={cue.sizes?.eyebrow}>{cue.eyebrow}</Sized>
       </span>
       <h2 className="mt-3 font-display text-[clamp(2rem,4.4vw,3.2rem)] font-bold leading-[1.05] text-neutral-100 [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_14px_rgba(5,32,26,0.7),0_2px_28px_rgba(5,32,26,0.6)] [-webkit-text-stroke:0.45px_currentColor]">
-        {cue.title}
+        <Sized scale={cue.sizes?.title}>{cue.title}</Sized>
       </h2>
       {cue.body && (
         <p className="mt-4 max-w-md text-lg text-neutral-200 [text-shadow:0_2px_16px_rgba(5,32,26,0.7)] md:text-xl">
-          {cue.body}
+          <Sized scale={cue.sizes?.body}>{cue.body}</Sized>
         </p>
       )}
       {!!cue.extra?.length && (
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1">
           {cue.extra.map((field, i) => (
-            <div key={i} className="flex gap-1.5 text-base text-neutral-200 [text-shadow:0_2px_12px_rgba(5,32,26,0.7)]">
+            <div
+              key={i}
+              className="flex gap-1.5 text-base text-neutral-200 [text-shadow:0_2px_12px_rgba(5,32,26,0.7)]"
+              // em against the 16px it inherits, so it scales text-base (1rem)
+              style={sizeStyle(cue.sizes?.extra)}
+            >
               <dt className="font-semibold text-accent-light">{field.label}</dt>
               <dd>{field.value}</dd>
             </div>
@@ -157,7 +169,7 @@ function CueBlock({
             href={ctaHref}
             className="inline-block rounded-full bg-accent px-8 py-3 text-base font-semibold text-primary-dark transition-transform hover:-translate-y-0.5"
           >
-            {ctaLabel}
+            <Sized scale={ctaSize}>{ctaLabel}</Sized>
           </a>
         </div>
       )}

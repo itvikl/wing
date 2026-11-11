@@ -2,9 +2,14 @@ import type { Metadata } from 'next';
 import { Frank_Ruhl_Libre, Heebo } from 'next/font/google';
 import localFont from 'next/font/local';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { locales, type Locale } from '@/i18n/request';
 import { CustomCursor } from '@/components/motion/CustomCursor';
+import { Tracking } from '@/components/Tracking';
+import { WhatsAppFab } from '@/components/WhatsAppFab';
+import { AccessibilityProvider } from '@/components/AccessibilityMenu';
+import { A11Y_BOOT_SCRIPT } from '@/lib/a11y';
+import { whatsappHref } from '@/lib/contact';
 import '../globals.css';
 
 // Google's latin cut of GFS Didot, self-hosted: next/font/google only knows the
@@ -53,14 +58,30 @@ export default async function LocaleLayout({
 }) {
   setRequestLocale(locale);
   const messages = await getMessages();
+  const footer = await getTranslations('footer');
   const dir = locale === 'he' ? 'rtl' : 'ltr';
+  // Read at request time (not NEXT_PUBLIC_, which is baked in at build), so
+  // the pixel can be switched on in apphosting.yaml without a code change.
+  const pixelId = process.env.META_PIXEL_ID?.trim();
 
   return (
-    <html lang={locale} dir={dir} className={`${didot.variable} ${hebrewDisplay.variable} ${hebrewSans.variable}`}>
+    // suppressHydrationWarning: the boot script below adds the visitor's saved
+    // accessibility classes (a11y-*) to <html> before React hydrates.
+    <html
+      lang={locale}
+      dir={dir}
+      className={`${didot.variable} ${hebrewDisplay.variable} ${hebrewSans.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: A11Y_BOOT_SCRIPT }} />
+      </head>
       <body className="font-sans">
         <NextIntlClientProvider messages={messages}>
           <CustomCursor />
-          {children}
+          <AccessibilityProvider>{children}</AccessibilityProvider>
+          <WhatsAppFab href={whatsappHref(footer('whatsappLink'), footer('whatsappMessage'))} label={footer('whatsapp')} />
+          <Tracking pixelId={pixelId} />
         </NextIntlClientProvider>
       </body>
     </html>

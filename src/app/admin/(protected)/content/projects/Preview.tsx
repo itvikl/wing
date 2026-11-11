@@ -1,5 +1,6 @@
 'use client';
 
+import { Sized } from '@/lib/textSize';
 import { Jump } from '@/components/admin/AdminLocale';
 import { PreviewLocaleToggle, usePreviewLocale } from '@/components/admin/PreviewLocaleToggle';
 import type { ProjectsText } from './actions';
@@ -17,8 +18,8 @@ export function ProjectsPreview({ labels, rows }: { labels: Record<ContentLocale
     <div>
       <PreviewLocaleToggle active={locale} onChange={setLocale} />
       <div dir={locale === 'he' ? 'rtl' : 'ltr'} className="bg-neutral-bg p-6 text-center">
-        <Jump to="eyebrow" as="span" className="text-xs uppercase tracking-[0.2em] text-accent-dark">{value.eyebrow || '—'}</Jump>
-        <Jump to="title" as="h2" className="mt-2 font-display text-lg font-semibold text-primary-dark">{value.title || '—'}</Jump>
+        <Jump to="eyebrow" as="span" className="text-xs uppercase tracking-[0.2em] text-accent-dark"><Sized scale={value.sizes?.eyebrow}>{value.eyebrow || '—'}</Sized></Jump>
+        <Jump to="title" as="h2" className="mt-2 font-display text-lg font-semibold text-primary-dark"><Sized scale={value.sizes?.title}>{value.title || '—'}</Sized></Jump>
         <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
           {rows.length ? (
             rows.map((row, index) => {
@@ -34,8 +35,8 @@ export function ProjectsPreview({ labels, rows }: { labels: Record<ContentLocale
                     <img src={row.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" />
                   )}
                   <div className="absolute inset-0 flex flex-col justify-end p-2 text-neutral-100">
-                    <Jump to={`rows.${index}.title`} as="h3" className="text-[11px] font-semibold leading-tight">{item.title || '—'}</Jump>
-                    <Jump to={`rows.${index}.location`} as="p" className="text-[9px] text-neutral-200">{item.location || '—'}</Jump>
+                    <Jump to={`rows.${index}.title`} as="h3" className="text-[11px] font-semibold leading-tight"><Sized scale={item.sizes?.title}>{item.title || '—'}</Sized></Jump>
+                    <Jump to={`rows.${index}.location`} as="p" className="text-[9px] text-neutral-200"><Sized scale={item.sizes?.location}>{item.location || '—'}</Sized></Jump>
                   </div>
                 </Jump>
               );

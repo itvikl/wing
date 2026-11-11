@@ -1,14 +1,28 @@
-/** `jump` targets the whole list; each paragraph is also `${jump}.${index}`. */
+import { FieldHeader } from './fields';
+
+/**
+ * `jump` targets the whole list; each paragraph is also `${jump}.${index}`.
+ * One size control for all the paragraphs (`size`/`onSize`).
+ */
 export function ParagraphListField({
   label,
   values,
   onChange,
   jump,
+  size,
+  onSize,
+  addLabel = '+ הוספת פסקה',
+  rows = 2,
 }: {
   label: string;
   values: string[];
   onChange: (values: string[]) => void;
   jump?: string;
+  size?: number;
+  onSize?: (value: number) => void;
+  /** The add button's text ("+ הוספת אפשרות" for a select's choices). */
+  addLabel?: string;
+  rows?: number;
 }) {
   function update(index: number, value: string) {
     onChange(values.map((v, i) => (i === index ? value : v)));
@@ -28,13 +42,13 @@ export function ParagraphListField({
 
   return (
     <div className="rounded-lg" data-jump-target={jump}>
-      <span className="block text-sm font-medium text-primary-dark">{label}</span>
+      <FieldHeader label={label} size={size} onSize={onSize} />
       <div className="mt-2 grid gap-3">
         {values.map((value, index) => (
           <div key={index} className="flex gap-2 rounded-lg" data-jump-target={jump ? `${jump}.${index}` : undefined}>
             <textarea
               value={value}
-              rows={2}
+              rows={rows}
               onChange={(event) => update(index, event.target.value)}
               className="flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-primary-dark focus:border-accent focus:outline-none"
             />
@@ -67,7 +81,7 @@ export function ParagraphListField({
         onClick={() => onChange([...values, ''])}
         className="mt-3 w-fit rounded-full border border-dashed border-neutral-200 px-4 py-2 text-sm text-neutral-muted transition-colors hover:border-accent hover:text-accent-dark"
       >
-        + הוספת פסקה
+        {addLabel}
       </button>
     </div>
   );

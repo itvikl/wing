@@ -1,5 +1,6 @@
 'use client';
 
+import { Sized } from '@/lib/textSize';
 import { Jump } from '@/components/admin/AdminLocale';
 import { PreviewLocaleToggle, usePreviewLocale } from '@/components/admin/PreviewLocaleToggle';
 import { PreviewNote } from '@/components/admin/SectionLayout';
@@ -11,7 +12,13 @@ type SceneRow = {
   en: { label: string; eyebrow: string; title: string; body: string };
   still: string;
 };
-type CueText = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
+type CueText = {
+  eyebrow: string;
+  title: string;
+  body?: string;
+  extra?: { label: string; value: string }[];
+  sizes?: Record<string, number>;
+};
 type CueRow = { he: CueText; en: CueText };
 
 export function SeeWingsPreview({
@@ -21,7 +28,7 @@ export function SeeWingsPreview({
 }: {
   scenes: SceneRow[];
   cues: CueRow[];
-  cta: Record<ContentLocale, { ctaPrimary: string; ctaSecondary: string }>;
+  cta: Record<ContentLocale, { ctaPrimary: string; ctaSecondary: string; sizes?: Record<string, number> }>;
 }) {
   const [locale, setLocale] = usePreviewLocale();
   const allCues = cues.map((c) => c[locale]);
@@ -54,15 +61,17 @@ export function SeeWingsPreview({
           {allCues.map((cue, index) => (
             <Jump key={index} to={`cues.${index}.title`} className="rounded-lg bg-black/20 p-3">
               <Jump to={`cues.${index}.eyebrow`} as="span" className="font-display text-[10px] font-bold uppercase tracking-[0.16em] text-accent-light">
-                {cue.eyebrow || '—'}
+                <Sized scale={cue.sizes?.eyebrow}>{cue.eyebrow || '—'}</Sized>
               </Jump>
-              <Jump to={`cues.${index}.title`} as="p" className="mt-1 font-display text-sm font-bold leading-tight text-neutral-100">{cue.title || '—'}</Jump>
-              {cue.body && <Jump to={`cues.${index}.body`} as="p" className="mt-1 text-xs text-neutral-200/80">{cue.body}</Jump>}
+              <Jump to={`cues.${index}.title`} as="p" className="mt-1 font-display text-sm font-bold leading-tight text-neutral-100"><Sized scale={cue.sizes?.title}>{cue.title || '—'}</Sized></Jump>
+              {cue.body && <Jump to={`cues.${index}.body`} as="p" className="mt-1 text-xs text-neutral-200/80"><Sized scale={cue.sizes?.body}>{cue.body}</Sized></Jump>}
               {!!cue.extra?.length && (
                 <p className="mt-1 flex flex-wrap gap-x-3 text-[10px] text-neutral-200/70">
                   {cue.extra.map((f, i) => (
                     <Jump key={i} to={`cues.${index}.extra.${i}.value`} as="span">
-                      {f.label}: {f.value}
+                      <Sized scale={cue.sizes?.extra}>
+                        {f.label}: {f.value}
+                      </Sized>
                     </Jump>
                   ))}
                 </p>
@@ -73,7 +82,7 @@ export function SeeWingsPreview({
 
         <div className="mt-4 flex gap-2">
           <Jump to="ctaPrimary" as="span" className="rounded-full bg-accent px-3 py-1 text-[10px] font-medium text-primary-dark">
-            {cta[locale].ctaPrimary || '—'}
+            <Sized scale={cta[locale].sizes?.ctaPrimary}>{cta[locale].ctaPrimary || '—'}</Sized>
           </Jump>
           <Jump to="ctaSecondary" as="span" className="rounded-full border border-white/30 px-3 py-1 text-[10px] text-neutral-100">
             {cta[locale].ctaSecondary || '—'}

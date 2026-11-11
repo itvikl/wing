@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { mountScrollWorld } from '@/lib/scrollWorld';
-import { SECTION_VH, CONN_VH, computeTrackVh, BOULEVARD_ZOOM, STATION_REST_S, STATION_STILLS, FLIGHT_SECONDS, STEP_PLAYBACK_RATE } from '@/lib/seeWingsTiming';
+import { SECTION_VH, CONN_VH, computeTrackVh, BOULEVARD_ZOOM, STATION_REST_S, FLIGHT_SECONDS, STEP_PLAYBACK_RATE } from '@/lib/seeWingsTiming';
 import { SeeWingsCues } from './SeeWingsCues';
 import { SeeWingsSplash } from './SeeWingsSplash';
 import type { Locale } from '@/i18n/request';
+import type { TextSizes } from '@/lib/content/schema';
 
 export type SeeWingsSection = {
   id: string;
@@ -17,11 +18,11 @@ export type SeeWingsSection = {
   tags: string[];
 };
 
-/** The opening screen's copy: Hero's eyebrow and headline. */
-export type SeeWingsOpening = { eyebrow: string; title: string };
+/** The opening screen's copy: Hero's eyebrow and headline, and their text sizes. */
+export type SeeWingsOpening = { eyebrow: string; title: string; sizes?: TextSizes };
 
-type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[] };
-type NavLink = { id: string; label: string };
+type Cue = { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[]; sizes?: TextSizes };
+type NavLink = { id: string; label: string; size?: number };
 export type SeeWingsMedia = {
   sections: { id: string; still: string; clip: string; stillMobile?: string; clipMobile?: string }[];
   connectors: (string | null)[];
@@ -52,18 +53,23 @@ export function SeeWingsExperience({
   cues,
   navLinks,
   ctaPrimary,
+  ctaPrimarySize,
   brandCta,
+  brandCtaSize,
   media,
   opening,
   seamlessHandoff = false,
   persistentTopbar = false,
+  phone,
 }: {
   locale: Locale;
   sections: SeeWingsSection[];
   cues: Cue[];
   navLinks: NavLink[];
   ctaPrimary: string;
+  ctaPrimarySize?: number;
   brandCta: string;
+  brandCtaSize?: number;
   media: SeeWingsMedia;
   /**
    * The admin's Hero section ("the first banner shown on entering the site").
@@ -85,6 +91,8 @@ export function SeeWingsExperience({
    * site's solid Header. For pages that render no Header of their own.
    */
   persistentTopbar?: boolean;
+  /** The office number for the topbar's phone pill (admin Footer section); none hides it. */
+  phone?: { href: string; label: string; aria: string };
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -125,13 +133,20 @@ export function SeeWingsExperience({
     // swipe should move the flight. Stepping (and the idle-snap back onto a
     // stop) made most swipes feel like they did nothing. Mouse and trackpad
     // keep the stop-to-stop flight.
-    const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    // TRIAL: /nonstop (the home page under another URL, see its page.tsx)
+    // scrubs freely on every device too, so the stop-to-stop flight can be
+    // compared against one continuous scrub. Remove once that's settled.
+    const nonstop = pathWithoutLocale === '/nonstop';
+    // TRIAL: /autoplay plays the flight by itself, start to end, no control.
+    const autoplay = pathWithoutLocale === '/autoplay';
+    const touch = nonstop || autoplay || window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
     const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
       // where the topbar mark would sit and takes over that role instead.
-      cta: { label: brandCta, href: `${homeHref}#contact` },
+      cta: { label: brandCta, href: `${homeHref}#contact`, size: brandCtaSize },
       lang: { label: targetLocale, href: langHref },
+      phone,
       keepTopbar: persistentTopbar,
       hint: locale === 'he' ? 'גללו כדי להמריא' : 'scroll to take flight',
       loadingHint: locale === 'he' ? 'טוען את החוויה' : 'loading the experience',
@@ -139,6 +154,7 @@ export function SeeWingsExperience({
       navLinks: navLinks.map((n) => ({
         label: n.label,
         href: ROUTED_IDS.has(n.id) ? routedHref(n.id) : `${homeHref}#${n.id}`,
+        size: n.size,
       })),
       atmosphere: true,
       // Whole-file download, not streaming: compared side by side on real
@@ -159,9 +175,14 @@ export function SeeWingsExperience({
       // Each wheel burst / arrow key flies to the next rest beat instead of
       // scrubbing freely (see scrollWorld.js's step-scroll).
       stepScroll: !touch,
+      // TRIAL (/nonstop): the wheel stops the flight dead, no easing tail.
+      instantScrub: nonstop,
+      autoplay,
       // Seconds a step takes to cross the whole track — the same
       // single-section assumption as restBeats above.
       stepTrackSeconds: FLIGHT_SECONDS / STEP_PLAYBACK_RATE,
+      // Steps back play at twice that: it's footage the reader has just seen.
+      stepBackSpeed: 2,
       // Trial switch, not a setting: ?flow=boost lets a gesture mid-flight
       // speed the camera on to a further stop (or turn it back) instead of
       // being ignored, so both behaviours can be compared side by side.
@@ -183,7 +204,6 @@ export function SeeWingsExperience({
           // Only the single current flight scene has a boulevard to crop; a
           // future second scene wouldn't automatically inherit this window.
           zoomBeats: i === 0 ? [BOULEVARD_ZOOM] : undefined,
-          restStills: i === 0 ? STATION_STILLS : undefined,
           // Linear on purpose. linger (was 0.55) eases scroll→time so the
           // camera settles mid-scene, which suited three short dives with one
           // caption each. With one 15s flight and six captions, mid-scene is
@@ -220,7 +240,7 @@ export function SeeWingsExperience({
       engine.dispose();
       Object.keys(SW_THEME_VARS).forEach((k) => root.style.removeProperty(k));
     };
-  }, [locale, sections, navLinks, brandCta, media, pathname, persistentTopbar]);
+  }, [locale, sections, navLinks, brandCta, brandCtaSize, media, pathname, persistentTopbar, phone]);
 
   const homeHref = locale === 'en' ? '/' : `/${locale}`;
 
@@ -257,8 +277,9 @@ export function SeeWingsExperience({
         homeHref={homeHref}
         trackVh={trackVh}
         persist={persistentTopbar}
+        sizes={opening?.title ? opening.sizes : undefined}
       />
-      <SeeWingsCues cues={cues} trackVh={trackVh} ctaLabel={ctaPrimary} ctaHref={`${homeHref}#contact`} />
+      <SeeWingsCues cues={cues} trackVh={trackVh} ctaLabel={ctaPrimary} ctaHref={`${homeHref}#contact`} ctaSize={ctaPrimarySize} />
     </>
   );
 }

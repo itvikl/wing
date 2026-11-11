@@ -7,8 +7,10 @@ import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 
 import { Reveal } from './motion/Reveal';
 import { TiltCard } from './motion/TiltCard';
 import { MagneticButton } from './motion/MagneticButton';
+import { Sized } from '@/lib/textSize';
+import type { TextSizes } from '@/lib/content/schema';
 
-type Item = { title: string; location: string; description: string; image?: string | null };
+type Item = { title: string; location: string; description: string; image?: string | null; sizes?: TextSizes };
 
 const PATTERNS = [
   'repeating-linear-gradient(135deg, rgba(181,130,56,0.25) 0px, rgba(181,130,56,0.25) 1px, transparent 1px, transparent 24px)',
@@ -22,6 +24,7 @@ export function ProjectsGallery({
   ctaLabel,
   viewDetailsLabel,
   closeLabel,
+  sizes,
   items,
 }: {
   eyebrow: string;
@@ -29,6 +32,8 @@ export function ProjectsGallery({
   ctaLabel: string;
   viewDetailsLabel: string;
   closeLabel: string;
+  /** The section's text sizes; each item carries its own. */
+  sizes?: TextSizes;
   items: Item[];
 }) {
   const locale = useLocale();
@@ -70,14 +75,16 @@ export function ProjectsGallery({
     <section id="projects" className="py-16 sm:py-20 md:py-24">
       <div className="mx-auto max-w-6xl px-6 text-center">
         <Reveal>
-          <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg">{eyebrow}</span>
+          <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg"><Sized scale={sizes?.eyebrow}>{eyebrow}</Sized></span>
           <h2 className="mt-4 font-display text-3xl font-semibold text-neutral-100 text-balance md:text-4xl">
-            {title}
+            <Sized scale={sizes?.title}>{title}</Sized>
           </h2>
         </Reveal>
 
         <Reveal index={1} className="mt-4">
-          <p className="text-base text-neutral-200">{viewDetailsLabel} →</p>
+          <p className="text-base text-neutral-200">
+            <Sized scale={sizes?.viewDetails}>{viewDetailsLabel} →</Sized>
+          </p>
         </Reveal>
       </div>
 
@@ -117,10 +124,10 @@ export function ProjectsGallery({
                 style={{ backgroundImage: PATTERNS[index % PATTERNS.length] }}
               />
               <div className="absolute inset-0 flex flex-col justify-end p-8 text-neutral-100">
-                <h3 className="font-display text-2xl font-semibold">{item.title}</h3>
-                <p className="mt-1 text-base text-neutral-200">{item.location}</p>
+                <h3 className="font-display text-2xl font-semibold"><Sized scale={item.sizes?.title}>{item.title}</Sized></h3>
+                <p className="mt-1 text-base text-neutral-200"><Sized scale={item.sizes?.location}>{item.location}</Sized></p>
                 <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-full border border-accent-light px-5 py-2 text-base text-accent-light transition-colors group-hover:bg-accent-light group-hover:text-primary-dark">
-                  {viewDetailsLabel}
+                  <Sized scale={sizes?.viewDetails}>{viewDetailsLabel}</Sized>
                 </span>
               </div>
             </button>
@@ -170,14 +177,14 @@ export function ProjectsGallery({
                 </button>
               </div>
               <div className="p-8">
-                <span className="text-base uppercase tracking-[0.2em] text-accent-dark md:text-lg">{active.location}</span>
-                <h3 className="mt-3 font-display text-2xl font-semibold text-primary-dark">{active.title}</h3>
-                <p className="mt-4 text-lg text-neutral-muted">{active.description}</p>
+                <span className="text-base uppercase tracking-[0.2em] text-accent-dark md:text-lg"><Sized scale={active.sizes?.location}>{active.location}</Sized></span>
+                <h3 className="mt-3 font-display text-2xl font-semibold text-primary-dark"><Sized scale={active.sizes?.title}>{active.title}</Sized></h3>
+                <p className="mt-4 text-lg text-neutral-muted"><Sized scale={active.sizes?.description}>{active.description}</Sized></p>
                 <MagneticButton
                   href={contactHref}
                   className="mt-8 inline-block rounded-full bg-accent px-8 py-3 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light"
                 >
-                  {ctaLabel}
+                  <Sized scale={sizes?.cta}>{ctaLabel}</Sized>
                 </MagneticButton>
               </div>
             </motion.div>

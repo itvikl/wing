@@ -53,7 +53,7 @@ export function CustomCursor() {
   if (!enabled) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100]" aria-hidden style={{ opacity: visible ? 1 : 0 }}>
+    <div data-custom-cursor className="pointer-events-none fixed inset-0 z-[100]" aria-hidden style={{ opacity: visible ? 1 : 0 }}>
       <motion.div
         className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent"
         style={{ left: x, top: y }}

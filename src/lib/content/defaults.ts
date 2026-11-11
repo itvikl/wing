@@ -5,6 +5,7 @@ import type { LocaleText, SiteContent, SiteText } from './schema';
 const FOOTER_LINK_DEFAULTS = {
   phoneNumber: '',
   whatsappLink: '',
+  emailAddress: '',
   facebookUrl: '',
   instagramUrl: '',
 };

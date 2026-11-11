@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField, TextAreaField } from '@/components/admin/fields';
+import { TextField, TextAreaField, sizeField } from '@/components/admin/fields';
 import { ImageUploadField } from '@/components/admin/ImageUploadField';
 import { RepeatableList } from '@/components/admin/RepeatableList';
 import { SectionLayout } from '@/components/admin/SectionLayout';
@@ -43,8 +43,8 @@ export function TeamForm({
   const { data, setData, saving, saved, error, handleSubmit } = useSectionForm<Data>(
     {
       labels: {
-        he: { eyebrow: initial.he.eyebrow, title: initial.he.title },
-        en: { eyebrow: initial.en.eyebrow, title: initial.en.title },
+        he: { eyebrow: initial.he.eyebrow, title: initial.he.title, sizes: initial.he.sizes ?? {} },
+        en: { eyebrow: initial.en.eyebrow, title: initial.en.title, sizes: initial.en.sizes ?? {} },
       },
       rows: toRows(initial.he.members, initial.en.members, initial.images),
     },
@@ -57,8 +57,8 @@ export function TeamForm({
       setData((prev) => ({ ...prev, labels: { ...prev.labels, [locale]: { ...prev.labels[locale], ...patch } } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" {...sizeField(value.sizes, 'eyebrow', (sizes) => update({ sizes }))} onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת" value={value.title} jump="title" {...sizeField(value.sizes, 'title', (sizes) => update({ sizes }))} onChange={(v) => update({ title: v })} />
       </div>
     );
   }
@@ -83,21 +83,21 @@ export function TeamForm({
               <LocaleTabs
                 he={
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <TextField label="שם מלא" value={row.he.name} jump={`rows.${index}.name`} onChange={(v) => updateRow({ he: { ...row.he, name: v } })} />
+                    <TextField label="שם מלא" value={row.he.name} jump={`rows.${index}.name`} {...sizeField(row.he.sizes, 'name', (sizes) => updateRow({ he: { ...row.he, sizes } }))} onChange={(v) => updateRow({ he: { ...row.he, name: v } })} />
                     <TextField label="ראשי תיבות (לעיגול)" value={row.he.initials} jump={`rows.${index}.initials`} onChange={(v) => updateRow({ he: { ...row.he, initials: v } })} />
-                    <TextField label="תפקיד" value={row.he.role} jump={`rows.${index}.role`} onChange={(v) => updateRow({ he: { ...row.he, role: v } })} />
+                    <TextField label="תפקיד" value={row.he.role} jump={`rows.${index}.role`} {...sizeField(row.he.sizes, 'role', (sizes) => updateRow({ he: { ...row.he, sizes } }))} onChange={(v) => updateRow({ he: { ...row.he, role: v } })} />
                     <div className="sm:col-span-2">
-                      <TextAreaField label="ביוגרפיה" value={row.he.bio} jump={`rows.${index}.bio`} onChange={(v) => updateRow({ he: { ...row.he, bio: v } })} />
+                      <TextAreaField label="ביוגרפיה" value={row.he.bio} jump={`rows.${index}.bio`} {...sizeField(row.he.sizes, 'bio', (sizes) => updateRow({ he: { ...row.he, sizes } }))} onChange={(v) => updateRow({ he: { ...row.he, bio: v } })} />
                     </div>
                   </div>
                 }
                 en={
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <TextField label="Full name" value={row.en.name} jump={`rows.${index}.name`} onChange={(v) => updateRow({ en: { ...row.en, name: v } })} />
+                    <TextField label="Full name" value={row.en.name} jump={`rows.${index}.name`} {...sizeField(row.en.sizes, 'name', (sizes) => updateRow({ en: { ...row.en, sizes } }))} onChange={(v) => updateRow({ en: { ...row.en, name: v } })} />
                     <TextField label="Initials" value={row.en.initials} jump={`rows.${index}.initials`} onChange={(v) => updateRow({ en: { ...row.en, initials: v } })} />
-                    <TextField label="Role" value={row.en.role} jump={`rows.${index}.role`} onChange={(v) => updateRow({ en: { ...row.en, role: v } })} />
+                    <TextField label="Role" value={row.en.role} jump={`rows.${index}.role`} {...sizeField(row.en.sizes, 'role', (sizes) => updateRow({ en: { ...row.en, sizes } }))} onChange={(v) => updateRow({ en: { ...row.en, role: v } })} />
                     <div className="sm:col-span-2">
-                      <TextAreaField label="Bio" value={row.en.bio} jump={`rows.${index}.bio`} onChange={(v) => updateRow({ en: { ...row.en, bio: v } })} />
+                      <TextAreaField label="Bio" value={row.en.bio} jump={`rows.${index}.bio`} {...sizeField(row.en.sizes, 'bio', (sizes) => updateRow({ en: { ...row.en, sizes } }))} onChange={(v) => updateRow({ en: { ...row.en, bio: v } })} />
                     </div>
                   </div>
                 }

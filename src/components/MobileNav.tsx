@@ -3,9 +3,10 @@
 import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Sized } from '@/lib/textSize';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
-type Link = { id: string; label: string };
+type Link = { id: string; label: string; size?: number };
 
 const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
 
@@ -65,7 +66,7 @@ export function MobileNav({ links }: { links: Link[] }) {
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-3 transition-colors hover:bg-primary-soft hover:text-accent-light"
                 >
-                  {link.label}
+                  <Sized scale={link.size}>{link.label}</Sized>
                 </a>
               );
             })}

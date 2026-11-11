@@ -1,8 +1,11 @@
 'use client';
 
 import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
+import type Lenis from 'lenis';
 import { flightVh } from '@/lib/seeWingsTiming';
+import { Sized } from '@/lib/textSize';
+import type { TextSizes } from '@/lib/content/schema';
 
 const BIG_HEIGHT = 128; // px, matches the md:h-32 splash size
 const SMALL_HEIGHT = 40; // px, lands at roughly the header logo's size
@@ -12,6 +15,22 @@ const BIG_WIDTH = BIG_HEIGHT * LOGO_ASPECT;
 const TARGET_TOP = 20; // px from viewport top, roughly the topbar's vertical center
 const TARGET_SIDE = 28; // px from the inline-start edge (left in LTR, right in RTL)
 const FLIGHT_END = 0.22; // fraction of the 0.5vh fade window where the flight completes
+const REWIND_S = 1.8; // logo click on the home page: the flight plays back to its start over this long
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+/**
+ * On the home page the logo's link would reload the very page it's on (and
+ * re-download the clip), so it rewinds the flight to its opening frame instead.
+ * Elsewhere, or with a modifier key, it stays a plain link home.
+ */
+function rewindOnHome(e: MouseEvent<HTMLAnchorElement>, homeHref: string) {
+  const here = window.location.pathname.replace(/\/$/, '') || '/';
+  if (here !== homeHref || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  const lenis = (window as typeof window & { __lenis?: Lenis }).__lenis;
+  if (lenis) lenis.scrollTo(0, { duration: REWIND_S, easing: easeInOutCubic, force: true });
+  else window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
 
 /**
  * Centered logo, eyebrow and headline shown only at the very top of the page.
@@ -31,9 +50,12 @@ export function SeeWingsSplash({
   homeHref,
   trackVh,
   persist = false,
+  sizes,
 }: {
   eyebrow: string;
   title: string;
+  /** Hero's per-field text sizes (eyebrow, headline). */
+  sizes?: TextSizes;
   homeHref: string;
   trackVh: number;
   /** Keep the mark in the topbar corner after the hand-off (no Header logo to defer to). */
@@ -109,6 +131,7 @@ export function SeeWingsSplash({
       {mounted ? (
         <motion.a
           href={homeHref}
+          onClick={(e) => rewindOnHome(e, homeHref)}
           aria-label="Wings"
           className="pointer-events-auto fixed left-0 top-0 block"
           style={{
@@ -148,10 +171,10 @@ export function SeeWingsSplash({
       >
         <div>
           <span className="splash-eyebrow block font-display text-base font-bold uppercase tracking-[0.2em] text-accent-light [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_12px_rgba(5,32,26,0.7)] [-webkit-text-stroke:0.25px_currentColor] md:text-lg">
-            {eyebrow}
+            <Sized scale={sizes?.eyebrow}>{eyebrow}</Sized>
           </span>
           <h1 className="splash-title max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-100 [text-shadow:0_1px_2px_rgba(5,32,26,0.95),0_0_14px_rgba(5,32,26,0.7),0_2px_24px_rgba(5,32,26,0.7)] [-webkit-text-stroke:0.45px_currentColor] md:text-5xl">
-            {title}
+            <Sized scale={sizes?.headline}>{title}</Sized>
           </h1>
         </div>
       </motion.div>

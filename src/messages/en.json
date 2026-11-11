@@ -10,7 +10,10 @@
   "hero": {
     "eyebrow": "Jerusalem, Then and Now",
     "headline": "From the Old City's Alleys to Jerusalem's New Skyline",
-    "subheadline": ["Between the historic walls and the boulevards rising around them,", "Wings brings you Jerusalem's most exclusive addresses — before they ever reach the open market."],
+    "subheadline": [
+      "Between the historic walls and the boulevards rising around them,",
+      "Wings brings you Jerusalem's most exclusive addresses — before they ever reach the open market."
+    ],
     "cta": "Request Private Access"
   },
   "about": {
@@ -37,10 +40,26 @@
     "ctaPrimary": "Contact Us",
     "ctaSecondary": "Back to Wings",
     "cues": [
-      { "eyebrow": "Jerusalem, Then and Now", "title": "From the Old City's Alleys to the New Skyline", "body": "Right here, in the heart of Jerusalem, two cities meet — the one you know, and the one you're about to." },
-      { "eyebrow": "Your Address in the Heart of the City", "title": "WINGS — A Boutique Tower on Jerusalem's Main Boulevard", "body": "One tower, in a location that won't come again — on the skyline of Israel's capital." },
-      { "eyebrow": "Living Above the City", "title": "A Rooftop, a Pool, and a 360° View of Jerusalem", "body": "Everything that defines true luxury living — at a level Jerusalem hasn't seen before." },
-      { "eyebrow": "Your Next Home Is Waiting", "title": "We'll Find You Your Property", "body": "Personal guidance from the first call to the keys in your hand — leave your details and we'll be in touch, in complete discretion." }
+      {
+        "eyebrow": "Jerusalem, Then and Now",
+        "title": "From the Old City's Alleys to the New Skyline",
+        "body": "Right here, in the heart of Jerusalem, two cities meet — the one you know, and the one you're about to."
+      },
+      {
+        "eyebrow": "Your Address in the Heart of the City",
+        "title": "WINGS — A Boutique Tower on Jerusalem's Main Boulevard",
+        "body": "One tower, in a location that won't come again — on the skyline of Israel's capital."
+      },
+      {
+        "eyebrow": "Living Above the City",
+        "title": "A Rooftop, a Pool, and a 360° View of Jerusalem",
+        "body": "Everything that defines true luxury living — at a level Jerusalem hasn't seen before."
+      },
+      {
+        "eyebrow": "Your Next Home Is Waiting",
+        "title": "We'll Find You Your Property",
+        "body": "Personal guidance from the first call to the keys in your hand — leave your details and we'll be in touch, in complete discretion."
+      }
     ]
   },
   "map": {
@@ -60,10 +79,22 @@
     "eyebrow": "Why Wings",
     "title": "What sets an exclusive process apart",
     "items": [
-      { "title": "Personal guidance", "body": "A single point of contact from first conversation to closing." },
-      { "title": "Below-market opportunities", "body": "Access to addresses before they are publicly listed." },
-      { "title": "Full-service", "body": "Legal, financing and property management under one roof." },
-      { "title": "Proven track record", "body": "Thousands of properties placed, hundreds of millions in transactions." }
+      {
+        "title": "Personal guidance",
+        "body": "A single point of contact from first conversation to closing."
+      },
+      {
+        "title": "Below-market opportunities",
+        "body": "Access to addresses before they are publicly listed."
+      },
+      {
+        "title": "Full-service",
+        "body": "Legal, financing and property management under one roof."
+      },
+      {
+        "title": "Proven track record",
+        "body": "Thousands of properties placed, hundreds of millions in transactions."
+      }
     ]
   },
   "team": {
@@ -103,13 +134,86 @@
     "phone": "Phone",
     "email": "Email",
     "message": "What are you looking for?",
+    "country": "Country code",
+    "callTime": "Best time to call",
+    "callTimeOptions": [
+      "Morning (9:00–12:00)",
+      "Afternoon (12:00–17:00)",
+      "Evening (17:00–21:00)",
+      "Any time"
+    ],
+    "timezoneNote": "Your local time ({tz})",
+    "budget": "Budget",
+    "budgetOptions": [
+      "Up to $1M",
+      "$1M – $2M",
+      "$2M – $4M",
+      "$4M+"
+    ],
+    "timeline": "Purchase timeline",
+    "timelineOptions": [
+      "Within 3 months",
+      "3–6 months",
+      "6–12 months",
+      "Just exploring"
+    ],
+    "purpose": "The home is for",
+    "purposeOptions": [
+      "Living in it",
+      "Investment",
+      "Our children",
+      "A holiday home"
+    ],
+    "consent": "I would like to receive updates on new opportunities",
+    "privacyNote": "By sending this form you agree to our",
+    "privacyLink": "Privacy Policy",
     "submit": "Schedule a Meeting",
-    "success": "Thank you — we'll be in touch shortly.",
+    "success": "Thank you — a representative will get back to you within 24 hours.",
+    "successWhatsapp": "Prefer to talk now? Message us on WhatsApp",
     "error": "Something went wrong. Please try again or reach us directly."
   },
   "footer": {
     "rights": "All rights reserved.",
     "phone": "Phone",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "whatsappMessage": "Hi, I'd like to hear about properties in Jerusalem"
+  },
+  "legal": {
+    "privacyTitle": "Privacy Policy",
+    "privacy": [
+      "Last updated: November 2026",
+      "Wings Real Estate (\"Wings\", \"we\") respects your privacy. This policy explains what information we collect through this website, how we use it, and the choices you have.",
+      "## Information we collect",
+      "When you fill in the contact form, we collect the details you give us: your name, phone number and email address, and, if you choose to answer, your budget, purchase timeline, the purpose of the purchase, a convenient time for a call and your message. We also record your time zone and how you reached the site (for example, the advertising campaign that brought you here).",
+      "We and our advertising partners use cookies and similar technologies, including the Meta (Facebook) Pixel, to measure visits to the site and the performance of our advertising. You can block or delete cookies in your browser settings.",
+      "## How we use it",
+      "To contact you about your inquiry and the properties that interest you; to manage our relationship with you; to measure and improve the site and our advertising; and, only if you agreed to it, to send you updates about new opportunities.",
+      "## Who we share it with",
+      "We do not sell your information. We share it only with service providers that help us operate — our customer management (CRM) system, our hosting provider (Google Firebase) and Meta, for advertising measurement — and, at your request, with professionals involved in a purchase, such as lawyers or mortgage advisors. Some of these providers store information outside Israel.",
+      "## Marketing messages",
+      "We send marketing updates only if you ticked the consent box on the form. You can withdraw your consent at any time by replying to any message or contacting us.",
+      "## Your rights",
+      "Under Israel's Protection of Privacy Law, you may ask to review the information we hold about you and ask us to correct or delete it. To do so, contact us using the details below.",
+      "## Retention and security",
+      "We keep your information for as long as it is needed for the purposes above or as required by law, and protect it with reasonable technical and organizational measures.",
+      "## Contact",
+      "For any question about this policy or your information, contact us by phone, WhatsApp or email, using the details at the bottom of this page."
+    ],
+    "accessibilityTitle": "Accessibility Statement",
+    "accessibility": [
+      "Last updated: November 2026",
+      "Wings Real Estate wants everyone to be able to use this website. We are working to make it accessible to people with disabilities, in line with Israel's Equal Rights for Persons with Disabilities (Service Accessibility Adjustments) Regulations, 2013, and Israeli Standard IS 5568, which is based on the WCAG 2.0 guidelines at level AA.",
+      "## Adjustments made on the site",
+      "Every page declares its language and reading direction, so screen readers read Hebrew right to left and English left to right.",
+      "Images that carry information have a text alternative; decorative images are marked so that screen readers skip them.",
+      "Every form field has an accessible name. The site can be navigated with a keyboard, the element in focus is clearly outlined, and a \"Skip to main content\" link appears on the first press of Tab.",
+      "An accessibility menu, opened from the button at the bottom corner of every page, lets you enlarge the text, raise the contrast, switch to grayscale, highlight links, use a plainer font, stop animations and enlarge the cursor. Your choices are kept for your next visit.",
+      "The site adapts to phone and tablet screens and supports the browser's zoom.",
+      "## Known limitations",
+      "The opening of the home page is a film that moves as you scroll, including for visitors who have asked their device to reduce motion. It is decorative: the information it presents also appears as text on the site's pages. If you find any part of the site hard to use, please tell us and we will help.",
+      "## Contact for accessibility",
+      "If you come across an accessibility problem, or need information in another format, contact us by phone, WhatsApp or email, using the details at the bottom of this page. We will do our best to reply quickly and to fix the problem."
+    ]
   }
 }

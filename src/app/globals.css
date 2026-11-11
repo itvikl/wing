@@ -160,3 +160,80 @@
     background-color: rgba(255, 188, 125, 0);
   }
 }
+
+/* ---- Accessibility ----------------------------------------------------- */
+
+/* Keyboard focus is always visible (mouse clicks don't show it). */
+:focus-visible {
+  outline: 2px solid #ffbc7d;
+  outline-offset: 3px;
+}
+
+/* The accessibility menu's settings (AccessibilityMenu.tsx), each a class on
+   <html>. Text size scales the root, so every rem-sized text follows. */
+html.a11y-text-1 { font-size: 112%; }
+html.a11y-text-2 { font-size: 125%; }
+html.a11y-text-3 { font-size: 140%; }
+
+/* A filter on <html> (not body) leaves position:fixed layers on the viewport. */
+html.a11y-contrast { filter: contrast(1.35); }
+html.a11y-mono { filter: grayscale(1); }
+html.a11y-contrast.a11y-mono { filter: grayscale(1) contrast(1.35); }
+/* Translucent text over the photos goes fully opaque, placeholders included. */
+html.a11y-contrast [class*='text-white/'],
+html.a11y-contrast [class*='text-neutral-200'],
+html.a11y-contrast .text-neutral-muted {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+html.a11y-contrast ::placeholder {
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+html.a11y-links a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 4px !important;
+  outline: 2px dashed #ffbc7d;
+  outline-offset: 2px;
+}
+
+html.a11y-font,
+html.a11y-font * {
+  font-family: Arial, Helvetica, sans-serif !important;
+  letter-spacing: normal !important;
+}
+
+/* Stops CSS animation and transitions; Framer Motion is held still by the
+   menu's MotionConfig. The scroll-driven flight moves only when scrolled. */
+html.a11y-still *,
+html.a11y-still *::before,
+html.a11y-still *::after {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  scroll-behavior: auto !important;
+}
+html.a11y-still { scroll-behavior: auto; }
+html.a11y-still .splash-eyebrow,
+html.a11y-still .splash-title {
+  animation: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+/* Large cursor: replaces the site's trailing gold cursor with a big arrow.
+   Stopping animations also brings back the normal cursor. */
+html.a11y-cursor [data-custom-cursor],
+html.a11y-still [data-custom-cursor] {
+  display: none !important;
+}
+html.a11y-still .custom-cursor-active,
+html.a11y-still .custom-cursor-active * {
+  cursor: revert !important;
+}
+html.a11y-cursor,
+html.a11y-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 11.5-6.5 1 3.8 7-2.6 1.4-3.8-7.1L5 20z' fill='black' stroke='white' stroke-width='1.3' stroke-linejoin='round'/%3E%3C/svg%3E") 7 4, auto !important;
+}

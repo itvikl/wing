@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField } from '@/components/admin/fields';
+import { TextField, sizeField } from '@/components/admin/fields';
 import { ParagraphListField } from '@/components/admin/ParagraphListField';
 import { SectionLayout } from '@/components/admin/SectionLayout';
 import { SaveBar } from '@/components/admin/SaveBar';
@@ -25,9 +25,9 @@ export function AboutForm({ initial }: { initial: Data }) {
       setData((prev) => ({ ...prev, [locale]: { ...prev[locale], ...patch } }));
     return (
       <div className="grid gap-4">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
-        <ParagraphListField label="טקסט" values={value.body} jump="body" onChange={(body) => update({ body })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" {...sizeField(value.sizes, 'eyebrow', (sizes) => update({ sizes }))} onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת" value={value.title} jump="title" {...sizeField(value.sizes, 'title', (sizes) => update({ sizes }))} onChange={(v) => update({ title: v })} />
+        <ParagraphListField label="טקסט" values={value.body} jump="body" {...sizeField(value.sizes, 'body', (sizes) => update({ sizes }))} onChange={(body) => update({ body })} />
       </div>
     );
   }

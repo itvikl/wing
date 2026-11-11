@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleTabs } from '@/components/admin/LocaleTabs';
-import { TextField, TextAreaField } from '@/components/admin/fields';
+import { TextField, TextAreaField, sizeField } from '@/components/admin/fields';
 import { ImageUploadField } from '@/components/admin/ImageUploadField';
 import { RepeatableList } from '@/components/admin/RepeatableList';
 import { SectionLayout } from '@/components/admin/SectionLayout';
@@ -43,8 +43,8 @@ export function ProjectsForm({
   const { data, setData, saving, saved, error, handleSubmit } = useSectionForm<Data>(
     {
       labels: {
-        he: { eyebrow: initial.he.eyebrow, title: initial.he.title, cta: initial.he.cta, viewDetails: initial.he.viewDetails, close: initial.he.close, empty: initial.he.empty ?? '' },
-        en: { eyebrow: initial.en.eyebrow, title: initial.en.title, cta: initial.en.cta, viewDetails: initial.en.viewDetails, close: initial.en.close, empty: initial.en.empty ?? '' },
+        he: { eyebrow: initial.he.eyebrow, title: initial.he.title, cta: initial.he.cta, viewDetails: initial.he.viewDetails, close: initial.he.close, empty: initial.he.empty ?? '', sizes: initial.he.sizes ?? {} },
+        en: { eyebrow: initial.en.eyebrow, title: initial.en.title, cta: initial.en.cta, viewDetails: initial.en.viewDetails, close: initial.en.close, empty: initial.en.empty ?? '', sizes: initial.en.sizes ?? {} },
       },
       rows: toRows(initial.he.items, initial.en.items, initial.images),
     },
@@ -57,12 +57,12 @@ export function ProjectsForm({
       setData((prev) => ({ ...prev, labels: { ...prev.labels, [locale]: { ...prev.labels[locale], ...patch } } }));
     return (
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" onChange={(v) => update({ eyebrow: v })} />
-        <TextField label="כותרת" value={value.title} jump="title" onChange={(v) => update({ title: v })} />
-        <TextField label="כפתור פנייה" value={value.cta} jump="cta" onChange={(v) => update({ cta: v })} />
-        <TextField label="תווית 'לצפייה בפרטים'" value={value.viewDetails} jump="viewDetails" onChange={(v) => update({ viewDetails: v })} />
+        <TextField label="תגית עליונה (Eyebrow)" value={value.eyebrow} jump="eyebrow" {...sizeField(value.sizes, 'eyebrow', (sizes) => update({ sizes }))} onChange={(v) => update({ eyebrow: v })} />
+        <TextField label="כותרת" value={value.title} jump="title" {...sizeField(value.sizes, 'title', (sizes) => update({ sizes }))} onChange={(v) => update({ title: v })} />
+        <TextField label="כפתור פנייה" value={value.cta} jump="cta" {...sizeField(value.sizes, 'cta', (sizes) => update({ sizes }))} onChange={(v) => update({ cta: v })} />
+        <TextField label="תווית 'לצפייה בפרטים'" value={value.viewDetails} jump="viewDetails" {...sizeField(value.sizes, 'viewDetails', (sizes) => update({ sizes }))} onChange={(v) => update({ viewDetails: v })} />
         <TextField label="תווית 'סגירה'" value={value.close} jump="close" onChange={(v) => update({ close: v })} />
-        <TextField label="הודעה כשאין הזדמנויות" value={value.empty ?? ''} jump="empty" onChange={(v) => update({ empty: v })} />
+        <TextField label="הודעה כשאין הזדמנויות" value={value.empty ?? ''} jump="empty" {...sizeField(value.sizes, 'empty', (sizes) => update({ sizes }))} onChange={(v) => update({ empty: v })} />
       </div>
     );
   }
@@ -85,22 +85,22 @@ export function ProjectsForm({
               <LocaleTabs
                 he={
                   <div className="grid gap-3">
-                    <TextField label="כותרת" value={row.he.title} jump={`rows.${index}.title`} onChange={(v) => updateRow({ he: { ...row.he, title: v } })} />
-                    <TextField label="מיקום" value={row.he.location} jump={`rows.${index}.location`} onChange={(v) => updateRow({ he: { ...row.he, location: v } })} />
+                    <TextField label="כותרת" value={row.he.title} jump={`rows.${index}.title`} {...sizeField(row.he.sizes, 'title', (sizes) => updateRow({ he: { ...row.he, sizes } }))} onChange={(v) => updateRow({ he: { ...row.he, title: v } })} />
+                    <TextField label="מיקום" value={row.he.location} jump={`rows.${index}.location`} {...sizeField(row.he.sizes, 'location', (sizes) => updateRow({ he: { ...row.he, sizes } }))} onChange={(v) => updateRow({ he: { ...row.he, location: v } })} />
                     <TextAreaField
                       label="תיאור"
-                      value={row.he.description} jump={`rows.${index}.description`}
+                      value={row.he.description} jump={`rows.${index}.description`} {...sizeField(row.he.sizes, 'description', (sizes) => updateRow({ he: { ...row.he, sizes } }))}
                       onChange={(v) => updateRow({ he: { ...row.he, description: v } })}
                     />
                   </div>
                 }
                 en={
                   <div className="grid gap-3">
-                    <TextField label="Title" value={row.en.title} jump={`rows.${index}.title`} onChange={(v) => updateRow({ en: { ...row.en, title: v } })} />
-                    <TextField label="Location" value={row.en.location} jump={`rows.${index}.location`} onChange={(v) => updateRow({ en: { ...row.en, location: v } })} />
+                    <TextField label="Title" value={row.en.title} jump={`rows.${index}.title`} {...sizeField(row.en.sizes, 'title', (sizes) => updateRow({ en: { ...row.en, sizes } }))} onChange={(v) => updateRow({ en: { ...row.en, title: v } })} />
+                    <TextField label="Location" value={row.en.location} jump={`rows.${index}.location`} {...sizeField(row.en.sizes, 'location', (sizes) => updateRow({ en: { ...row.en, sizes } }))} onChange={(v) => updateRow({ en: { ...row.en, location: v } })} />
                     <TextAreaField
                       label="Description"
-                      value={row.en.description} jump={`rows.${index}.description`}
+                      value={row.en.description} jump={`rows.${index}.description`} {...sizeField(row.en.sizes, 'description', (sizes) => updateRow({ en: { ...row.en, sizes } }))}
                       onChange={(v) => updateRow({ en: { ...row.en, description: v } })}
                     />
                   </div>

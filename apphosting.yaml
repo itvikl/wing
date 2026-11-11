@@ -59,3 +59,20 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+  # Meta Pixel + Conversions API (lead measurement). Off until set:
+  #  1. Uncomment META_PIXEL_ID with the pixel's numeric ID (Events Manager →
+  #     Data sources). It's public (it ends up in the page), so a plain value.
+  #  2. For the server-side copy of each Lead (survives ad blockers / iOS),
+  #     create the secret first — `firebase apphosting:secrets:set
+  #     meta-capi-access-token` with a token from Events Manager → Settings →
+  #     Conversions API — then uncomment META_CAPI_ACCESS_TOKEN. Referencing a
+  #     secret that doesn't exist fails the build.
+  # - variable: META_PIXEL_ID
+  #   value: "000000000000000"
+  #   availability:
+  #     - RUNTIME
+  # - variable: META_CAPI_ACCESS_TOKEN
+  #   secret: meta-capi-access-token
+  #   availability:
+  #     - RUNTIME

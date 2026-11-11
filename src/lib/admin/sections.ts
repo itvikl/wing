@@ -7,6 +7,7 @@ export const ADMIN_SECTIONS = [
   { key: 'team', href: '/admin/content/team', label: 'הצוות' },
   { key: 'lead-form', href: '/admin/content/lead-form', label: 'טופס יצירת קשר' },
   { key: 'footer', href: '/admin/content/footer', label: 'פוטר' },
+  { key: 'legal', href: '/admin/content/legal', label: 'פרטיות ונגישות' },
   { key: 'nav', href: '/admin/content/nav', label: 'תפריט ניווט' },
   { key: 'see-wings', href: '/admin/content/see-wings', label: 'הטיסה הקולנועית' },
 ] as const;
