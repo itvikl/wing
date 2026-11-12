@@ -4,7 +4,7 @@ import type { Locale } from '@/i18n/request';
 import { getLocaleText, getSiteMedia, hasProjects } from '@/lib/content/store';
 import type { TextSizes } from '@/lib/content/schema';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
-import { telHref } from '@/lib/contact';
+import { formatPhone, telHref } from '@/lib/contact';
 
 // Every string on the site comes from the Firestore content doc (see
 // i18n/request.ts -> getLocaleText). That's a raw Admin SDK read, not a fetch,
@@ -35,7 +35,7 @@ export default async function SeeWingsPage({ params: { locale } }: { params: { l
   const navSizes = text.nav.sizes;
   const phoneNumber = text.footer.phoneNumber.trim();
   const phone = phoneNumber
-    ? { href: telHref(phoneNumber), label: phoneNumber, aria: `${text.footer.phone}: ${phoneNumber}` }
+    ? { href: telHref(phoneNumber), label: formatPhone(phoneNumber), aria: `${text.footer.phone}: ${phoneNumber}` }
     : undefined;
   const emailAddress = text.footer.emailAddress.trim();
   const email = emailAddress

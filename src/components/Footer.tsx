@@ -2,7 +2,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { getLocaleText } from '@/lib/content/store';
 import type { ContentLocale } from '@/lib/content/schema';
 import { Sized } from '@/lib/textSize';
-import { localePath, telHref, whatsappHref } from '@/lib/contact';
+import { formatPhone, localePath, telHref, whatsappHref } from '@/lib/contact';
 import { MailGlyph, PhoneGlyph, WhatsAppGlyph } from './icons';
 
 export async function Footer() {
@@ -31,7 +31,7 @@ export async function Footer() {
             <a href={telHref(phoneNumber)} className={contact} aria-label={`${t('phone')}: ${phoneNumber}`}>
               <PhoneGlyph className="h-4 w-4 text-accent-light" />
               <Sized scale={sizes?.phone}>
-                <span dir="ltr">{phoneNumber}</span>
+                <span dir="ltr">{formatPhone(phoneNumber)}</span>
               </Sized>
             </a>
           )}

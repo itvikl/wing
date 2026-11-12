@@ -150,7 +150,13 @@ export function SeeWingsExperience({
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
       // where the topbar mark would sit and takes over that role instead.
       cta: { label: brandCta, href: routedHref('contact'), size: brandCtaSize },
-      lang: { label: targetLocale, href: langHref },
+      // "EN | עב" in that order on both sites; the current one isn't a link.
+      lang: {
+        items: [
+          { text: 'EN', lang: 'en', href: locale === 'en' ? undefined : langHref, aria: locale === 'en' ? undefined : 'English' },
+          { text: 'עב', lang: 'he', href: locale === 'he' ? undefined : langHref, aria: locale === 'he' ? undefined : 'עברית' },
+        ],
+      },
       phone,
       email,
       keepTopbar: persistentTopbar,

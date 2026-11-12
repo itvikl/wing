@@ -9,7 +9,7 @@ import { MagneticButton } from './motion/MagneticButton';
 import { NavLinks } from './NavLinks';
 import { MobileNav } from './MobileNav';
 import { MailGlyph, PhoneGlyph } from './icons';
-import { telHref } from '@/lib/contact';
+import { formatPhone, telHref } from '@/lib/contact';
 
 export async function Header() {
   const t = await getTranslations('nav');
@@ -49,7 +49,7 @@ export async function Header() {
               className="flex h-10 items-center gap-2 rounded-full text-base hover:text-accent-light max-lg:w-10 max-lg:justify-center max-lg:border max-lg:border-white/20"
             >
               <PhoneGlyph className="h-4 w-4 text-accent-light" />
-              <span dir="ltr" className="hidden lg:inline">{phoneNumber}</span>
+              <span dir="ltr" className="hidden lg:inline">{formatPhone(phoneNumber)}</span>
             </a>
           )}
           {/* An icon only: the address is long, and shows in full in the footer. */}

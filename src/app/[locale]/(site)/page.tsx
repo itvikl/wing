@@ -3,7 +3,7 @@ import type { Locale } from '@/i18n/request';
 import { getLocaleText, getSiteMedia, hasProjects } from '@/lib/content/store';
 import type { TextSizes } from '@/lib/content/schema';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
-import { telHref } from '@/lib/contact';
+import { formatPhone, telHref } from '@/lib/contact';
 import { computeTrackVh } from '@/lib/seeWingsTiming';
 import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
 import { PortalReveal } from '@/components/PortalReveal';
@@ -38,7 +38,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const navSizes = text.nav.sizes;
   const phoneNumber = text.footer.phoneNumber.trim();
   const phone = phoneNumber
-    ? { href: telHref(phoneNumber), label: phoneNumber, aria: `${text.footer.phone}: ${phoneNumber}` }
+    ? { href: telHref(phoneNumber), label: formatPhone(phoneNumber), aria: `${text.footer.phone}: ${phoneNumber}` }
     : undefined;
   const emailAddress = text.footer.emailAddress.trim();
   const email = emailAddress

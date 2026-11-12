@@ -9,6 +9,21 @@ export function telHref(number: string): string {
 }
 
 /**
+ * An Israeli number as people read it: "+972584121366" → "+972 58-412-1366",
+ * "+97225550123" → "+972 2-555-0123". Anything else comes back as typed.
+ */
+export function formatPhone(number: string): string {
+  const digits = number.replace(/\D/g, '');
+  if (digits.startsWith('972') && (digits.length === 12 || digits.length === 11)) {
+    const national = digits.slice(3);
+    const area = national.length === 9 ? national.slice(0, 2) : national.slice(0, 1);
+    const rest = national.slice(area.length);
+    return `+972 ${area}-${rest.slice(0, 3)}-${rest.slice(3)}`;
+  }
+  return number.trim();
+}
+
+/**
  * The admin's WhatsApp link with a first line already typed in, so the chat
  * opens ready to send. A link that already carries its own text keeps it.
  */
