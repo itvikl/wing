@@ -18,9 +18,22 @@ export function LanguageSwitcher() {
 
   // No prefetch: kept from when the middleware set a locale cookie on the
   // prefetch's response too, which flipped the next bare link to Hebrew.
+  // "EN | עב" in that order on both sites, the current one in gold and not a
+  // link — the same switch as the flight's topbar.
+  const item = (code: 'en' | 'he', label: string) =>
+    locale === code ? (
+      <span lang={code} aria-current="true" className="text-accent-light">{label}</span>
+    ) : (
+      <Link href={href} prefetch={false} lang={code} aria-label={code === 'en' ? 'English' : 'עברית'} className="transition-colors hover:text-accent-light">
+        {label}
+      </Link>
+    );
+
   return (
-    <Link href={href} prefetch={false} className="text-base font-medium uppercase tracking-wide hover:text-accent-light">
-      {targetLocale}
-    </Link>
+    <span dir="ltr" className="inline-flex items-center gap-2 whitespace-nowrap text-sm tracking-[0.08em] text-neutral-100/90">
+      {item('en', 'EN')}
+      <span aria-hidden className="opacity-50">|</span>
+      {item('he', 'עב')}
+    </span>
   );
 }

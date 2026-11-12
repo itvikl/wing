@@ -138,7 +138,9 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] start-5 z-[70] flex h-12 w-12 items-center justify-center rounded-full bg-primary-dark text-accent-light shadow-[0_10px_30px_-6px_rgba(5,32,26,0.55)] ring-1 ring-accent/50 transition-transform hover:-translate-y-0.5"
+        // Stacked above the WhatsApp button in the same corner: 16px over its
+        // 56px circle (phones) / 48px pill (md+), centered on the circle.
+        className="fixed bottom-[calc(1.25rem+72px+env(safe-area-inset-bottom))] end-6 z-[70] flex h-12 w-12 md:bottom-[calc(1.25rem+64px+env(safe-area-inset-bottom))] md:end-5 items-center justify-center rounded-full bg-primary-dark text-accent-light shadow-[0_10px_30px_-6px_rgba(5,32,26,0.55)] ring-1 ring-accent/50 transition-transform hover:-translate-y-0.5"
       >
         <AccessibilityGlyph className="h-6 w-6" />
       </button>
@@ -149,7 +151,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
           id={panelId}
           role="dialog"
           aria-label={copy.title}
-          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] start-5 z-[71] w-[min(20rem,calc(100vw-2.5rem))] rounded-2xl border border-accent/30 bg-primary-dark p-4 text-neutral-100 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.6)]"
+          className="fixed bottom-[calc(1.25rem+128px+env(safe-area-inset-bottom))] end-5 z-[71] md:bottom-[calc(1.25rem+120px+env(safe-area-inset-bottom))] w-[min(20rem,calc(100vw-2.5rem))] rounded-2xl border border-accent/30 bg-primary-dark p-4 text-neutral-100 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.6)]"
         >
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-lg font-semibold">{copy.title}</h2>

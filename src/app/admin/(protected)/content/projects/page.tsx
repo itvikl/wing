@@ -1,3 +1,4 @@
+import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { ProjectsForm } from './Form';
 
@@ -6,8 +7,7 @@ export default async function ProjectsAdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-primary-dark">הזדמנויות</h1>
-      <p className="mt-2 text-neutral-muted">כרטיסי ההזדמנויות המוצגים בגלריה ועל המפה.</p>
+      <SectionHeader sectionKey="projects" />
       <ProjectsForm
         initial={{
           he: content.text.he.projects,

@@ -14,7 +14,7 @@ function withFooterDefaults(messages: typeof enJson | typeof heJson): LocaleText
   return {
     ...messages,
     hero: { ...messages.hero, subheadline: [messages.hero.subheadline] },
-    about: { ...messages.about, body: [messages.about.body] },
+    about: { ...messages.about, body: Array.isArray(messages.about.body) ? messages.about.body : [messages.about.body] },
     footer: { ...messages.footer, ...FOOTER_LINK_DEFAULTS },
   } as unknown as LocaleText;
 }

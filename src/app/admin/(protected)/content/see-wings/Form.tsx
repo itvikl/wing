@@ -278,10 +278,9 @@ export function SeeWingsForm({
 
         <div className="mt-4 rounded-xl border border-dashed border-neutral-200 bg-neutral-100 p-4">
           <p className="text-xs text-neutral-muted">
-            הכותרת הראשונה ברשימה היא התחנה הראשונה, שמופיעה מיד כשמתחילים לגלול. את מסך הפתיחה עצמו (הלוגו, התגית
-            והכותרת לפני הגלילה) עורכים בעמוד{' '}
-            <Link href="/admin/content/hero" className="font-medium text-accent-dark underline">
-              ראשי (Hero)
+            הכיתוב הראשון ברשימה מופיע מיד כשמתחילים לגלול. את מסך הפתיחה עצמו (הלוגו והכותרות לפני הגלילה) עורכים{' '}
+            <Link href="#opening" className="font-medium text-accent-dark underline">
+              למעלה, בחלק 1
             </Link>
             .
           </p>

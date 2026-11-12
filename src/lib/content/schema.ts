@@ -46,8 +46,19 @@ export const teamMemberSchema = z.object({
   initials: z.string(),
   role: z.string(),
   bio: z.string(),
+  // The Team page's profile details. Optional: members saved before they
+  // existed have none, and an empty one is simply not shown.
+  years: z.string().optional(),
+  languages: z.string().optional(),
+  quote: z.string().optional(),
+  /** A personal WhatsApp: a wa.me link or a number (the same in both languages). */
+  whatsapp: z.string().optional(),
+  linkedin: z.string().optional(),
   sizes: textSizesSchema,
 });
+
+/** A professional the team works with (lawyer, mortgage advisor…), shown on the Team page. */
+export const teamPartnerSchema = z.object({ role: z.string(), name: z.string(), url: z.string().optional() });
 
 export const navTextSchema = z.object({
   about: z.string(),
@@ -67,10 +78,38 @@ export const heroTextSchema = z.object({
   sizes: textSizesSchema,
 });
 
+/**
+ * The About page: where the name comes from (the verse), how the three
+ * partners started Wings, one shared photo, the mission, a few facts about
+ * the company, and a closing call. `body` holds the verse, a line per entry.
+ * Any field left empty is not shown on the site.
+ */
 export const aboutTextSchema = z.object({
   eyebrow: z.string(),
   title: z.string(),
   body: z.array(z.string()),
+  verseSource: z.string(),
+  verseTranslation: z.string(),
+  nameLine: z.string(),
+  storyEyebrow: z.string(),
+  storyTitle: z.string(),
+  story: z.array(z.string()),
+  storyClosing: z.string(),
+  /** The partners' shared photo (the same in both languages). */
+  photo: z.string(),
+  photoCaption: z.string(),
+  teamLink: z.string(),
+  missionEyebrow: z.string(),
+  mission: z.string(),
+  foundedLabel: z.string(),
+  founded: z.string(),
+  officeLabel: z.string(),
+  office: z.string(),
+  licenseLabel: z.string(),
+  license: z.string(),
+  closingTitle: z.string(),
+  closingCall: z.string(),
+  closingWhy: z.string(),
   sizes: textSizesSchema,
 });
 
@@ -119,7 +158,14 @@ export const whyUsTextSchema = z.object({
 export const teamTextSchema = z.object({
   eyebrow: z.string(),
   title: z.string(),
+  intro: z.string().optional(),
   members: z.array(teamMemberSchema),
+  /** Labels for each member's links. */
+  whatsappLabel: z.string().optional(),
+  linkedinLabel: z.string().optional(),
+  partnersEyebrow: z.string().optional(),
+  partnersTitle: z.string().optional(),
+  partners: z.array(teamPartnerSchema).optional(),
   sizes: textSizesSchema,
 });
 
@@ -183,6 +229,27 @@ export const legalTextSchema = z.object({
   accessibility: z.array(z.string()),
 });
 
+/**
+ * The FAQ page: questions grouped by topic, each topic a filter on the page.
+ * Every question, answer and topic is edited (added, removed, reordered) in
+ * the admin, per language.
+ */
+export const faqItemSchema = z.object({ q: z.string(), a: z.string() });
+export const faqCategorySchema = z.object({ name: z.string(), items: z.array(faqItemSchema) });
+export const faqTextSchema = z.object({
+  navLabel: z.string(),
+  eyebrow: z.string(),
+  title: z.string(),
+  intro: z.string(),
+  allLabel: z.string(),
+  categories: z.array(faqCategorySchema),
+  asideEyebrow: z.string(),
+  asideTitle: z.string(),
+  asideBody: z.string(),
+  asideWhatsapp: z.string(),
+  asideCall: z.string(),
+});
+
 export const localeTextSchema = z.object({
   nav: navTextSchema,
   hero: heroTextSchema,
@@ -196,6 +263,7 @@ export const localeTextSchema = z.object({
   leadForm: leadFormTextSchema,
   footer: footerTextSchema,
   legal: legalTextSchema,
+  faq: faqTextSchema,
 });
 export type LocaleText = z.infer<typeof localeTextSchema>;
 
@@ -252,6 +320,7 @@ export const TEXT_SECTION_SCHEMAS = {
   footer: footerTextSchema,
   seeWings: seeWingsTextSchema,
   legal: legalTextSchema,
+  faq: faqTextSchema,
 } as const;
 export type TextSectionKey = keyof typeof TEXT_SECTION_SCHEMAS;
 

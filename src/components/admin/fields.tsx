@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type { TextSizes } from '@/lib/content/schema';
 
 // `jump` marks the field as the target a preview element jumps to (see
@@ -91,6 +91,7 @@ export function TextField({
   jump,
   size,
   onSize,
+  singleLine = false,
 }: {
   label: string;
   value: string;
@@ -98,18 +99,39 @@ export function TextField({
   jump?: string;
   size?: number;
   onSize?: (value: number) => void;
+  /** For a link, phone, email or code: one line, Enter does nothing. */
+  singleLine?: boolean;
 }) {
   const id = useId();
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  // One line tall, growing with each line break the editor adds (Enter): the
+  // site shows the text broken at exactly those points (white-space:pre-line
+  // in globals.css), so a heading's lines are the editor's to set.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  const className = 'rounded-lg border border-neutral-200 bg-white px-3 py-2 text-primary-dark focus:border-accent focus:outline-none';
+
   return (
     <div className="grid gap-1.5 rounded-lg text-sm" data-jump-target={jump}>
       <FieldHeader label={label} htmlFor={id} size={size} onSize={onSize} />
-      <input
-        id={id}
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-primary-dark focus:border-accent focus:outline-none"
-      />
+      {singleLine ? (
+        <input id={id} type="text" dir="auto" value={value} onChange={(event) => onChange(event.target.value)} className={className} />
+      ) : (
+        <textarea
+          ref={ref}
+          id={id}
+          rows={1}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={`${className} resize-none overflow-hidden leading-6`}
+        />
+      )}
     </div>
   );
 }

@@ -62,7 +62,7 @@ export function AdminLocaleToggle() {
           </button>
         ))}
       </div>
-      <span className="text-xs text-neutral-muted">לחיצה על טקסט בתצוגה המקדימה קופצת לשדה שלו.</span>
+      <span className="text-xs text-neutral-muted">Enter בתוך שדה מוריד שורה באתר. לחיצה על טקסט בתצוגה המקדימה קופצת לשדה שלו.</span>
     </div>
   );
 }

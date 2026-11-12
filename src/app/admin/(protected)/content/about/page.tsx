@@ -1,3 +1,4 @@
+import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { AboutForm } from './Form';
 
@@ -6,8 +7,7 @@ export default async function AboutAdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-primary-dark">אודות</h1>
-      <p className="mt-2 text-neutral-muted">קטע &quot;אודות&quot; בעמוד הבית.</p>
+      <SectionHeader sectionKey="about" />
       <AboutForm initial={{ he: content.text.he.about, en: content.text.en.about }} />
     </div>
   );

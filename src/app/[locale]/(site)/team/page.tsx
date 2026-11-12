@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
 import { getLocaleText, getSiteMedia } from '@/lib/content/store';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { PageBackdrop } from '@/components/PageBackdrop';
-import { GalleryWall } from '@/components/GalleryWall';
+import { TeamProfiles } from '@/components/TeamProfiles';
 
 // Every string on the site comes from the Firestore content doc (see
 // i18n/request.ts -> getLocaleText). That's a raw Admin SDK read, not a fetch,
@@ -22,18 +22,11 @@ export const metadata: Metadata = {
   description: 'The people behind every address at Wings Real Estate, Jerusalem.',
 };
 
-type Member = { name: string; initials: string; role: string; bio: string; sizes?: Record<string, number> };
-
 export default async function TeamPage({ params: { locale } }: { params: { locale: Locale } }) {
   setRequestLocale(locale);
 
-  const t = await getTranslations('team');
   const media = await getSiteMedia();
   const text = await getLocaleText(locale);
-  const members = (t.raw('members') as Member[]).map((member, index) => ({
-    ...member,
-    image: media.team.members[index] ?? null,
-  }));
 
   return (
     // At least one screen tall with the content stretching, so a short page
@@ -43,7 +36,7 @@ export default async function TeamPage({ params: { locale } }: { params: { local
       <PageBackdrop />
       <Header />
       <main id="main-content" tabIndex={-1} className="flex-1">
-        <GalleryWall eyebrow={t('eyebrow')} title={t('title')} sizes={text.team.sizes} members={members} />
+        <TeamProfiles team={text.team} images={media.team.members} />
       </main>
       <Footer />
     </div>

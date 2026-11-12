@@ -8,7 +8,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 
 type Link = { id: string; label: string; size?: number };
 
-const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
+const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'faq', 'contact']);
 
 export function MobileNav({ links }: { links: Link[] }) {
   const [open, setOpen] = useState(false);

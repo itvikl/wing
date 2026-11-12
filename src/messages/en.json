@@ -17,9 +17,36 @@
     "cta": "Request Private Access"
   },
   "about": {
-    "eyebrow": "Who We Are",
-    "title": "An end-to-end path to a home in Jerusalem",
-    "body": "From sourcing and legal guidance to financing and ongoing management, Wings accompanies every step of acquiring a home in Israel — with the discretion our clients expect."
+    "eyebrow": "Where our name comes from",
+    "title": "On Eagles’ Wings",
+    "body": [
+      "וָאֶשָּׂא אֶתְכֶם עַל כַּנְפֵי נְשָׁרִים",
+      "וָאָבִא אֶתְכֶם אֵלָי"
+    ],
+    "verseSource": "Exodus 19:4",
+    "verseTranslation": "“I bore you on eagles’ wings, and brought you unto Myself.”",
+    "nameLine": "That is where our name comes from, and it is what we do: bringing families from around the world home, to Jerusalem.",
+    "storyEyebrow": "How it began",
+    "storyTitle": "Three partners, one purpose",
+    "story": [
+      "For fifteen years, Meir has been finding off-market homes in Jerusalem.",
+      "Meir, Yossef and Yaniv divided the journey between them: Meir finds the home, Yossef spots the opportunity and vets it before it reaches the market, and Yaniv takes the deal from contract to closing."
+    ],
+    "storyClosing": "That is how Wings began: a partnership of three, with every family the whole way home.",
+    "photo": "",
+    "photoCaption": "Meir, Yossef and Yaniv",
+    "teamLink": "Meet each of them",
+    "missionEyebrow": "Our mission",
+    "mission": "End-to-end guidance, from the first call to the keys in your hand.",
+    "foundedLabel": "Established",
+    "founded": "",
+    "officeLabel": "Office",
+    "office": "",
+    "licenseLabel": "Licensed broker",
+    "license": "",
+    "closingTitle": "We’d be glad to meet you",
+    "closingCall": "Book a call",
+    "closingWhy": "Why Wings"
   },
   "video": {
     "eyebrow": "See Wings",
@@ -32,7 +59,7 @@
         "id": "main",
         "label": "Old City",
         "eyebrow": "Wings Real Estate — Jerusalem",
-        "title": "Exclusive addresses, quietly offered",
+        "title": "Exclusive addresses, before they reach the market",
         "body": "A curated selection of properties in Jerusalem, available to a limited circle before they ever reach the open market.",
         "tags": []
       }
@@ -58,7 +85,7 @@
       {
         "eyebrow": "Your Next Home Is Waiting",
         "title": "We'll Find You Your Property",
-        "body": "Personal guidance from the first call to the keys in your hand — leave your details and we'll be in touch, in complete discretion."
+        "body": "Personal guidance from the first call to the keys in your hand. Leave your details and we'll be in touch."
       }
     ]
   },
@@ -100,6 +127,7 @@
   "team": {
     "eyebrow": "Meet the Team",
     "title": "The people behind every address",
+    "intro": "",
     "members": [
       {
         "name": "Noa Amrani",
@@ -125,7 +153,12 @@
         "role": "Client Relations",
         "bio": "The single point of contact for international buyers, from first call through settling in."
       }
-    ]
+    ],
+    "whatsappLabel": "WhatsApp",
+    "linkedinLabel": "LinkedIn",
+    "partnersEyebrow": "The professionals we work with",
+    "partnersTitle": "Every expert you’ll need, under one roof",
+    "partners": []
   },
   "leadForm": {
     "eyebrow": "Get in Touch",
@@ -215,5 +248,96 @@
       "## Contact for accessibility",
       "If you come across an accessibility problem, or need information in another format, contact us by phone, WhatsApp or email, using the details at the bottom of this page. We will do our best to reply quickly and to fix the problem."
     ]
+  },
+  "faq": {
+    "navLabel": "FAQ",
+    "eyebrow": "FAQ",
+    "title": "Buying in Jerusalem from abroad, answered",
+    "intro": "The questions buyers from overseas ask us most. Don’t see yours? We’d be glad to talk.",
+    "allLabel": "All",
+    "categories": [
+      {
+        "name": "Buying from abroad",
+        "items": [
+          {
+            "q": "Can I buy in Jerusalem without coming to Israel?",
+            "a": "Yes. We handle the whole process remotely: a video tour of the property, legal due diligence, and signing through a power of attorney. Many of our clients first visit only to collect the keys."
+          },
+          {
+            "q": "How does a power of attorney work?",
+            "a": "You sign a power of attorney for an Israeli lawyer, at an Israeli consulate or before a notary with an apostille, so they can sign on your behalf. The lawyer we work with prepares it and walks you through each step."
+          },
+          {
+            "q": "Do I need an Israeli bank account?",
+            "a": "Not always. For a cash purchase, funds can be transferred from an account abroad. An Israeli mortgage usually requires opening a local account, and we help with that."
+          }
+        ]
+      },
+      {
+        "name": "Financing & tax",
+        "items": [
+          {
+            "q": "Can I get a mortgage as a foreign resident?",
+            "a": "Yes. Israeli banks lend to foreign residents, at a lower loan-to-value than for Israeli residents. The mortgage advisor we work with checks the options for your situation."
+          },
+          {
+            "q": "How much purchase tax will I pay?",
+            "a": "It depends on whether this is your only home in Israel, and whether you are, or plan to become, a new immigrant, who receive reductions. We will work out the figure with you on the first call."
+          },
+          {
+            "q": "We are planning aliyah. Should we buy before or after?",
+            "a": "The timing affects purchase tax and financing. We plan it with you, together with the lawyer and tax advisor."
+          }
+        ]
+      },
+      {
+        "name": "The homes",
+        "items": [
+          {
+            "q": "What does “off-market” mean?",
+            "a": "Homes that have not been listed publicly. Many owners prefer to sell without a public listing, and we show these properties to our clients before they reach the listings."
+          },
+          {
+            "q": "Which neighborhoods do you work in?",
+            "a": "Mainly the neighborhoods most sought after by buyers from abroad: Talbiyeh, Rehavia, the German Colony, Baka, Old Katamon, Arnona and the city center."
+          },
+          {
+            "q": "Can you find a home with a Sukkah balcony, a safe room or a Shabbat elevator?",
+            "a": "Yes. These are among our clients’ most common requirements, and we filter for them from the very first step."
+          }
+        ]
+      },
+      {
+        "name": "After you buy",
+        "items": [
+          {
+            "q": "Who looks after the home while we are abroad?",
+            "a": "We connect you with property management: maintenance, regular payments, renting it out if you wish, and periodic checks on the home."
+          },
+          {
+            "q": "Can we rent the home out while we are abroad?",
+            "a": "Yes. We help find tenants and manage the rental, and connect you with a tax advisor for reporting the rental income."
+          }
+        ]
+      },
+      {
+        "name": "Working with us",
+        "items": [
+          {
+            "q": "What does your service cost?",
+            "a": "We go over every cost, including our fee, on the introductory call, with no obligation."
+          },
+          {
+            "q": "What happens after I leave my details?",
+            "a": "A representative contacts you for a short introductory call, scheduled at an hour that suits your time zone. We learn what you are looking for, and only show homes that truly fit."
+          }
+        ]
+      }
+    ],
+    "asideEyebrow": "Still wondering?",
+    "asideTitle": "Ask us directly",
+    "asideBody": "A short introductory call, at an hour that suits your time zone.",
+    "asideWhatsapp": "Message us on WhatsApp",
+    "asideCall": "Book a call"
   }
 }

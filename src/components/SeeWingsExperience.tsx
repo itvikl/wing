@@ -30,7 +30,7 @@ export type SeeWingsMedia = {
 
 // Contact included: the topbar's Contact link and its "Contact Us" button open
 // the contact page directly instead of flying the whole film to the form.
-const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'contact']);
+const ROUTED_IDS = new Set(['about', 'projects', 'why-us', 'team', 'faq', 'contact']);
 
 const GOLD = '#B58238';
 const GOLD_LIGHT = '#FFBC7D';

@@ -10,6 +10,10 @@ type Props<T> = {
   addLabel?: string;
   /** Hides add/remove/reorder controls — items can only have their rendered fields edited in place. */
   locked?: boolean;
+  /** Asks this before removing an item (e.g. "למחוק את השאלה?"); none removes at once. */
+  confirmRemove?: string;
+  /** The remove button's text (default "מחיקה"). */
+  removeLabel?: string;
 };
 
 export function RepeatableList<T>({
@@ -19,12 +23,15 @@ export function RepeatableList<T>({
   renderItem,
   addLabel = 'הוספת פריט',
   locked = false,
+  confirmRemove,
+  removeLabel = 'מחיקה',
 }: Props<T>) {
   function update(index: number, patch: Partial<T>) {
     onChange(items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
   }
 
   function remove(index: number) {
+    if (confirmRemove && !window.confirm(confirmRemove)) return;
     onChange(items.filter((_, i) => i !== index));
   }
 
@@ -61,7 +68,7 @@ export function RepeatableList<T>({
                   למטה
                 </button>
                 <button type="button" onClick={() => remove(index)} className="text-red-600 hover:text-red-700">
-                  מחיקה
+                  {removeLabel}
                 </button>
               </div>
             </div>

@@ -49,6 +49,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
     { id: 'projects', label: nav('projects'), size: navSizes?.projects },
     { id: 'why-us', label: nav('advantages'), size: navSizes?.advantages },
     { id: 'team', label: nav('team'), size: navSizes?.team },
+    { id: 'faq', label: text.faq.navLabel },
     { id: 'contact', label: nav('contact'), size: navSizes?.contact },
   ].filter((link) => link.id !== 'projects' || showProjects);
 

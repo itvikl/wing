@@ -8,6 +8,7 @@ import { MailGlyph, PhoneGlyph, WhatsAppGlyph } from './icons';
 export async function Footer() {
   const t = await getTranslations('footer');
   const legal = await getTranslations('legal');
+  const faq = await getTranslations('faq');
   const locale = await getLocale();
   const year = new Date().getFullYear();
   const phoneNumber = t('phoneNumber');
@@ -22,8 +23,8 @@ export async function Footer() {
 
   return (
     <footer className="bg-primary-dark text-neutral-100">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 pb-24 pt-10 text-base text-neutral-200 md:flex-row md:justify-between">
-        {/* pb-24: clear of the floating WhatsApp button, which sits over this corner. */}
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 pb-40 pt-10 text-base text-neutral-200 md:flex-row md:justify-between">
+        {/* pb-40: clear of the WhatsApp and accessibility buttons stacked in this corner. */}
         {/* Shown as the number itself, not a "Phone" label: a buyer abroad
             often writes it down or dials from another device. */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
@@ -60,7 +61,8 @@ export async function Footer() {
         </div>
 
         <div className="flex flex-col items-center gap-2 text-sm text-neutral-200/80 md:items-end">
-          <nav className="flex gap-4">
+          <nav className="flex flex-wrap justify-center gap-4">
+            <a href={localePath(locale, '/faq')} className="hover:text-accent-light">{faq('navLabel')}</a>
             <a href={localePath(locale, '/privacy')} className="hover:text-accent-light">{legal('privacyTitle')}</a>
             <a href={localePath(locale, '/accessibility')} className="hover:text-accent-light">{legal('accessibilityTitle')}</a>
           </nav>

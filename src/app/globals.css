@@ -16,6 +16,12 @@
        ruins it. The Hebrew fallbacks have real weights and still get theirs. */
     font-synthesis-weight: none;
   }
+  /* A line break typed in the admin (Enter in a field) breaks the line on the
+     site at that very point, so the editor sets where a heading wraps. Text
+     with no typed break wraps as before; a nowrap utility still wins. */
+  h1, h2, h3, h4, h5, h6, p, blockquote, figcaption, li, dt, dd, label, span, a, button {
+    white-space: pre-line;
+  }
 }
 
 .map-tint .leaflet-tile-pane {

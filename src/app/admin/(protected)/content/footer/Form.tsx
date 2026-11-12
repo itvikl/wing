@@ -50,27 +50,27 @@ export function FooterForm({ initial }: { initial: Data }) {
             <LocaleTabs he={localizedFields('he')} en={localizedFields('en')} />
 
             <div className="mt-8 grid gap-4 border-t border-neutral-200 pt-6 sm:grid-cols-2">
-              <TextField
+              <TextField singleLine
                 label="מספר טלפון, כפי שיוצג באתר (למשל +972 2-123-4567)"
                 value={links.phoneNumber} jump="phoneNumber"
                 onChange={(v) => updateLink({ phoneNumber: v })}
               />
-              <TextField
+              <TextField singleLine
                 label="קישור וואטסאפ (https://wa.me/972501234567) — מפעיל את הכפתור הצף"
                 value={links.whatsappLink} jump="whatsappLink"
                 onChange={(v) => updateLink({ whatsappLink: v })}
               />
-              <TextField
+              <TextField singleLine
                 label="כתובת אימייל"
                 value={links.emailAddress} jump="emailAddress"
                 onChange={(v) => updateLink({ emailAddress: v })}
               />
-              <TextField
+              <TextField singleLine
                 label="קישור פייסבוק"
                 value={links.facebookUrl} jump="facebookUrl"
                 onChange={(v) => updateLink({ facebookUrl: v })}
               />
-              <TextField
+              <TextField singleLine
                 label="קישור אינסטגרם"
                 value={links.instagramUrl} jump="instagramUrl"
                 onChange={(v) => updateLink({ instagramUrl: v })}
