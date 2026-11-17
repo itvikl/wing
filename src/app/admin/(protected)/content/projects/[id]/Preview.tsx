@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { jumpToField, useAdminLocale } from '@/components/admin/AdminLocale';
 import { ProjectPage, type ProjectPageLabels } from '@/components/project/ProjectPage';
 import { projectView, type ProjectData } from '@/lib/projects/schema';
+import { DEFAULT_BACKDROP } from '@/components/PageBackdrop';
 import type { ContentLocale } from '@/lib/content/schema';
 import type { LeadPreviewLabels } from './Editor';
 
@@ -70,9 +71,12 @@ export function ProjectPreview({
         className="project-preview absolute left-0 top-0 isolate overflow-hidden bg-primary-dark"
         style={{ width: frame.width, transform: `scale(${frame.scale})`, transformOrigin: 'top left' }}
       >
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-          <Image src="/scroll-world/img/main.webp" alt="" fill sizes="1200px" className="scale-105 object-cover object-top blur-[2px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/80 via-primary-dark/85 to-primary-dark/95" />
+        {/* The site pins the backdrop to the screen. A transformed preview
+            can't, and stretched over the whole page the photo blew up past
+            recognition, so it covers one desktop screen at its real size. */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[800px] overflow-hidden">
+          <Image src={view.backdropImage || DEFAULT_BACKDROP} alt="" fill sizes="1200px" className="scale-105 object-cover blur-[2px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/80 via-primary-dark/85 to-primary-dark" />
         </div>
         <ProjectPage
           view={view}

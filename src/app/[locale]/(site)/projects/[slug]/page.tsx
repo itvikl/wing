@@ -41,7 +41,7 @@ export default async function ProjectRoute({ params: { locale, slug } }: Params)
 
   return (
     <div className="relative isolate flex min-h-screen min-h-dvh flex-col">
-      <PageBackdrop />
+      <PageBackdrop src={view.backdropImage || undefined} />
       <Header />
       <main id="main-content" tabIndex={-1} className="flex-1">
         <ProjectPage

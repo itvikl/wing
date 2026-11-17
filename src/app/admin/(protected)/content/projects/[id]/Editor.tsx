@@ -193,6 +193,12 @@ export function ProjectEditor({
               </div>
             ))}
             <ImageUploadField label="תמונה ראשית (לרוחב, משותפת לשתי השפות)" folder="projects" value={data.heroImage} jump="heroImage" onChange={(url) => set({ heroImage: url })} />
+            <div>
+              <ImageUploadField label="תמונת רקע לדף" folder="projects" value={data.backdropImage} jump="backdropImage" onChange={(url) => set({ backdropImage: url })} />
+              <p className="mt-2 text-xs leading-relaxed text-neutral-muted">
+                מופיעה מאחורי כל הדף, מטושטשת ומוחשכת בירוק. בלי תמונה כאן, הרקע הוא התמונה הראשית.
+              </p>
+            </div>
             <div className="grid gap-1.5 text-sm" data-jump-target="slug">
               <label htmlFor="project-slug" className="font-medium text-primary-dark">כתובת הדף</label>
               <div dir="ltr" className="flex items-center rounded-lg border border-neutral-200 bg-white focus-within:border-accent">

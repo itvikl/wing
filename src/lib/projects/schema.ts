@@ -75,6 +75,8 @@ export const projectSchema = z.object({
   /** Stays on the site with a "sold" tag; the lead form gives way to a closing note. */
   sold: z.boolean().default(false),
   heroImage: image,
+  /** Behind the whole page, blurred and dimmed. Empty: the hero image is used. */
+  backdropImage: image,
   text: z.object({ he: projectTextSchema, en: projectTextSchema }),
   facts: z.array(projectFactSchema).max(MAX_FACTS).default([]),
   blocks: z.array(projectBlockSchema).max(12).default([]),
@@ -196,6 +198,7 @@ export function blankProject(): ProjectData {
     published: false,
     sold: false,
     heroImage: '',
+    backdropImage: '',
     text: {
       he: { ...emptyText, cta: 'אני רוצה לשמוע פרטים', leadTitle: 'רוצים לשמוע עוד?', leadText: 'השאירו פרטים ונחזור אליכם עם תוכניות ומחירון.' },
       en: { ...emptyText, cta: 'I’d like to hear more', leadTitle: 'Want to hear more?', leadText: 'Leave your details and we’ll get back to you with plans and prices.' },
@@ -219,6 +222,8 @@ export type ProjectView = {
   slug: string;
   sold: boolean;
   heroImage: string;
+  /** The chosen backdrop, or else the hero image; empty only when neither is set. */
+  backdropImage: string;
   showLeadForm: boolean;
   name: string;
   area: string;
@@ -251,6 +256,7 @@ export function projectView(project: ProjectData, locale: ContentLocale): Projec
     slug: project.slug,
     sold: project.sold,
     heroImage: project.heroImage.trim(),
+    backdropImage: (project.backdropImage || project.heroImage).trim(),
     showLeadForm: project.showLeadForm,
     name: t('name'),
     area: t('area'),
