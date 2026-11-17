@@ -5,6 +5,14 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
+function signInMessage(error: unknown): string {
+  const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
+  if (code === 'auth/user-disabled') return 'החשבון הזה חסום. פנו לבעלים של האתר.';
+  if (code === 'auth/too-many-requests') return 'יותר מדי ניסיונות. חכו כמה דקות ונסו שוב.';
+  if (code === 'auth/network-request-failed') return 'אין חיבור לאינטרנט.';
+  return 'האימייל או הסיסמה לא נכונים.';
+}
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -17,20 +25,29 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await credential.user.getIdToken();
+      let idToken: string;
+      try {
+        const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+        idToken = await credential.user.getIdToken();
+      } catch (err) {
+        throw new Error(signInMessage(err));
+      }
       const response = await fetch('/admin/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
       });
+      const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
         throw new Error(
-          payload.error === 'not-authorized' ? 'המשתמש הזה אינו מורשה לגשת לפאנל הניהול.' : 'ההתחברות נכשלה.',
+          payload.error === 'disabled'
+            ? 'החשבון הזה חסום. פנו לבעלים של האתר.'
+            : payload.error === 'not-authorized'
+              ? 'המשתמש הזה אינו מורשה לגשת לפאנל הניהול.'
+              : 'ההתחברות נכשלה.',
         );
       }
-      router.push('/admin');
+      router.push(payload.mustChangePassword ? '/admin/change-password' : '/admin');
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ההתחברות נכשלה. בדקו אימייל וסיסמה.');
@@ -75,6 +92,7 @@ export default function AdminLoginPage() {
         >
           {loading ? 'מתחבר…' : 'התחברות'}
         </button>
+        <p className="mt-4 text-center text-xs text-neutral-muted">שכחתם סיסמה? הבעלים של האתר יכולים לקבוע לכם סיסמה חדשה.</p>
       </form>
     </div>
   );

@@ -46,12 +46,15 @@ export function ProjectEditor({
   updatedAt,
   labels,
   lead,
+  canPublish,
 }: {
   id: string;
   initial: ProjectData;
   updatedAt: string;
   labels: Record<ContentLocale, ProjectPageLabels>;
   lead: Record<ContentLocale, LeadPreviewLabels>;
+  /** Owners and editors; a limited editor edits content but can't publish or unpublish. */
+  canPublish: boolean;
 }) {
   const router = useRouter();
   const { locale } = useAdminLocale();
@@ -124,7 +127,7 @@ export function ProjectEditor({
             <div className="flex flex-wrap gap-3">
               <Switch
                 checked={data.published}
-                disabled={!data.published && problems.length > 0}
+                disabled={!canPublish || (!data.published && problems.length > 0)}
                 onChange={(published) => set({ published })}
                 on="מפורסם באתר"
                 off="לא מפורסם"
@@ -139,6 +142,9 @@ export function ProjectEditor({
               {data.sold && 'כנמכר, הוא נשאר באתר עם תגית "נמכר", ובמקום הטופס מופיע קישור לשאר הפרויקטים. '}
               {data.published !== savedData.published || data.sold !== savedData.sold ? <strong className="font-medium text-amber-700">השינוי ייכנס לתוקף בשמירה.</strong> : null}
             </p>
+            {!canPublish && (
+              <p className="mt-2 text-sm text-neutral-muted">פרסום והסתרה של פרויקט נעשים על ידי בעלים או עורך.</p>
+            )}
             {data.published && problems.length > 0 && (
               <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
                 הפרויקט מסומן לפרסום, אבל חסר: {problems.join(', ')}. השמירה לא תעבור עד שזה יושלם, או שתכבו את הפרסום.

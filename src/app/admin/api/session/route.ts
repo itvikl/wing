@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
-import { allowedAdminEmails, SESSION_COOKIE, SESSION_MAX_AGE_MS } from '@/lib/auth/session';
+import { SESSION_COOKIE, SESSION_MAX_AGE_MS } from '@/lib/auth/session';
+import { accessFor, getUserRecord, recordLogin } from '@/lib/auth/users';
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -17,13 +18,15 @@ export async function POST(request: NextRequest) {
   }
 
   const email = (decoded.email || '').toLowerCase();
-  if (!email || !allowedAdminEmails().includes(email)) {
-    return NextResponse.json({ error: 'not-authorized' }, { status: 403 });
+  const record = await getUserRecord(decoded.uid);
+  if (!email || !accessFor(email, record)) {
+    return NextResponse.json({ error: record?.disabled ? 'disabled' : 'not-authorized' }, { status: 403 });
   }
 
+  await recordLogin(decoded.uid, email, (decoded.name as string | undefined) ?? '');
   const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: SESSION_MAX_AGE_MS });
 
-  const response = NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true, mustChangePassword: record?.mustChangePassword ?? false });
   response.cookies.set(SESSION_COOKIE, sessionCookie, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

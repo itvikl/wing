@@ -1,3 +1,5 @@
+import { requireSection } from '@/lib/auth/session';
+import { canPublish } from '@/lib/auth/roles';
 import { notFound } from 'next/navigation';
 import { getLocaleText } from '@/lib/content/store';
 import { getProject } from '@/lib/projects/store';
@@ -5,6 +7,7 @@ import { projectPageLabels } from '@/components/project/ProjectPage';
 import { ProjectEditor, type LeadPreviewLabels } from './Editor';
 
 export default async function ProjectEditorPage({ params: { id } }: { params: { id: string } }) {
+  const session = await requireSection('projects');
   const [project, he, en] = await Promise.all([getProject(id), getLocaleText('he'), getLocaleText('en')]);
   if (!project) notFound();
 
@@ -23,6 +26,7 @@ export default async function ProjectEditorPage({ params: { id } }: { params: { 
       updatedAt={updatedAt}
       labels={{ he: projectPageLabels(he), en: projectPageLabels(en) }}
       lead={{ he: lead(he), en: lead(en) }}
+      canPublish={canPublish(session)}
     />
   );
 }

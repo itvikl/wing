@@ -1,3 +1,4 @@
+import { requireSection } from '@/lib/auth/session';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent, getLocaleText } from '@/lib/content/store';
 import { HeroForm } from '../hero/Form';
@@ -9,6 +10,7 @@ import { SeeWingsForm } from '../see-wings/Form';
  * part keeps its own form and save.
  */
 export default async function HomeAdminPage() {
+  await requireSection('home');
   const content = await getContent();
   // The text as the site shows it, so a first caption that still echoes the
   // opening screen (saved before it had its own fields) opens with what's live.

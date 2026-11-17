@@ -1,3 +1,5 @@
+import { requireSection } from '@/lib/auth/session';
+import { canPublish } from '@/lib/auth/roles';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { legacyProjectCount, listProjects } from '@/lib/projects/store';
@@ -7,6 +9,7 @@ import { ProjectsLabelsForm } from './Form';
 import type { ProjectsLabels } from './actions';
 
 export default async function ProjectsAdminPage() {
+  const session = await requireSection('projects');
   const [content, projects] = await Promise.all([getContent(), listProjects()]);
   const legacyCount = projects.length ? 0 : await legacyProjectCount();
 
@@ -30,7 +33,7 @@ export default async function ProjectsAdminPage() {
   return (
     <div>
       <SectionHeader sectionKey="projects" />
-      <ProjectList rows={rows} legacyCount={legacyCount} />
+      <ProjectList rows={rows} legacyCount={legacyCount} canPublish={canPublish(session)} />
 
       <details className="group mt-12 rounded-2xl border border-neutral-200 bg-white px-5 py-4 open:pb-0">
         <summary className="cursor-pointer list-none text-base font-semibold text-primary-dark">

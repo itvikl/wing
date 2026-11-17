@@ -1,8 +1,10 @@
+import { requireSection } from '@/lib/auth/session';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { AboutForm } from './Form';
 
 export default async function AboutAdminPage() {
+  await requireSection('about');
   const content = await getContent();
 
   return (

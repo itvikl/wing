@@ -1,8 +1,10 @@
+import { requireSection } from '@/lib/auth/session';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { WhyUsForm } from './Form';
 
 export default async function WhyUsAdminPage() {
+  await requireSection('why-us');
   const content = await getContent();
 
   return (

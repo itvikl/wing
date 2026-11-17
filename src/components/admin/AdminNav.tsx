@@ -2,10 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ADMIN_GROUPS } from '@/lib/admin/sections';
+import { visibleGroups } from '@/lib/admin/sections';
+import { canManageUsers, type AdminAccess } from '@/lib/auth/roles';
 
-/** The admin's screens in their two groups; `onNavigate` closes the phone menu on a pick. */
-export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
+/**
+ * The admin's screens in their groups, only those this person may edit (plus
+ * the users screen for owners); `onNavigate` closes the phone menu on a pick.
+ */
+export function AdminNav({ access, onNavigate }: { access: AdminAccess; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -20,7 +24,7 @@ export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
       >
         סקירה כללית
       </Link>
-      {ADMIN_GROUPS.map((group) => (
+      {visibleGroups(access).map((group) => (
         <div key={group.title}>
           <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.14em] text-accent-light/80">{group.title}</div>
           <div className="flex flex-col gap-0.5">
@@ -43,6 +47,21 @@ export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         </div>
       ))}
+      {canManageUsers(access) && (
+        <div>
+          <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.14em] text-accent-light/80">ניהול</div>
+          <Link
+            href="/admin/users"
+            onClick={onNavigate}
+            aria-current={pathname.startsWith('/admin/users') ? 'page' : undefined}
+            className={`block rounded-lg px-3 py-2 text-[15px] transition-colors ${
+              pathname.startsWith('/admin/users') ? 'bg-accent font-medium text-primary-dark' : 'text-neutral-100 hover:bg-white/5'
+            }`}
+          >
+            משתמשים
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }

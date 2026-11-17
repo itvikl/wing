@@ -1,8 +1,10 @@
+import { requireSection } from '@/lib/auth/session';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { BrandForm } from './Form';
 
 export default async function BrandAdminPage() {
+  await requireSection('brand');
   const content = await getContent();
 
   return (

@@ -41,7 +41,7 @@ function formatDate(iso: string) {
  * Every project, in the order the site shows them: publish or unpublish one
  * right here, move it, copy it, delete it, or open it to edit its page.
  */
-export function ProjectList({ rows, legacyCount }: { rows: ProjectRow[]; legacyCount: number }) {
+export function ProjectList({ rows, legacyCount, canPublish: mayPublish }: { rows: ProjectRow[]; legacyCount: number; canPublish: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -119,7 +119,7 @@ export function ProjectList({ rows, legacyCount }: { rows: ProjectRow[]; legacyC
         <ul className="mt-6 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
           {rows.map((row, index) => {
             const busy = pending && busyId === row.id;
-            const canPublish = row.published || row.problems.length === 0;
+            const canPublish = mayPublish && (row.published || row.problems.length === 0);
             return (
               <li key={row.id} className={`grid gap-4 p-4 md:grid-cols-[28px_96px_minmax(0,1fr)_auto] md:items-center ${busy ? 'opacity-60' : ''}`}>
                 <div className="flex gap-1 md:flex-col">
@@ -152,7 +152,7 @@ export function ProjectList({ rows, legacyCount }: { rows: ProjectRow[]; legacyC
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  <label className={`flex items-center gap-2.5 rounded-full border px-3 py-1.5 text-sm ${row.published ? 'border-green-600/30 bg-green-50 text-green-800' : 'border-neutral-200 text-neutral-muted'} ${canPublish ? 'cursor-pointer' : 'cursor-not-allowed'}`} title={canPublish ? undefined : `חסר: ${row.problems.join(', ')}`}>
+                  <label className={`flex items-center gap-2.5 rounded-full border px-3 py-1.5 text-sm ${row.published ? 'border-green-600/30 bg-green-50 text-green-800' : 'border-neutral-200 text-neutral-muted'} ${canPublish ? 'cursor-pointer' : 'cursor-not-allowed'}`} title={canPublish ? undefined : mayPublish ? `חסר: ${row.problems.join(', ')}` : 'פרסום והסתרה נעשים על ידי בעלים או עורך'}>
                     <input
                       type="checkbox"
                       role="switch"
@@ -185,6 +185,7 @@ export function ProjectList({ rows, legacyCount }: { rows: ProjectRow[]; legacyC
                   >
                     שכפול
                   </button>
+                  {mayPublish && (
                   <button
                     type="button"
                     disabled={pending}
@@ -196,6 +197,7 @@ export function ProjectList({ rows, legacyCount }: { rows: ProjectRow[]; legacyC
                   >
                     מחיקה
                   </button>
+                  )}
                 </div>
               </li>
             );

@@ -1,8 +1,10 @@
+import { requireSection } from '@/lib/auth/session';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { LegalForm } from './Form';
 
 export default async function LegalAdminPage() {
+  await requireSection('legal');
   const content = await getContent();
 
   return (

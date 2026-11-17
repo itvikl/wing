@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { AdminAccess } from '@/lib/auth/roles';
 import { useEffect, useState, type ReactNode } from 'react';
 import { AdminNav } from './AdminNav';
 import { LogoutButton } from './LogoutButton';
@@ -10,7 +12,15 @@ import { LogoutButton } from './LogoutButton';
  * button opens the same menu as a drawer (it had none at all before, so a
  * phone couldn't leave the screen it landed on).
  */
-export function AdminShell({ email, children }: { email: string; children: ReactNode }) {
+export function AdminShell({
+  user,
+  access,
+  children,
+}: {
+  user: { email: string; name: string; roleLabel: string };
+  access: AdminAccess;
+  children: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -30,10 +40,15 @@ export function AdminShell({ email, children }: { email: string; children: React
     <>
       <div className="px-3 text-lg font-semibold text-neutral-100">Wings · ניהול האתר</div>
       <div className="mt-8 flex-1 overflow-y-auto">
-        <AdminNav onNavigate={() => setOpen(false)} />
+        <AdminNav access={access} onNavigate={() => setOpen(false)} />
       </div>
       <div className="mt-6 border-t border-white/10 px-3 pt-5">
-        <p className="mb-3 truncate text-xs text-neutral-200" dir="ltr">{email}</p>
+        {user.name && <p className="truncate text-sm font-medium text-neutral-100">{user.name}</p>}
+        <p className="truncate text-xs text-neutral-200" dir="ltr" style={{ textAlign: 'right' }}>{user.email}</p>
+        <p className="mb-3 mt-0.5 text-xs text-accent-light/80">{user.roleLabel}</p>
+        <Link href="/admin/change-password" className="mb-2 block rounded-lg px-3 py-1.5 text-center text-xs text-neutral-200 transition-colors hover:bg-white/5">
+          החלפת סיסמה
+        </Link>
         <LogoutButton />
       </div>
     </>

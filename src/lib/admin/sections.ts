@@ -1,3 +1,5 @@
+import { canEditSection, type AdminAccess } from '@/lib/auth/roles';
+
 /**
  * The admin's screens, grouped the way the site owner thinks about them:
  * the site's pages (in the order the site's menu shows them), then settings
@@ -42,4 +44,11 @@ export function adminSection(key: string): AdminSection {
   const section = ADMIN_SECTIONS.find((s) => s.key === key);
   if (!section) throw new Error(`Unknown admin section: ${key}`);
   return section;
+}
+
+/** The groups with only the sections this person may edit; empty groups dropped. */
+export function visibleGroups(access: AdminAccess) {
+  return ADMIN_GROUPS.map((group) => ({ ...group, sections: group.sections.filter((s) => canEditSection(access, s.key)) })).filter(
+    (group) => group.sections.length > 0,
+  );
 }

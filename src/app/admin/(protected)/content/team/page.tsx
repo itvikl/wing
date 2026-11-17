@@ -1,8 +1,10 @@
+import { requireSection } from '@/lib/auth/session';
 import { SectionHeader } from '@/components/admin/SectionHeader';
 import { getContent } from '@/lib/content/store';
 import { TeamForm } from './Form';
 
 export default async function TeamAdminPage() {
+  await requireSection('team');
   const content = await getContent();
 
   return (
