@@ -95,25 +95,25 @@ export function ProjectPage({
         <a href={projectsHref} className="self-start border-b border-accent-light/40 pb-1 text-sm text-neutral-200 transition-colors hover:text-accent-light">
           <span aria-hidden>{backArrow}</span> {labels.back}
         </a>
-        <div {...jump('area')} className="mt-12 md:mt-16">
+        <div {...jump('area')} className="mt-8 md:mt-10">
           {view.area && <span className={EYEBROW}>{view.area}</span>}
         </div>
         <h1 {...jump('name')} className="mt-5 max-w-4xl font-display text-5xl font-semibold leading-[1.05] text-neutral-100 text-balance md:text-7xl">
           {view.name || (editable ? 'שם הפרויקט' : '')}
         </h1>
-        <Rule className="mt-9" />
+        <Rule className="mt-7" />
         {view.tagline && (
-          <p {...jump('tagline')} className="mt-8 max-w-2xl text-lg font-light leading-relaxed text-neutral-100 md:text-[21px]">
+          <p {...jump('tagline')} className="mt-6 max-w-2xl text-lg font-light leading-relaxed text-neutral-100 md:text-[21px]">
             {view.tagline}
           </p>
         )}
         {showForm && view.cta && (
-          <a {...jump('cta')} href="#contact" className="mt-9 inline-flex min-h-12 items-center rounded-full bg-accent px-8 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light">
+          <a {...jump('cta')} href="#contact" className="mt-8 inline-flex min-h-12 items-center rounded-full bg-accent px-8 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light">
             {view.cta}
           </a>
         )}
-        <div aria-hidden className="mt-12 h-16 w-px bg-gradient-to-b from-accent/0 to-accent md:h-20" />
-        <div {...jump('heroImage')} className="relative aspect-[4/3] w-full overflow-hidden rounded border-[3px] border-accent bg-primary sm:aspect-[16/9]">
+        <div aria-hidden className="mt-8 h-10 w-px bg-gradient-to-b from-accent/0 to-accent md:h-12" />
+        <div {...jump('heroImage')} className="relative aspect-[4/3] w-full overflow-hidden rounded border-[3px] border-accent bg-primary sm:aspect-[21/9]">
           {view.heroImage ? (
             <Image src={view.heroImage} alt={view.name} fill priority sizes="(min-width: 1152px) 1104px, 100vw" className="object-cover" />
           ) : (
@@ -129,7 +129,7 @@ export function ProjectPage({
 
       {/* Quick facts */}
       {view.facts.length ? (
-        <dl {...jump('facts')} className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 px-6 pt-16 md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:gap-10 md:pt-20">
+        <dl {...jump('facts')} className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-8 px-6 pt-12 md:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] md:gap-10 md:pt-14">
           {view.facts.map((f) => (
             <div key={f.index} className="border-t border-accent pt-5">
               <dt className="text-[13px] uppercase tracking-[0.18em] text-accent-light rtl:tracking-[0.1em]">{f.label}</dt>
@@ -143,7 +143,7 @@ export function ProjectPage({
 
       {/* Photo beside text */}
       {view.blocks.length ? (
-        <div className="mx-auto flex max-w-6xl flex-col gap-20 px-6 pt-20 md:gap-28 md:pt-28">
+        <div className="mx-auto flex max-w-6xl flex-col gap-14 px-6 pt-14 md:gap-[72px] md:pt-[72px]">
           {view.blocks.map((b) =>
             b.side === 'full' ? (
               <section key={b.index} {...jump(`blocks.${b.index}`)} className="mx-auto max-w-3xl text-center">
@@ -152,8 +152,8 @@ export function ProjectPage({
                 {b.body && <p className="whitespace-pre-line text-lg font-light leading-[1.85] text-neutral-200 md:text-xl">{b.body}</p>}
               </section>
             ) : (
-              <section key={b.index} {...jump(`blocks.${b.index}`)} className="grid items-center gap-8 md:grid-cols-2 md:gap-20">
-                <div className={`relative aspect-[4/5] overflow-hidden rounded border-[3px] border-accent bg-primary ${b.side === 'end' ? 'md:order-last' : ''}`}>
+              <section key={b.index} {...jump(`blocks.${b.index}`)} className="grid items-center gap-7 md:grid-cols-2 md:gap-14">
+                <div className={`relative aspect-[4/3] overflow-hidden rounded border-[3px] border-accent bg-primary ${b.side === 'end' ? 'md:order-last' : ''}`}>
                   <Image src={b.image} alt={b.title} fill sizes="(min-width: 1152px) 520px, (min-width: 768px) 45vw, 100vw" className="object-cover" />
                 </div>
                 <div className="min-w-0">
@@ -171,7 +171,7 @@ export function ProjectPage({
 
       {/* Features */}
       {view.features.length ? (
-        <section {...jump('features')} className="mx-auto max-w-6xl px-6 pt-24 md:pt-28">
+        <section {...jump('features')} className="mx-auto max-w-6xl px-6 pt-16 md:pt-[72px]">
           <div className="rounded-3xl border border-white/10 bg-primary/80 p-7 backdrop-blur-xl md:p-10">
             <span className={EYEBROW}>{labels.featuresEyebrow}</span>
             <h2 className="mt-2 font-display text-2xl font-semibold text-neutral-100 md:text-[28px]">{labels.featuresTitle}</h2>
@@ -191,7 +191,7 @@ export function ProjectPage({
 
       {/* Nearby */}
       {view.nearby.length ? (
-        <section {...jump('nearby')} className="mx-auto max-w-6xl px-6 pt-24 md:pt-28">
+        <section {...jump('nearby')} className="mx-auto max-w-6xl px-6 pt-16 md:pt-[72px]">
           <SectionHead eyebrow={labels.nearbyEyebrow} title={labels.nearbyTitle} />
           <ul className="mx-auto mt-10 grid max-w-4xl gap-x-16 md:mt-14 md:grid-cols-2">
             {view.nearby.map((n) => (
@@ -210,7 +210,7 @@ export function ProjectPage({
 
       {/* Gallery */}
       {view.gallery.length ? (
-        <section {...jump('gallery')} className="mx-auto max-w-6xl px-6 pt-24 md:pt-28">
+        <section {...jump('gallery')} className="mx-auto max-w-6xl px-6 pt-16 md:pt-[72px]">
           <SectionHead eyebrow={labels.galleryEyebrow} title={labels.galleryTitle} />
           <div className="mt-10 md:mt-14">
             <ProjectGallery images={view.gallery} alt={view.name} locale={locale} closeLabel={labels.close} still={editable} />
@@ -222,7 +222,7 @@ export function ProjectPage({
 
       {/* Contact, or once sold, a closing note */}
       {view.sold ? (
-        <section {...jump('lead')} className="mx-auto mt-24 max-w-6xl px-6 md:mt-28">
+        <section {...jump('lead')} className="mx-auto mt-16 max-w-6xl px-6 md:mt-[72px]">
           <div className="w-full border-t border-white/10 pt-12 md:flex md:items-center md:justify-between md:gap-10">
             <div>
               <span className={EYEBROW}>{labels.sold}</span>
@@ -240,7 +240,7 @@ export function ProjectPage({
           </div>
         </section>
       ) : showForm ? (
-        <div {...jump('lead')} className="mt-12 md:mt-16">
+        <div {...jump('lead')} className="mt-14 md:mt-[72px]">
           {leadForm}
         </div>
       ) : (
