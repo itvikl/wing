@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { Frank_Ruhl_Libre, Heebo } from 'next/font/google';
-import localFont from 'next/font/local';
+import { didot, hebrewDisplay, hebrewSans } from '@/lib/fonts';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { locales, type Locale } from '@/i18n/request';
@@ -12,34 +11,6 @@ import { AccessibilityProvider } from '@/components/AccessibilityMenu';
 import { A11Y_BOOT_SCRIPT } from '@/lib/a11y';
 import { whatsappHref } from '@/lib/contact';
 import '../globals.css';
-
-// Google's latin cut of GFS Didot, self-hosted: next/font/google only knows the
-// font's greek subset, so it would never preload the one this site reads in.
-const didot = localFont({
-  src: '../fonts/GFSDidot-latin.woff2',
-  weight: '400',
-  variable: '--font-didot',
-  display: 'swap',
-  // The generated metric-matched fallback is local Times New Roman for every
-  // character, Hebrew included, so it would win over the Hebrew fonts below.
-  adjustFontFallback: false,
-});
-
-// GFS Didot has no Hebrew glyphs, so Hebrew falls through to these, character
-// by character: see --font-display and --font-sans in globals.css.
-const hebrewDisplay = Frank_Ruhl_Libre({
-  subsets: ['hebrew'],
-  weight: ['500', '600', '700'],
-  variable: '--font-hebrew-display',
-  display: 'swap',
-});
-
-const hebrewSans = Heebo({
-  subsets: ['hebrew'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-hebrew-sans',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'Wings Real Estate — Jerusalem',
