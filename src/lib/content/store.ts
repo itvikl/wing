@@ -83,16 +83,6 @@ export async function getLocaleText(locale: ContentLocale): Promise<LocaleText> 
   };
 }
 
-/**
- * Whether the admin has published any opportunities. A row with no title is
- * a blank one left in the list, not a project. With none, every nav link to
- * the Opportunities page disappears and the page itself shows a short notice.
- */
-export async function hasProjects(locale: ContentLocale) {
-  const text = await getLocaleText(locale);
-  return text.projects.items.some((item) => item.title.trim());
-}
-
 export async function getSiteMedia() {
   const content = await getContent();
   return content.media;
@@ -115,16 +105,17 @@ export async function updateVideoPoster(url: string) {
   await contentDoc().set({ media: { video: { poster: url } } }, { merge: true });
 }
 
-/** Text (both locales) + images written in one Firestore call so a mid-save failure can never leave them out of sync. */
-export async function updateProjectsSection(he: unknown, en: unknown, images: (string | null)[]) {
+/**
+ * The projects section's own words (the gallery's heading, the project page
+ * template's fixed labels), both languages in one write. The old cards
+ * (`items`) are left as they are: merge keeps any field not written.
+ */
+export async function updateProjectsLabels(he: unknown, en: unknown) {
   await requireAdmin();
-  const schema = TEXT_SECTION_SCHEMAS.projects;
+  const schema = TEXT_SECTION_SCHEMAS.projects.omit({ items: true });
   const parsedHe = schema.parse(he);
   const parsedEn = schema.parse(en);
-  await contentDoc().set(
-    { text: { he: { projects: parsedHe }, en: { projects: parsedEn } }, media: { projects: { items: images } } },
-    { merge: true },
-  );
+  await contentDoc().set({ text: { he: { projects: parsedHe }, en: { projects: parsedEn } } }, { merge: true });
 }
 
 /** Text (both locales) + images written in one Firestore call so a mid-save failure can never leave them out of sync. */

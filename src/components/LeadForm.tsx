@@ -43,10 +43,20 @@ function zoneCity(zone: string) {
 export function LeadForm({
   variant = 'section',
   sizes,
+  eyebrow,
+  title,
+  intro,
+  project,
 }: {
   variant?: 'section' | 'overlay';
   /** The lead form's per-field text sizes (see textSizesSchema). */
   sizes?: TextSizes;
+  /** A project page's own heading over the form, in place of the form's usual one. */
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+  /** The project the form sits on (its Hebrew name), sent with the lead so it shows where it came from. */
+  project?: string;
 }) {
   const t = useTranslations('leadForm');
   const footer = useTranslations('footer');
@@ -106,10 +116,11 @@ export function LeadForm({
         marketingConsent: data.get('marketingConsent') === 'on',
         locale,
         refUrl: window.location.href,
+        project,
         eventId,
         attribution: getAttribution(),
       });
-      trackEvent('Lead', { content_name: 'Lead form', lead_purpose: purpose || undefined }, eventId);
+      trackEvent('Lead', { content_name: project ? `Project: ${project}` : 'Lead form', lead_purpose: purpose || undefined }, eventId);
       form.reset();
       setStatus('success');
     } catch (error) {
@@ -123,8 +134,9 @@ export function LeadForm({
 
   const content = (
     <>
-      <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg"><Sized scale={sizes?.eyebrow}>{t('eyebrow')}</Sized></span>
-      <h2 className="mt-4 font-display text-3xl font-semibold text-balance md:text-4xl"><Sized scale={sizes?.title}>{t('title')}</Sized></h2>
+      <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg"><Sized scale={sizes?.eyebrow}>{eyebrow || t('eyebrow')}</Sized></span>
+      <h2 className="mt-4 font-display text-3xl font-semibold text-balance md:text-4xl"><Sized scale={sizes?.title}>{title || t('title')}</Sized></h2>
+      {intro && <p className="mt-4 text-lg font-light leading-relaxed text-neutral-200">{intro}</p>}
 
       {status === 'success' ? (
         <div role="status" className="mt-10">

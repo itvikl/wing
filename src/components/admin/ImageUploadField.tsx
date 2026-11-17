@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
-import { requestMediaUpload } from '@/app/admin/(protected)/upload-actions';
+import { uploadMedia } from './uploadMedia';
 
 export function ImageUploadField({
   label,
@@ -26,10 +26,7 @@ export function ImageUploadField({
     setUploading(true);
     setError(null);
     try {
-      const { uploadUrl, publicUrl } = await requestMediaUpload(folder, file.name, file.type);
-      const putResponse = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
-      if (!putResponse.ok) throw new Error('ההעלאה נכשלה');
-      onChange(publicUrl);
+      onChange(await uploadMedia(folder, file));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ההעלאה נכשלה');
     } finally {

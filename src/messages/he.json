@@ -100,7 +100,21 @@
     "viewDetails": "לצפייה בפרטים",
     "close": "סגירה",
     "empty": "אין כרגע פרויקטים לפרסום",
-    "items": []
+    "items": [],
+    "pageBack": "כל הפרויקטים",
+    "pageFeaturesEyebrow": "בבניין",
+    "pageFeaturesTitle": "מאפיינים",
+    "pageNearbyEyebrow": "השכונה",
+    "pageNearbyTitle": "מה יש בסביבה",
+    "pageGalleryEyebrow": "גלריה",
+    "pageGalleryTitle": "מבט מקרוב",
+    "pageWalk": "דק׳ הליכה",
+    "pageDrive": "דק׳ נסיעה",
+    "pageLeadEyebrow": "פרטים נוספים",
+    "pageSold": "נמכר",
+    "pageSoldTitle": "הפרויקט נמכר במלואו",
+    "pageSoldBody": "רוצים לשמוע ראשונים על הפרויקט הבא?",
+    "pageSoldCta": "לכל הפרויקטים"
   },
   "whyUs": {
     "eyebrow": "למה Wings",

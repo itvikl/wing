@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { requestMediaUpload } from '@/app/admin/(protected)/upload-actions';
+import { uploadMedia } from './uploadMedia';
 
 export function VideoUploadField({
   label,
@@ -27,10 +27,7 @@ export function VideoUploadField({
     setError(null);
     setProgressNote(`מעלה ${(file.size / (1024 * 1024)).toFixed(1)}MB…`);
     try {
-      const { uploadUrl, publicUrl } = await requestMediaUpload(folder, file.name, file.type);
-      const putResponse = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
-      if (!putResponse.ok) throw new Error('ההעלאה נכשלה');
-      onChange(publicUrl);
+      onChange(await uploadMedia(folder, file));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ההעלאה נכשלה');
     } finally {

@@ -100,7 +100,21 @@
     "viewDetails": "View Details",
     "close": "Close",
     "empty": "There are no projects to show right now",
-    "items": []
+    "items": [],
+    "pageBack": "All projects",
+    "pageFeaturesEyebrow": "In the building",
+    "pageFeaturesTitle": "Features",
+    "pageNearbyEyebrow": "The neighbourhood",
+    "pageNearbyTitle": "What's nearby",
+    "pageGalleryEyebrow": "Gallery",
+    "pageGalleryTitle": "A closer look",
+    "pageWalk": "min walk",
+    "pageDrive": "min drive",
+    "pageLeadEyebrow": "More details",
+    "pageSold": "Sold",
+    "pageSoldTitle": "This project is sold out",
+    "pageSoldBody": "Want to hear first about the next one?",
+    "pageSoldCta": "All projects"
   },
   "whyUs": {
     "eyebrow": "Why Wings",

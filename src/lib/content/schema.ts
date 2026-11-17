@@ -144,7 +144,27 @@ export const projectsTextSchema = z.object({
   // Shown on /projects when no opportunity is published. Optional: content
   // saved before it existed has no such key (the defaults fill it in).
   empty: z.string().optional(),
+  // The cards before each project had a page of its own. No longer shown;
+  // kept so content saved then still parses, and so the admin can turn those
+  // cards into project pages (see lib/projects/store importLegacyProjects).
   items: z.array(projectItemSchema),
+  // The fixed words on every project page (headings of the template's parts,
+  // "sold", minutes). Optional for content saved before they existed; the
+  // defaults (messages/*.json) fill them in.
+  pageBack: z.string().optional(),
+  pageFeaturesEyebrow: z.string().optional(),
+  pageFeaturesTitle: z.string().optional(),
+  pageNearbyEyebrow: z.string().optional(),
+  pageNearbyTitle: z.string().optional(),
+  pageGalleryEyebrow: z.string().optional(),
+  pageGalleryTitle: z.string().optional(),
+  pageWalk: z.string().optional(),
+  pageDrive: z.string().optional(),
+  pageLeadEyebrow: z.string().optional(),
+  pageSold: z.string().optional(),
+  pageSoldTitle: z.string().optional(),
+  pageSoldBody: z.string().optional(),
+  pageSoldCta: z.string().optional(),
   sizes: textSizesSchema,
 });
 

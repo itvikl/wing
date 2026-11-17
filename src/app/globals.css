@@ -152,6 +152,18 @@
 
 /* Admin: the field a preview click jumped to (AdminLocale's jumpToField)
    glows gold for a moment so the eye lands on it. */
+/* The admin's project preview: each part of the page opens its field on click. */
+.project-preview [data-jump] {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: outline-color 0.15s;
+  outline: 4px solid transparent;
+  outline-offset: 8px;
+}
+.project-preview [data-jump]:hover {
+  outline-color: rgba(255, 188, 125, 0.6);
+}
+
 .admin-jump-flash {
   animation: admin-jump-flash 1.6s ease-out;
 }

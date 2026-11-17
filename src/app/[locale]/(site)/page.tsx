@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/request';
-import { getLocaleText, getSiteMedia, hasProjects } from '@/lib/content/store';
+import { getLocaleText, getSiteMedia } from '@/lib/content/store';
+import { hasPublishedProjects } from '@/lib/projects/store';
 import type { TextSizes } from '@/lib/content/schema';
 import { SeeWingsExperience, type SeeWingsSection } from '@/components/SeeWingsExperience';
 import { formatPhone, telHref } from '@/lib/contact';
@@ -31,7 +32,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const text = await getLocaleText(locale);
   const opening = { eyebrow: hero('eyebrow'), title: hero('headline'), sizes: text.hero.sizes };
   const media = await getSiteMedia();
-  const showProjects = await hasProjects(locale);
+  const showProjects = await hasPublishedProjects();
   const sections = t.raw('sections') as SeeWingsSection[];
   const cues = t.raw('cues') as { eyebrow: string; title: string; body?: string; extra?: { label: string; value: string }[]; sizes?: TextSizes }[];
   const trackVh = computeTrackVh(sections.length, media.seeWings.connectors);

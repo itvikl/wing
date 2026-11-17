@@ -105,15 +105,41 @@ export function TextField({
   const id = useId();
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  // One line tall, growing with each line break the editor adds (Enter): the
-  // site shows the text broken at exactly those points (white-space:pre-line
-  // in globals.css), so a heading's lines are the editor's to set.
+  // One line tall, growing with each line break the editor adds (Enter) and
+  // with wrapping on a narrow screen: the site shows the text broken at
+  // exactly the typed points (white-space:pre-line in globals.css), so a
+  // heading's lines are the editor's to set.
+  //
+  // A field in the language not being edited is hidden (display:none), where
+  // scrollHeight reads 0: measuring it then pinned it shut, and the text was
+  // cut off once that language was shown. So a hidden field is left alone,
+  // and a ResizeObserver measures again whenever the field's width changes,
+  // which includes the moment it's first shown and a phone rotating.
+  const fit = () => {
+    const el = ref.current;
+    if (!el || el.offsetParent === null) return;
+    el.style.height = 'auto';
+    // border-box sizing: scrollHeight leaves out the 1px borders.
+    el.style.height = `${el.scrollHeight + 2}px`;
+  };
+
+  useEffect(fit, [value]);
+
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
-  }, [value]);
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    let width = -1;
+    const observer = new ResizeObserver(([entry]) => {
+      const next = Math.round(entry.contentRect.width);
+      // Our own height change re-triggers the observer; only a new width matters.
+      if (next === width) return;
+      width = next;
+      fit();
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const className = 'rounded-lg border border-neutral-200 bg-white px-3 py-2 text-primary-dark focus:border-accent focus:outline-none';
 
@@ -129,7 +155,7 @@ export function TextField({
           rows={1}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className={`${className} resize-none overflow-hidden leading-6`}
+          className={`${className} min-h-[42px] resize-none overflow-hidden leading-6`}
         />
       )}
     </div>

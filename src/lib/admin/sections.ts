@@ -19,7 +19,7 @@ export const ADMIN_GROUPS: { title: string; sections: AdminSection[] }[] = [
       { key: 'home', href: '/admin/content/home', label: 'עמוד הבית', description: 'מסך הפתיחה, הכיתובים שמתחלפים בזמן הגלילה, ותמונות וסרטוני הטיסה.', sitePath: '/' },
       { key: 'about', href: '/admin/content/about', label: 'אודות', description: 'מאיפה השם, סיפור ההקמה, תמונה משותפת, המשימה ועובדות על החברה.', sitePath: '/about' },
       { key: 'why-us', href: '/admin/content/why-us', label: 'למה Wings', description: 'היתרונות של העבודה איתכם.', sitePath: '/why-us' },
-      { key: 'projects', href: '/admin/content/projects', label: 'הזדמנויות', description: 'כרטיסי הנכסים. בלי אף נכס, העמוד מוסתר מהתפריט.', sitePath: '/projects' },
+      { key: 'projects', href: '/admin/content/projects', label: 'פרויקטים', description: 'דף לכל פרויקט, באותה תבנית. כל פרויקט מתפרסם או מוסתר במתג משלו; בלי אף פרויקט מפורסם, הקישור לעמוד יורד מהתפריט.', sitePath: '/projects' },
       { key: 'team', href: '/admin/content/team', label: 'הצוות שלנו', description: 'פרופיל לכל איש צוות, ואנשי המקצוע שעובדים איתכם.', sitePath: '/team' },
       { key: 'faq', href: '/admin/content/faq', label: 'שאלות נפוצות', description: 'נושאים, שאלות ותשובות, והכרטיס שבצד.', sitePath: '/faq' },
       { key: 'lead-form', href: '/admin/content/lead-form', label: 'צור קשר', description: 'טופס הפנייה: השדות, השאלות, ההסכמה והודעת התודה.', sitePath: '/contact' },

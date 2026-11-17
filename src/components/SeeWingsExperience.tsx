@@ -138,13 +138,7 @@ export function SeeWingsExperience({
     // swipe should move the flight. Stepping (and the idle-snap back onto a
     // stop) made most swipes feel like they did nothing. Mouse and trackpad
     // keep the stop-to-stop flight.
-    // TRIAL: /nonstop (the home page under another URL, see its page.tsx)
-    // scrubs freely on every device too, so the stop-to-stop flight can be
-    // compared against one continuous scrub. Remove once that's settled.
-    const nonstop = pathWithoutLocale === '/nonstop';
-    // TRIAL: /autoplay plays the flight by itself, start to end, no control.
-    const autoplay = pathWithoutLocale === '/autoplay';
-    const touch = nonstop || autoplay || window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
     const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
@@ -187,9 +181,6 @@ export function SeeWingsExperience({
       // Each wheel burst / arrow key flies to the next rest beat instead of
       // scrubbing freely (see scrollWorld.js's step-scroll).
       stepScroll: !touch,
-      // TRIAL (/nonstop): the wheel stops the flight dead, no easing tail.
-      instantScrub: nonstop,
-      autoplay,
       // Seconds a step takes to cross the whole track — the same
       // single-section assumption as restBeats above.
       stepTrackSeconds: FLIGHT_SECONDS / STEP_PLAYBACK_RATE,

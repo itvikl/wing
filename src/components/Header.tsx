@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { getLocaleText, getSiteMedia, hasProjects } from '@/lib/content/store';
+import { getLocaleText, getSiteMedia } from '@/lib/content/store';
+import { hasPublishedProjects } from '@/lib/projects/store';
 import { Sized } from '@/lib/textSize';
 import type { ContentLocale } from '@/lib/content/schema';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -18,7 +19,7 @@ export async function Header() {
   const emailAddress = footer('emailAddress');
   const media = await getSiteMedia();
   const locale = await getLocale();
-  const showProjects = await hasProjects(locale as ContentLocale);
+  const showProjects = await hasPublishedProjects();
   const contactHref = locale === 'en' ? '/contact' : `/${locale}/contact`;
   // Text sizes aren't strings, so they're read off the content itself rather than through t().
   const sizes = (await getLocaleText(locale as ContentLocale)).nav.sizes;

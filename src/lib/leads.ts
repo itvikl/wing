@@ -43,6 +43,8 @@ const leadSubmissionSchema = z.object({
   marketingConsent: z.boolean().optional().default(false),
   locale: optionalText(5),
   refUrl: optionalText(1000),
+  /** The project page the form was sent from, if any. */
+  project: optionalText(200),
   eventId: optionalText(100),
   attribution: attributionSchema,
 });
@@ -54,6 +56,7 @@ type Lead = z.output<typeof leadSubmissionSchema>;
 function leadDetails(lead: Lead): string {
   const a = lead.attribution;
   const lines = [
+    lead.project && `Project: ${lead.project}`,
     lead.message,
     lead.budget && `Budget: ${lead.budget}`,
     lead.timeline && `Timeline: ${lead.timeline}`,
@@ -153,7 +156,7 @@ async function sendMetaLead(lead: Lead): Promise<boolean> {
               action_source: 'website',
               event_source_url: lead.refUrl || undefined,
               user_data: userData,
-              custom_data: { content_name: 'Lead form', lead_purpose: lead.purpose || undefined },
+              custom_data: { content_name: lead.project ? `Project: ${lead.project}` : 'Lead form', lead_purpose: lead.purpose || undefined },
             },
           ],
           // Set while checking events in Events Manager → Test events; unset in production.
