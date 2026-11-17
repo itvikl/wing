@@ -40,4 +40,7 @@ export const heeboLatin = localFont({
   weight: '300 700',
   variable: '--font-heebo-latin',
   display: 'swap',
+  // Its generated fallback is local Arial for every character, so Hebrew
+  // would stop there instead of reaching Heebo's Hebrew cut.
+  adjustFontFallback: false,
 });
