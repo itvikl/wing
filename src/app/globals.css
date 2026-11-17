@@ -283,3 +283,20 @@ html.a11y-cursor * {
 html.a11y-still .wa-pulse {
   display: none !important;
 }
+
+/* A project page's bottom bar on a phone (ProjectBar) takes the floating
+   WhatsApp button's job, and the accessibility button steps up above it. */
+@media (max-width: 767px) {
+  body:has([data-project-bar]) {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+  body:has([data-project-bar]) [data-floating='whatsapp'] {
+    display: none;
+  }
+  body:has([data-project-bar]) [data-floating='a11y'] {
+    bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+  }
+  body:has([data-project-bar]) [data-floating='a11y-panel'] {
+    bottom: calc(136px + env(safe-area-inset-bottom)) !important;
+  }
+}

@@ -7,10 +7,12 @@ import { Footer } from '@/components/Footer';
 import { PageBackdrop } from '@/components/PageBackdrop';
 import { LeadForm } from '@/components/LeadForm';
 import { ProjectPage, projectPageLabels } from '@/components/project/ProjectPage';
+import { QuickLeadForm } from '@/components/project/QuickLeadForm';
+import { ProjectBar } from '@/components/project/ProjectBar';
 import { getLocaleText } from '@/lib/content/store';
 import { getPublishedProjectBySlug } from '@/lib/projects/store';
 import { projectView } from '@/lib/projects/schema';
-import { localePath } from '@/lib/contact';
+import { localePath, whatsappHref } from '@/lib/contact';
 
 // Rendered per request, like every page under [locale]: see projects/page.tsx.
 export const dynamic = 'force-dynamic';
@@ -38,6 +40,10 @@ export default async function ProjectRoute({ params: { locale, slug } }: Params)
 
   const text = await getLocaleText(locale);
   const view = projectView(project, locale);
+  const labels = projectPageLabels(text);
+  // Leads carry the Hebrew name, so the CRM shows one name per project in both languages.
+  const leadProject = project.text.he.name || view.name;
+  const formOn = !view.sold && view.showLeadForm;
 
   return (
     <div className="relative isolate flex min-h-screen min-h-dvh flex-col">
@@ -46,17 +52,31 @@ export default async function ProjectRoute({ params: { locale, slug } }: Params)
       <main id="main-content" tabIndex={-1} className="flex-1">
         <ProjectPage
           view={view}
-          labels={projectPageLabels(text)}
+          labels={labels}
           locale={locale}
           projectsHref={localePath(locale, '/projects')}
           contactHref={localePath(locale, '/contact')}
+          quickForm={<QuickLeadForm title={labels.quickTitle} text={labels.quickText} sentText={labels.quickSent} project={leadProject} />}
           leadForm={
             <LeadForm
+              compact
               sizes={text.leadForm.sizes}
-              eyebrow={text.projects.pageLeadEyebrow}
+              eyebrow={labels.leadEyebrow}
               title={view.leadTitle}
               intro={view.leadText}
-              project={project.text.he.name || view.name}
+              submitLabel={labels.leadSubmit}
+              project={leadProject}
+            />
+          }
+          bar={
+            <ProjectBar
+              ctaLabel={labels.barCta}
+              ctaHref={formOn ? '#contact' : localePath(locale, '/contact')}
+              whatsappHref={whatsappHref(text.footer.whatsappLink, text.footer.whatsappMessage)}
+              whatsappLabel={text.footer.whatsapp}
+              shareLabel={labels.share}
+              sharedLabel={labels.shared}
+              title={view.name}
             />
           }
         />

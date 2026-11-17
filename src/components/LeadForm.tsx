@@ -47,8 +47,14 @@ export function LeadForm({
   title,
   intro,
   project,
+  compact = false,
+  submitLabel,
 }: {
   variant?: 'section' | 'overlay';
+  /** Name, phone, email and a message only: a project page asks the rest in the call. */
+  compact?: boolean;
+  /** The button's words in place of the form's usual ones. */
+  submitLabel?: string;
   /** The lead form's per-field text sizes (see textSizesSchema). */
   sizes?: TextSizes;
   /** A project page's own heading over the form, in place of the form's usual one. */
@@ -134,7 +140,7 @@ export function LeadForm({
 
   const content = (
     <>
-      <span className="text-base uppercase tracking-[0.2em] text-accent-light md:text-lg"><Sized scale={sizes?.eyebrow}>{eyebrow || t('eyebrow')}</Sized></span>
+      <span className="text-base uppercase tracking-[0.2em] text-accent-light rtl:tracking-normal md:text-lg"><Sized scale={sizes?.eyebrow}>{eyebrow || t('eyebrow')}</Sized></span>
       <h2 className="mt-4 font-display text-3xl font-semibold text-balance md:text-4xl"><Sized scale={sizes?.title}>{title || t('title')}</Sized></h2>
       {intro && <p className="mt-4 text-lg font-light leading-relaxed text-neutral-200">{intro}</p>}
 
@@ -196,7 +202,7 @@ export function LeadForm({
 
           <input name="email" type="email" autoComplete="email" required maxLength={200} placeholder={t('email')} aria-label={t('email')} className={FIELD} style={sizeStyle(sizes?.email)} />
 
-          <div className="grid items-start gap-4 sm:grid-cols-2">
+          <div className={compact ? 'hidden' : 'grid items-start gap-4 sm:grid-cols-2'}>
             <Choice name="budget" label={t('budget')} options={options('budgetOptions')} style={sizeStyle(sizes?.budget)} />
             <Choice name="timeline" label={t('timeline')} options={options('timelineOptions')} style={sizeStyle(sizes?.timeline)} />
             <Choice name="purpose" label={t('purpose')} options={options('purposeOptions')} style={sizeStyle(sizes?.purpose)} />
@@ -220,7 +226,7 @@ export function LeadForm({
             disabled={status === 'submitting'}
             className="mt-2 rounded-full bg-accent px-8 py-3 text-base font-medium text-primary-dark transition-colors hover:bg-accent-light disabled:opacity-60"
           >
-            <Sized scale={sizes?.submit}>{status === 'submitting' ? '…' : t('submit')}</Sized>
+            <Sized scale={sizes?.submit}>{status === 'submitting' ? '…' : submitLabel || t('submit')}</Sized>
           </button>
 
           <p className="text-center text-sm text-white/70" style={sizeStyle(sizes?.privacyNote)}>

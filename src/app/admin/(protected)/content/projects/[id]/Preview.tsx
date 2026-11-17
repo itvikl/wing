@@ -85,6 +85,18 @@ export function ProjectPreview({
           projectsHref="#"
           contactHref="#"
           editable
+          quickForm={
+            <div className="grid grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,1fr))_auto] items-end gap-6 rounded-[22px] border border-white/10 bg-primary/85 px-7 py-6 backdrop-blur-xl">
+              <div>
+                <p className="font-display text-2xl font-semibold text-neutral-100">{pageLabels.quickTitle}</p>
+                {pageLabels.quickText && <p className="mt-1 text-sm font-light text-neutral-200/80">{pageLabels.quickText}</p>}
+              </div>
+              {[leadLabels.name, leadLabels.phone, leadLabels.email].map((label) => (
+                <div key={label} className="border-b border-neutral-100/35 pb-2 text-sm text-neutral-200/80">{label}</div>
+              ))}
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-2xl text-primary-dark">{locale === 'he' ? '←' : '→'}</div>
+            </div>
+          }
           leadForm={
             <section className="flex justify-center px-4 py-8">
               <div className="w-full max-w-xl rounded-3xl border border-white/20 bg-primary-dark/35 px-10 py-12 text-center text-white backdrop-blur-2xl">
@@ -95,7 +107,7 @@ export function ProjectPreview({
                   {[leadLabels.name, leadLabels.phone, leadLabels.email].map((label) => (
                     <div key={label} className="rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-white/70">{label}</div>
                   ))}
-                  <div className="mt-2 rounded-full bg-accent px-8 py-3 text-center font-medium text-primary-dark">{leadLabels.submit}</div>
+                  <div className="mt-2 rounded-full bg-accent px-8 py-3 text-center font-medium text-primary-dark">{pageLabels.leadSubmit || leadLabels.submit}</div>
                 </div>
               </div>
             </section>

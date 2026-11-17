@@ -6,6 +6,7 @@ import { requireSection } from '@/lib/auth/session';
 import { canPublish } from '@/lib/auth/roles';
 import { updateProjectsLabels } from '@/lib/content/store';
 import { TEXT_SECTION_SCHEMAS } from '@/lib/content/schema';
+import { buildStreetMap, type StreetMap } from '@/lib/projects/streetMap';
 import {
   createProject,
   deleteProject,
@@ -76,4 +77,45 @@ export async function deleteProjectAction(id: string) {
 export async function importLegacyAction(): Promise<number> {
   await requireSection('projects');
   return importLegacyProjects();
+}
+
+export type DrawnMap = { ok: true; streets: StreetMap } | { ok: false; error: string };
+
+/** Draws the neighbourhood map's streets around a point (slow: up to a minute). Only the point is sent. */
+export async function drawMapAction(lat: number, lng: number): Promise<DrawnMap> {
+  await requireSection('projects');
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return { ok: false, error: 'המיקום לא תקין.' };
+  }
+  try {
+    const streets = await buildStreetMap(lat, lng);
+    if (!streets.major && !streets.minor) return { ok: false, error: 'לא נמצאו רחובות סביב הנקודה. בדקו שהמיקום נכון.' };
+    return { ok: true, streets };
+  } catch {
+    return { ok: false, error: 'שרת המפות עמוס כרגע. נסו שוב בעוד כמה דקות; שאר הדף נשמר כרגיל.' };
+  }
+}
+
+export type FoundPlace = { ok: true; lat: number; lng: number; label: string } | { ok: false; error: string };
+
+/**
+ * An address → a point for the neighbourhood map, through OpenStreetMap's
+ * search (Nominatim: one request at a time, an app name in the User-Agent).
+ * Only the typed address is sent.
+ */
+export async function findAddressAction(query: string): Promise<FoundPlace> {
+  await requireSection('projects');
+  const q = String(query ?? '').trim().slice(0, 200);
+  if (q.length < 3) return { ok: false, error: 'הקלידו כתובת: רחוב, מספר ועיר.' };
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=he&q=${encodeURIComponent(q)}`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'WingsSiteAdmin/1.0' }, cache: 'no-store' });
+    if (!response.ok) return { ok: false, error: 'החיפוש לא זמין כרגע. אפשר להדביק קישור מגוגל מפות במקום.' };
+    const results = (await response.json()) as { lat: string; lon: string; display_name: string }[];
+    const first = results[0];
+    if (!first) return { ok: false, error: 'הכתובת לא נמצאה. נסו לכתוב אותה אחרת, או הדביקו קישור מגוגל מפות.' };
+    return { ok: true, lat: Number(first.lat), lng: Number(first.lon), label: first.display_name };
+  } catch {
+    return { ok: false, error: 'החיפוש לא זמין כרגע. אפשר להדביק קישור מגוגל מפות במקום.' };
+  }
 }

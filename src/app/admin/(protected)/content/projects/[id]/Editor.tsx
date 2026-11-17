@@ -13,14 +13,23 @@ import { useSectionForm } from '@/components/admin/useSectionForm';
 import { FeatureIcon } from '@/components/project/FeatureIcon';
 import type { ProjectPageLabels } from '@/components/project/ProjectPage';
 import {
+  BADGE_PRESETS,
   BLOCK_PRESETS,
   FACT_PRESETS,
   FEATURE_IDS,
   FEATURE_LABELS,
+  MAX_BADGES,
   MAX_FACTS,
+  MAX_STATUS,
+  MAX_UNITS,
+  STATUS_PRESETS,
+  UNIT_PRESETS,
+  newBadge,
   newBlock,
   newFact,
   newPlace,
+  newStatus,
+  newUnit,
   projectView,
   publishProblems,
   readiness,
@@ -31,6 +40,7 @@ import {
 import type { ContentLocale } from '@/lib/content/schema';
 import { saveProjectAction } from '../actions';
 import { GalleryField } from './GalleryField';
+import { LocationField } from './LocationField';
 import { ProjectPreview } from './Preview';
 
 export type LeadPreviewLabels = { name: string; phone: string; email: string; submit: string };
@@ -181,7 +191,7 @@ export function ProjectEditor({
             </div>
           </section>
 
-          <Part id="opening" title="פתיח ופרטים" description="החלק העליון של הדף. השם, השכונה והתמונה הראשית מופיעים גם בכרטיס הפרויקט בעמוד הפרויקטים.">
+          <Part id="opening" title="פתיח ופרטים" description="המסך הראשון: התמונה הראשית על כל המסך, ועליה התגיות, השם, משפט הפתיחה, שורת הנתונים והכפתור. השם, השכונה והתמונה מופיעים גם בכרטיס הפרויקט בעמוד הפרויקטים.">
             {both((l) => (
               <div className="grid gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -192,7 +202,28 @@ export function ProjectEditor({
                 <TextField label={l === 'he' ? 'הכפתור בפתיח (גולל לטופס)' : 'Opening button (scrolls to the form)'} value={data.text[l].cta} jump="cta" singleLine onChange={(v) => setText(l, { cta: v })} />
               </div>
             ))}
-            <ImageUploadField label="תמונה ראשית (לרוחב, משותפת לשתי השפות)" folder="projects" value={data.heroImage} jump="heroImage" onChange={(url) => set({ heroImage: url })} />
+            <div className="grid gap-2" data-jump-target="badges">
+              <span className="text-sm font-medium text-primary-dark">תגיות על התמונה (עד {MAX_BADGES})</span>
+              <RepeatableList
+                items={data.badges}
+                onChange={(badges) => set({ badges: badges.slice(0, MAX_BADGES) })}
+                newItem={() => newBadge()}
+                addLabel="הוספת תגית"
+                renderItem={(badge, update) =>
+                  both((l) => (
+                    <TextField label={l === 'he' ? 'תגית' : 'Tag'} value={badge[l].text} singleLine onChange={(v) => update(inLocale(l, { text: v }))} />
+                  ))
+                }
+              />
+              <Presets
+                label="תגית מוכנה:"
+                presets={BADGE_PRESETS.filter(([he]) => !data.badges.some((b) => b.he.text === he))}
+                disabled={data.badges.length >= MAX_BADGES}
+                locale={locale}
+                onPick={(he, en) => set({ badges: [...data.badges, newBadge(he, en)] })}
+              />
+            </div>
+            <ImageUploadField label="תמונה ראשית (לרוחב, על כל המסך, משותפת לשתי השפות)" folder="projects" value={data.heroImage} jump="heroImage" onChange={(url) => set({ heroImage: url })} />
             <div>
               <ImageUploadField label="תמונת רקע לדף" folder="projects" value={data.backdropImage} jump="backdropImage" onChange={(url) => set({ backdropImage: url })} />
               <p className="mt-2 text-xs leading-relaxed text-neutral-muted">
@@ -226,7 +257,7 @@ export function ProjectEditor({
             </div>
           </Part>
 
-          <Part id="facts" title="נתונים מהירים" description={`פס קצר מתחת לתמונה הראשית. עד ${MAX_FACTS} נתונים. נתון בלי ערך לא מוצג.`}>
+          <Part id="facts" title="שורת הנתונים על התמונה" description={`מספר גדול ומילה מתחתיו, למשל 30 / דירות, או 85–210 / מ״ר. עד ${MAX_FACTS} נתונים; נתון בלי ערך לא מוצג.`}>
             <RepeatableList
               items={data.facts}
               onChange={(facts) => set({ facts: facts.slice(0, MAX_FACTS) })}
@@ -235,8 +266,8 @@ export function ProjectEditor({
               renderItem={(fact, update) =>
                 both((l) => (
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <TextField label={l === 'he' ? 'נתון' : 'Label'} value={fact[l].label} singleLine onChange={(v) => update(inLocale(l, { ...fact[l], label: v }))} />
-                    <TextField label={l === 'he' ? 'ערך' : 'Value'} value={fact[l].value} singleLine onChange={(v) => update(inLocale(l, { ...fact[l], value: v }))} />
+                    <TextField label={l === 'he' ? 'המספר (גדול)' : 'Figure (large)'} value={fact[l].value} singleLine onChange={(v) => update(inLocale(l, { ...fact[l], value: v }))} />
+                    <TextField label={l === 'he' ? 'המילה מתחתיו' : 'Word under it'} value={fact[l].label} singleLine onChange={(v) => update(inLocale(l, { ...fact[l], label: v }))} />
                   </div>
                 ))
               }
@@ -250,7 +281,65 @@ export function ProjectEditor({
             />
           </Part>
 
-          <Part id="blocks" title="תמונה לצד טקסט" description="הלב של הדף. כל בלוק הוא כותרת, טקסט ותמונה לאורך. הצד של התמונה מתחלף לבד, ובלוק בלי תמונה נפרש לרוחב מלא.">
+          <Part id="status" title="מצב השיווק" description={`עד ${MAX_STATUS} נתונים בשורה מתחת לתמונה: כמה נמכר, מתי האכלוס, תנאי תשלום. נתון בלי ערך לא מוצג. פס התקדמות מופיע רק כשמסמנים אותו.`}>
+            <RepeatableList
+              items={data.status}
+              onChange={(status) => set({ status: status.slice(0, MAX_STATUS) })}
+              newItem={() => newStatus()}
+              addLabel="הוספת נתון"
+              renderItem={(item, update) => (
+                <div className="grid gap-3">
+                  {both((l) => (
+                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
+                      <TextField label={l === 'he' ? 'כותרת (נמכרו עד היום)' : 'Label (Sold so far)'} value={item[l].label} singleLine onChange={(v) => update(inLocale(l, { ...item[l], label: v }))} />
+                      <TextField label={l === 'he' ? 'הערך (67%, קיץ 2028)' : 'Value (67%, Summer 2028)'} value={item[l].value} singleLine onChange={(v) => update(inLocale(l, { ...item[l], value: v }))} />
+                      <div className="sm:col-span-2">
+                        <TextField label={l === 'he' ? 'שורה מתחת (20 מתוך 30 הדירות)' : 'Line under it (20 of the 30 apartments)'} value={item[l].note} singleLine onChange={(v) => update(inLocale(l, { ...item[l], note: v }))} />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <label className="flex cursor-pointer items-center gap-2 text-primary-dark">
+                      <input type="checkbox" checked={item.bar !== null} onChange={(e) => update({ bar: e.target.checked ? 0 : null })} className="h-4 w-4 accent-[#B58238]" />
+                      פס התקדמות
+                    </label>
+                    {item.bar !== null && (
+                      <label className="flex items-center gap-2 text-neutral-muted">
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={item.bar}
+                          onChange={(e) => update({ bar: Number(e.target.value) })}
+                          className="w-40 accent-[#B58238]"
+                          aria-label="אחוז בפס"
+                        />
+                        <span className="w-10 tabular-nums">{item.bar}%</span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+              )}
+            />
+            <Presets
+              label="נתון מוכן:"
+              presets={STATUS_PRESETS.filter(([he]) => !data.status.some((st) => st.he.label === he)).map(([he, en]) => [he, en] as [string, string])}
+              disabled={data.status.length >= MAX_STATUS}
+              locale={locale}
+              onPick={(he, en) => set({ status: [...data.status, newStatus(he, en, STATUS_PRESETS.find(([h]) => h === he)?.[2])] })}
+            />
+            <label className="grid max-w-xs gap-1.5 text-sm">
+              <span className="font-medium text-primary-dark">נכון לחודש (מוצג כ״עודכן לאחרונה״)</span>
+              <input
+                type="month"
+                value={data.statusDate}
+                onChange={(e) => set({ statusDate: e.target.value })}
+                className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-primary-dark focus:border-accent focus:outline-none"
+              />
+            </label>
+          </Part>
+
+          <Part id="blocks" title="תמונה לצד טקסט" description="הלב של הדף. כל בלוק הוא כותרת, טקסט ותמונה לרוחב. הצד של התמונה מתחלף לבד, ובלוק בלי תמונה נפרש לרוחב מלא.">
             <RepeatableList
               items={data.blocks}
               onChange={(blocks) => set({ blocks })}
@@ -266,7 +355,7 @@ export function ProjectEditor({
                       <TextAreaField label={l === 'he' ? 'טקסט' : 'Text'} value={block[l].body} rows={5} onChange={(v) => update(inLocale(l, { ...block[l], body: v }))} />
                     </div>
                   ))}
-                  <ImageUploadField label="תמונה (לאורך, יחס 4:5)" folder="projects" value={block.image} onChange={(url) => update({ image: url })} />
+                  <ImageUploadField label="תמונה (לרוחב, יחס 4:3)" folder="projects" value={block.image} onChange={(url) => update({ image: url })} />
                 </div>
               )}
             />
@@ -275,6 +364,46 @@ export function ProjectEditor({
               presets={BLOCK_PRESETS.filter(([he]) => !data.blocks.some((b) => b.he.title === he))}
               locale={locale}
               onPick={(he, en) => set({ blocks: [...data.blocks, newBlock(he, en)] })}
+            />
+          </Part>
+
+          <Part id="units" title="סוגי דירות" description={`שורה לכל סוג דירה (לא לכל דירה): שטחים, קומות, כמה יש וכמה נותרו, ותוכנית טיפוסית שנפתחת בלחיצה. עד ${MAX_UNITS} סוגים.`}>
+            <RepeatableList
+              items={data.units}
+              onChange={(units) => set({ units: units.slice(0, MAX_UNITS) })}
+              newItem={() => newUnit()}
+              addLabel="הוספת סוג דירה"
+              confirmRemove="למחוק את סוג הדירה?"
+              renderItem={(unit, update) => (
+                <div className="grid gap-4">
+                  <div className="grid gap-3 sm:grid-cols-[90px_minmax(0,1fr)_minmax(0,1fr)]">
+                    <SmallText label="סימן גדול" hint="3, 4, PH" value={unit.code} max={6} onChange={(v) => update({ code: v })} />
+                    <SmallText label="שטח במ״ר" hint="85–92" value={unit.size} max={30} ltr onChange={(v) => update({ size: v })} />
+                    <SmallText label="קומות" hint="1–4" value={unit.floors} max={30} ltr onChange={(v) => update({ floors: v })} />
+                  </div>
+                  {both((l) => (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <TextField label={l === 'he' ? 'שם הסוג (4 חדרים)' : 'Type (4 rooms)'} value={unit[l].title} singleLine onChange={(v) => update(inLocale(l, { ...unit[l], title: v }))} />
+                      <TextField label={l === 'he' ? 'מרפסת / גינה (מרפסת 12–16 מ״ר)' : 'Balcony / garden (12–16 m² balcony)'} value={unit[l].outdoor} singleLine onChange={(v) => update(inLocale(l, { ...unit[l], outdoor: v }))} />
+                    </div>
+                  ))}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <CountField label="כמה דירות מהסוג בפרויקט" value={unit.total} onChange={(total) => update({ total })} />
+                    <CountField label="כמה נותרו למכירה (0 = אזלו)" value={unit.left} onChange={(left) => update({ left })} />
+                  </div>
+                  <ImageUploadField label="תוכנית טיפוסית (תמונה או צילום של התוכנית)" folder="projects" value={unit.plan} onChange={(url) => update({ plan: url })} />
+                </div>
+              )}
+            />
+            <Presets
+              label="סוג מוכן:"
+              presets={UNIT_PRESETS.filter(([, he]) => !data.units.some((u) => u.he.title === he)).map(([, he, en]) => [he, en] as [string, string])}
+              disabled={data.units.length >= MAX_UNITS}
+              locale={locale}
+              onPick={(he, en) => {
+                const code = UNIT_PRESETS.find(([, h]) => h === he)?.[0] ?? '';
+                set({ units: [...data.units, newUnit(code, he, en)] });
+              }}
             />
           </Part>
 
@@ -299,7 +428,12 @@ export function ProjectEditor({
             </div>
           </Part>
 
-          <Part id="nearby" title="בסביבה" description="מקומות קרובים וכמה דקות לוקח להגיע. מוצג כרשימה בשתי עמודות.">
+          <Part id="nearby" title="השכונה ומפה" description="פס על רוחב המסך: מפה בצבעי האתר עם סיכה על הבניין, ולידה פסקה על השכונה ומקומות קרובים עם דקות הליכה או נסיעה.">
+            {both((l) => (
+              <TextAreaField label={l === 'he' ? 'פסקה על השכונה' : 'About the neighbourhood'} value={data.text[l].areaText} jump="areaText" rows={4} onChange={(v) => setText(l, { areaText: v })} />
+            ))}
+            <LocationField value={data.location} onChange={(location) => set({ location })} />
+            <span className="-mb-2 text-sm font-medium text-primary-dark">מה יש בסביבה</span>
             <RepeatableList
               items={data.nearby}
               onChange={(nearby) => set({ nearby })}
@@ -346,6 +480,10 @@ export function ProjectEditor({
               <input type="checkbox" checked={data.showLeadForm} onChange={(e) => set({ showLeadForm: e.target.checked })} className="h-4 w-4 accent-[#B58238]" />
               להציג טופס פנייה בדף
             </label>
+            <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-primary-dark" data-jump-target="quickForm">
+              <input type="checkbox" checked={data.showQuickForm} disabled={!data.showLeadForm} onChange={(e) => set({ showQuickForm: e.target.checked })} className="h-4 w-4 accent-[#B58238]" />
+              גם טופס קצר על קצה התמונה הראשית (שם, טלפון, אימייל; במחשב בלבד)
+            </label>
             {data.sold && <p className="rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-muted">הפרויקט מסומן ״נמכר״, ולכן במקום הטופס מוצגת הודעה שהוא נמכר, עם קישור לשאר הפרויקטים.</p>}
             {both((l) => (
               <div className="grid gap-3">
@@ -353,7 +491,7 @@ export function ProjectEditor({
                 <TextAreaField label={l === 'he' ? 'טקסט קצר' : 'Short text'} value={data.text[l].leadText} jump="leadText" rows={2} onChange={(v) => setText(l, { leadText: v })} />
               </div>
             ))}
-            <p className="text-xs text-neutral-muted">שדות הטופס עצמם (שם, טלפון, שאלות, הסכמה) זהים בכל האתר ונערכים במסך ״צור קשר״.</p>
+            <p className="text-xs text-neutral-muted">בדף פרויקט הטופס מקוצר: שם, טלפון, אימייל והודעה. שמות השדות זהים בכל האתר ונערכים במסך ״צור קשר״; הכפתור והכותרות הקבועות נערכים ב״כותרות ומילים קבועות״ ברשימת הפרויקטים.</p>
           </Part>
 
           <Part id="seo" title="גוגל ושיתוף" description="איך הדף נראה בתוצאות החיפוש. התמונה בשיתוף בוואטסאפ ובפייסבוק היא התמונה הראשית.">
@@ -467,6 +605,36 @@ function Switch({
         <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${checked ? 'start-[18px]' : 'start-0.5'}`} />
       </span>
       {checked ? on : off}
+    </label>
+  );
+}
+
+const SMALL_INPUT = 'w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-primary-dark focus:border-accent focus:outline-none';
+
+/** A short value both languages share (a mark, a range). */
+function SmallText({ label, hint, value, max, ltr = false, onChange }: { label: string; hint: string; value: string; max: number; ltr?: boolean; onChange: (value: string) => void }) {
+  return (
+    <label className="grid gap-1.5 text-sm">
+      <span className="font-medium text-primary-dark">{label}</span>
+      <input value={value} maxLength={max} placeholder={hint} dir={ltr ? 'ltr' : undefined} onChange={(e) => onChange(e.target.value)} className={`${SMALL_INPUT} ${ltr ? 'text-end' : ''}`} />
+    </label>
+  );
+}
+
+/** A whole number, or empty when it isn't to be shown. */
+function CountField({ label, value, onChange }: { label: string; value: number | null; onChange: (value: number | null) => void }) {
+  return (
+    <label className="grid gap-1.5 text-sm">
+      <span className="font-medium text-primary-dark">{label}</span>
+      <input
+        type="number"
+        min={0}
+        max={999}
+        value={value ?? ''}
+        placeholder="לא מוצג"
+        onChange={(e) => onChange(e.target.value === '' ? null : Math.min(999, Math.max(0, Math.round(Number(e.target.value)) || 0)))}
+        className={SMALL_INPUT}
+      />
     </label>
   );
 }
