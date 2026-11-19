@@ -134,11 +134,16 @@ export function SeeWingsExperience({
     const targetLocale = locale === 'en' ? 'he' : 'en';
     const langHref = `/${targetLocale}${pathWithoutLocale}`;
 
-    // Phones and tablets scrub freely: people swipe a lot there, and every
-    // swipe should move the flight. Stepping (and the idle-snap back onto a
-    // stop) made most swipes feel like they did nothing. Mouse and trackpad
-    // keep the stop-to-stop flight.
+    // Phones and tablets fly stop to stop like the desktop: every swipe
+    // carries the camera to the next stop, so each caption lands readable on
+    // a sharp frame instead of wherever a flick's momentum ran out, and the
+    // 11-screen flight doesn't take dozens of swipes. They scrubbed freely
+    // for a while because the old stepping swallowed swipes made mid-flight
+    // ('lock'), which read as swipes doing nothing; on touch a swipe
+    // mid-flight now speeds the camera on (or back) instead ('boost'),
+    // capped at 2x — chosen on a real phone against the free scrub.
     const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const params = new URLSearchParams(window.location.search);
 
     const engine = mountScrollWorld(ref.current, {
       // brand omitted on purpose — SeeWingsSplash's flying logo lands exactly
@@ -167,7 +172,7 @@ export function SeeWingsExperience({
       // phones (the old ?nostream switch), streaming stalled whenever a swipe
       // ran ahead of the ranges fetched so far and then jumped forward, while
       // a clip already in memory scrubs smoothly. The cost is a longer wait
-      // before scroll opens (6.4MB phone clip, 21MB desktop).
+      // before scroll opens (8.7MB phone clip, 18.6MB desktop).
       stream: false,
       diveScroll: SECTION_VH,
       connScroll: CONN_VH,
@@ -177,19 +182,21 @@ export function SeeWingsExperience({
       // because there's a single continuous section with no connectors today,
       // so "fraction of this clip" and "fraction of the whole track" are the
       // same number; re-derive if a second scene/connector ever returns.
-      restBeats: touch ? [] : STATION_REST_S.map((s) => s / FLIGHT_SECONDS),
-      // Each wheel burst / arrow key flies to the next rest beat instead of
-      // scrubbing freely (see scrollWorld.js's step-scroll).
-      stepScroll: !touch,
+      restBeats: STATION_REST_S.map((s) => s / FLIGHT_SECONDS),
+      // Each wheel burst / swipe / arrow key flies to the next rest beat
+      // instead of scrubbing freely (see scrollWorld.js's step-scroll).
+      stepScroll: true,
       // Seconds a step takes to cross the whole track — the same
       // single-section assumption as restBeats above.
       stepTrackSeconds: FLIGHT_SECONDS / STEP_PLAYBACK_RATE,
       // Steps back play at twice that: it's footage the reader has just seen.
       stepBackSpeed: 2,
-      // Trial switch, not a setting: ?flow=boost lets a gesture mid-flight
-      // speed the camera on to a further stop (or turn it back) instead of
-      // being ignored, so both behaviours can be compared side by side.
-      stepInterrupt: new URLSearchParams(window.location.search).get('flow') === 'boost' ? 'boost' : 'lock',
+      // Touch always boosts (see above). On desktop it's still a trial
+      // switch: ?flow=boost lets a gesture mid-flight speed the camera on to
+      // a further stop (or turn it back) instead of being ignored, so both
+      // behaviours can be compared side by side.
+      stepInterrupt: touch || params.get('flow') === 'boost' ? 'boost' : 'lock',
+      stepBoostMax: touch ? 2 : 4,
       // Native per-section copy/cta is intentionally omitted — the chapter
       // headlines are rendered by SeeWingsCues instead, driven by the same
       // total scroll range (trackVh).
@@ -217,6 +224,11 @@ export function SeeWingsExperience({
         };
       }),
       connectors: media.connectors,
+      // main.mp4 / main.mobile.mp4 are motion-interpolated to 48fps (the 24fps
+      // render held each picture for 2-3 screen refreshes and read as judder).
+      // Seeks are quantised to this rate; a 24fps clip uploaded in the admin
+      // still plays correctly, just with two seeks per picture.
+      fps: 48,
     });
     // A link to #contact (the last caption's button, the skip link) flies to
     // the end of the flight on a page whose lead
