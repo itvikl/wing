@@ -444,6 +444,13 @@ function mountScrollWorld(container, config) {
   // (phones: past 2x a 48fps clip asks for more seeks than they can paint,
   // and the camera skips instead of speeding up).
   const STEP_BOOST_MAX = config.stepBoostMax || 4;
+  // `config.stepCalmFrom` (fraction of the track): a stretch from that stop
+  // onward that always plays at the clip's own speed. A boost can carry the
+  // camera up to that stop but never past it, and a forward gesture while
+  // flying from it is ignored. Without it, eager swipes doubled the speed right
+  // where the camera enters the apartment, and the glass doorway went by in
+  // ~0.7s with a third of its frames painted (the entry read as skipped).
+  const STEP_CALM_FR = config.stepCalmFrom;
   let stepping = false, stepTimer = null, lastWheelT = 0, burstUsed = false, touchY0 = null;
   let stepTargetY = 0, stepDir = 0, stepSpeed = 1;
   // Going back covers footage the reader has already seen, so it flies faster
@@ -483,16 +490,22 @@ function mountScrollWorld(container, config) {
     if (stepping && !boosting) return;
     const y = window.scrollY || window.pageYOffset;
     const end = totalW * vh;
+    // Already headed for (or past) the calm stop: a forward boost would rush
+    // the calm stretch, so the camera carries on to where it was going at the
+    // speed it had. Not a plain return: the swipe's touchstart has already
+    // reached Lenis, which stops its running animation on any touch, so an
+    // ignored swipe left the camera frozen mid-flight.
+    const calm = boosting && dir > 0 && stepDir > 0 && STEP_CALM_FR != null && stepTargetY >= STEP_CALM_FR * end - 2;
     const stops = REST_FR.map(f => f * end).concat(end);
     // Mid-flight in the same direction, count from where the camera is
     // already headed; past the last stop there's nothing further, so just
     // hurry on to the current target.
     const from = boosting && dir === stepDir ? stepTargetY : y;
     const backGap = Math.max(2, BACK_MIN_GAP * end);
-    const next = dir > 0 ? stops.find(s => s > from + 2) : stops.slice().reverse().find(s => s < from - backGap);
+    const next = calm ? null : dir > 0 ? stops.find(s => s > from + 2) : stops.slice().reverse().find(s => s < from - backGap);
     const targetY = next != null ? next : (boosting && dir === stepDir ? stepTargetY : null);
     if (targetY == null) return;
-    stepSpeed = boosting ? Math.min(stepSpeed + 1, STEP_BOOST_MAX) : 1;
+    stepSpeed = calm ? stepSpeed : boosting ? Math.min(stepSpeed + 1, STEP_BOOST_MAX) : 1;
     stepTargetY = targetY; stepDir = dir;
     const speed = stepSpeed * (dir < 0 ? STEP_BACK_SPEED : 1);
     // A re-aim starts with the camera already moving, so it gets no ramp-up

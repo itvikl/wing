@@ -111,6 +111,12 @@ export const BOULEVARD_ZOOM = { from: 2.3, to: 6.0, scale: 1.12, rampIn: 1.5, ra
 // back on the way out. The stop now rests on the clip's own frame 72.
 export const STATION_REST_S = [0, 3.03, 5.2, 10.1, 14.9];
 
+// From the pool stop on, the camera enters the apartment (pergola, glass
+// doors, living room). That stretch always plays at the clip's own speed: a
+// swipe made mid-flight can speed the camera up to this stop, never past it.
+// Must be one of STATION_REST_S. See scrollWorld.js's stepCalmFrom.
+export const ENTRY_CALM_FROM_S = 10.1;
+
 // How fast a step plays the flight between two stops, as a multiple of the
 // clip's own speed: 1 = real time, so a hop across 4.9s of footage takes 4.9s.
 // A flat 1.6s per step (~3x real time on the long hops) read as rushing past.

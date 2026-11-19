@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { mountScrollWorld } from '@/lib/scrollWorld';
-import { SECTION_VH, CONN_VH, computeTrackVh, BOULEVARD_ZOOM, STATION_REST_S, FLIGHT_SECONDS, STEP_PLAYBACK_RATE } from '@/lib/seeWingsTiming';
+import { SECTION_VH, CONN_VH, computeTrackVh, BOULEVARD_ZOOM, STATION_REST_S, FLIGHT_SECONDS, STEP_PLAYBACK_RATE, ENTRY_CALM_FROM_S } from '@/lib/seeWingsTiming';
 import { SeeWingsCues } from './SeeWingsCues';
 import { SeeWingsSplash } from './SeeWingsSplash';
 import type { Locale } from '@/i18n/request';
@@ -197,6 +197,8 @@ export function SeeWingsExperience({
       // behaviours can be compared side by side.
       stepInterrupt: touch || params.get('flow') === 'boost' ? 'boost' : 'lock',
       stepBoostMax: touch ? 2 : 4,
+      // The entry into the apartment is never rushed by a boost.
+      stepCalmFrom: ENTRY_CALM_FROM_S / FLIGHT_SECONDS,
       // Native per-section copy/cta is intentionally omitted — the chapter
       // headlines are rendered by SeeWingsCues instead, driven by the same
       // total scroll range (trackVh).
