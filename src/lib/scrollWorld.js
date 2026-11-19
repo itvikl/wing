@@ -294,7 +294,6 @@ function mountScrollWorld(container, config) {
     });
     s.el = scene; s.img = img; s.video = null; s.hasClip = false;
     s.loading = false; s.ready = false; s.cur = 0; s.target = 0; s.visible = false;
-    s.reqFrame = -1;
   });
 
   // per-section copy / route / nav
@@ -440,10 +439,7 @@ function mountScrollWorld(container, config) {
   // For flyToEnd: a quick shortcut through the whole flight, not a step.
   const easeInOutSine = t => -(Math.cos(Math.PI * t) - 1) / 2;
   const STEP_BOOST = config.stepInterrupt === 'boost';
-  // `config.stepBoostMax` caps it lower where the decoder can't keep up
-  // (phones: past 2x a 48fps clip asks for more seeks than they can paint,
-  // and the camera skips instead of speeding up).
-  const STEP_BOOST_MAX = config.stepBoostMax || 4;
+  const STEP_BOOST_MAX = 4;
   let stepping = false, stepTimer = null, lastWheelT = 0, burstUsed = false, touchY0 = null;
   let stepTargetY = 0, stepDir = 0, stepSpeed = 1;
   // Going back covers footage the reader has already seen, so it flies faster
@@ -800,39 +796,18 @@ function mountScrollWorld(container, config) {
     ticking = false;
   }
 
-  // ---- frame-exact seeking: a seek only matters when it lands on a
-  // DIFFERENT frame of the clip (`config.fps`, the clip's own frame rate).
-  // The old loop seeked whenever the time moved by a few ms, so at 60Hz it
-  // asked the decoder for ~2.4 seeks per real frame change (measured: 520
-  // seeks for 219 frames over three steps), each re-decoding the picture
-  // already on screen. On a desktop GPU that's spare work; on a phone decoder
-  // it's the difference between keeping up and falling behind. Now a seek
-  // goes out once per frame change, aimed at the frame's middle so rounding
-  // can't land it on a neighbour. Deliberately NOT chained off `seeked`:
-  // seeking again before the new frame has painted threw it away unseen
-  // (tried, measured worse on a fast drag). ----
-  const FPS = config.fps || 24;
-  function frameFor(s, t) {
-    const last = Math.max(0, Math.round((s.video.duration || 0) * FPS) - 1);
-    return Math.min(last, Math.max(0, Math.floor(t * FPS + 1e-4)));
-  }
-  function seekFrame(s, f) {
-    s.reqFrame = f;
-    try { s.video.currentTime = (f + 0.5) / FPS; } catch (e) {}
-  }
-
   function raf() {
     if (disposed) return;
     // Lenis is created by a sibling effect that runs after this mount, so the
     // gate can't stop it up front — catch it here the first frame it exists.
     if (gated && window.__lenis && !gateStoppedLenis) { window.__lenis.stop(); gateStoppedLenis = true; }
+    const eps = isMobile() ? 0.02 : 0.008;   // coarser seek step on phones = fewer decodes
     for (let i = 0; i < NSEG; i++) {
       const s = SEGMENTS[i];
       if (!s.hasClip || !s.ready || !s.video) continue;
       // Never queue a seek while the decoder is still resolving the last one.
-      // cur holds still meanwhile, so a busy decoder slows the camera for a
-      // beat instead of skipping frames (measured: letting cur run on doubled
-      // the skipped frames on a fast drag).
+      // On phones a fast flick would otherwise pile up seeks and freeze the clip;
+      // cur keeps lerping, so we snap to the latest target the moment it's free.
       if (s.video.seeking) continue;
       if (!s.visible && Math.abs(s.cur - s.target) < 0.002) continue;
       // A step's own easing already shapes the motion; easing again on top
@@ -843,12 +818,9 @@ function mountScrollWorld(container, config) {
       // it's never seeked here (that would fight the playback); its time
       // still drives the crop below.
       const playingSelf = autoplaying && s === gateSeg;
-      if (playingSelf) { s.cur = s.video.currentTime / dur; s.reqFrame = -1; }
+      if (playingSelf) s.cur = s.video.currentTime / dur;
       const t = playingSelf ? s.video.currentTime : clamp(s.cur, 0, 0.999) * dur;
-      if (!playingSelf) {
-        const f = frameFor(s, t);
-        if (f !== s.reqFrame) seekFrame(s, f);
-      }
+      if (!playingSelf && Math.abs(s.video.currentTime - t) > eps) { try { s.video.currentTime = t; } catch (e) {} }
       if (s.zoomBeats.length) {
         const z = zoomForTime(s.zoomBeats, t);
         s.video.style.transformOrigin = '50% 0%';
